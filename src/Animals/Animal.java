@@ -1,6 +1,10 @@
 package Animals;
 
+import Meats.ratMeat;
+import Plants.Plant;
 import gameComponents.Food;
+import processedFood.mysteryMeat;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -11,6 +15,7 @@ public abstract class Animal {
     protected int value;
     protected int wasAtHealth = 100;
     protected int lostHealth = 0;
+    protected int sellsFor = 0;
 
     protected ArrayList<Food> whatItEats(Food firstItem, Food secondItem, Food thirdItem){
         ArrayList<Food> toReturn = new ArrayList<>();
@@ -37,6 +42,12 @@ public abstract class Animal {
             return false;
         }
         return true;
+    }
+
+    public int getSellsFor(){
+        double valueMultiplicator = (double) this.health / 100.0;
+        double toReturn = this.value * valueMultiplicator;
+        return (int) toReturn;
     }
 
     public ArrayList<Food> getWhatItEats(){
@@ -70,11 +81,24 @@ public abstract class Animal {
         return this.lostHealth;
     }
 
-    public void eat(int kilosOfFood){
-        this.health += (kilosOfFood * 10);
-        if(this.health > 100){
-            this.health = 100;
+    public int eat(int kilosOfFood, Food fedWith){
+        if(eats.contains(fedWith)){
+            if(fedWith.getClass().getSimpleName().equals("mysteryMeat")){
+                mysteryMeat theMeat = (mysteryMeat) fedWith;
+                for(Food contents : theMeat.getContentsOfMeat()){
+                    if(contents instanceof Plant || contents instanceof ratMeat){
+                        return -2; //Did not like the mysteryMeat, because it smelled funny or is not a fan of plants
+                    }
+                }
+            }
+            this.health += (kilosOfFood * 10);
+            if(this.health > 100){
+                this.health = 100;
+            }
+            return -1; //Went through fine, the Animal ate the food
         }
+
+        return -2; //Went through fine, the Animal ate the food
     }
 
     public int getValue(){

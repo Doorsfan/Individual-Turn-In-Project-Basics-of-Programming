@@ -64,4 +64,8 @@ public class mysteryMeat extends processedFood{
         }
 
     }
+
+    public ArrayList<Food> getContentsOfMeat(){
+        return this.contains;
+    }
 }

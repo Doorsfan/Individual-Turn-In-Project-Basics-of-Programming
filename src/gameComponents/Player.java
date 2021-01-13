@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class Player {
     private String name;
-    private int amountOfMoney = 1000;
+    private int amountOfMoney;
     private boolean playing = true;
     private ArrayList<Animal> ownedAnimals = new ArrayList<>();
     private ArrayList<Food> ownedFood = new ArrayList<>();
@@ -21,9 +21,9 @@ public class Player {
         return this.amountOfMoney;
     }
 
-    public void setAmountOfMoney(int amount){
-        this.amountOfMoney = amount;
-    }
+    public void pay(int amount){ this.amountOfMoney -= amount; }
+
+    public void getPaid(int amount){ this.amountOfMoney += amount; }
 
     public ArrayList<Animal> getOwnedAnimals(){
         return this.ownedAnimals;

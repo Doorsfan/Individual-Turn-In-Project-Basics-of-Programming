@@ -42,7 +42,7 @@ public class Game {
                 for(int i = 0; i < players; i++){
                     System.out.print("Please write the name for player " + (i+1) + ": ");
                     String name = userInput.next();
-                    playersPlaying.add(new Player(name, 100));
+                    playersPlaying.add(new Player(name, 1000));
                 }
                 menuSetup = false;
             } catch (Exception e) {
@@ -58,6 +58,43 @@ public class Game {
                 players = 0;
             }
         }
+    }
+
+    public int feedAnimal(Player playerFeeding){
+        //TO DO - Implement Selection/Finalize Error handling in processing
+        int counter = 1;
+        boolean finishedFeeding = false;
+        Scanner input = new Scanner(System.in);
+        if(playerFeeding.getOwnedFood().size() == 0){
+            System.out.println(playerFeeding.getName() + " has no food to feed with. Returning to main menu.");
+            return -2;
+        }
+        System.out.println("Which one of your animals would you like to feed?");
+
+        while(!finishedFeeding){
+            for(Animal ownedAnimal: playerFeeding.getOwnedAnimals()){
+                System.out.println("[" + counter + "] " + ownedAnimal.getName() + " the " + ownedAnimal.getClass().getSimpleName() + " (" + ownedAnimal.getGender()
+                        + ") Health: " +
+                        ownedAnimal.getHealth());
+                System.out.print("\tIt eats: [ ");
+                for(Food foodEaten: ownedAnimal.getWhatItEats()){
+                    System.out.print(foodEaten.getClass().getSimpleName() + " ");
+                }
+                System.out.print("]\n");
+                counter += 1;
+            }
+
+            System.out.println("Which animal do you wish to feed?");
+            int chosenAnimal = Integer.valueOf(input.next());
+            Animal toBeFed = playerFeeding.getOwnedAnimals().get((chosenAnimal-1));
+            System.out.println("With what do you wish to feed " + toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() +
+                    "(" + toBeFed.getGender() + ", " + " Health: " + toBeFed.getHealth() + ")?");
+            //TO DO
+
+            counter = 1;
+        }
+
+        return -1;
     }
 
     public void runGame(){
@@ -84,7 +121,6 @@ public class Game {
             String gameMenyInput = gameMenyScanner.next();
             switch(gameMenyInput){
                 case "1":
-                    //TO DO - BUY ANIMAL
                     if(ourStore.buyAnimalorFood(playersPlaying.get(currentPlayer), "Buy Animal") == -2){
                         playersPlaying.get(currentPlayer).setTurnIsOver(false); //Tried to enter shop with no funds
                     }
@@ -93,7 +129,6 @@ public class Game {
                     }
                     break;
                 case "2":
-                    //TO DO - SELL ANIMALS
                     if(ourStore.sellAnimal(playersPlaying.get(currentPlayer)) == -2){
                         playersPlaying.get(currentPlayer).setTurnIsOver(false); //Tried to Sell animals to the shop with no animals
                     }
@@ -102,7 +137,8 @@ public class Game {
                     }
                     break;
                 case "3":
-                    //TO DO - FEED ANIMALS
+                    //TO DO - FEED ANIMALS - ABOUT 50% DONE
+                    feedAnimal(playersPlaying.get(currentPlayer));
                     break;
                 case "4":
                     //TO DO - BREED ANIMALS
