@@ -31,8 +31,7 @@ public class Player {
 
     public ArrayList<Food> getOwnedFood() { return this.ownedFood; }
 
-    public void addToOwnedAnimals(Animal toAdd, String name){
-        toAdd.setName(name);
+    public void addToOwnedAnimals(Animal toAdd){
         this.ownedAnimals.add(toAdd);
     }
 

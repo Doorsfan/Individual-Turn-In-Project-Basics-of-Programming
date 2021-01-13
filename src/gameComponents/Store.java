@@ -11,6 +11,25 @@ import java.util.Scanner;
 
 public class Store {
 
+    public int sellAnimal(Player seller){
+        int shopCounter = 1;
+        ArrayList<Animal> animalsToSell = seller.getOwnedAnimals();
+        if(animalsToSell.size() == 0){
+            System.out.println(seller.getName() + " has no animals to sell currently.");
+            return -2;
+        }
+        System.out.println("Which animal would " + seller.getName() + " like to sell?");
+        double animalHealth = 0.00;
+        for(Animal animal : animalsToSell){
+            animalHealth = animal.getHealth() / 100.0;
+
+            System.out.println("[" + shopCounter + "] " + animal.getName() + " the " + animal.getGender() + " " + animal.getClass().getSimpleName() +
+                    " - Health: " + animal.getHealth() + " Sells for: " );
+            shopCounter += 1;
+        }
+        return -1;
+    }
+
     public int buyAnimalorFood(Player buyer, String purpose){
         int shopCounter = 0;
         boolean boughtFood = false;
@@ -175,7 +194,24 @@ public class Store {
                     if (animalsToOffer.get(index).getValue() <= buyer.getAmountOfMoney()) {
                         System.out.println("What would you like to name your new " + animalsToOffer.get(index).getClass().getSimpleName() + "?");
                         String wantedName = input.next();
-                        buyer.addToOwnedAnimals(animalsToOffer.get(index), wantedName);
+                        String wantedGender = animalsToOffer.get(index).getGender();
+                        switch(animalsToOffer.get(index).getClass().getSimpleName()){
+                            case "Bird":
+                                buyer.addToOwnedAnimals(new Bird(wantedName, wantedGender));
+                                break;
+                            case "Cat":
+                                buyer.addToOwnedAnimals(new Cat(wantedName, wantedGender));
+                                break;
+                            case "Dog":
+                                buyer.addToOwnedAnimals(new Dog(wantedName, wantedGender));
+                                break;
+                            case "Elephant":
+                                buyer.addToOwnedAnimals(new Elephant(wantedName, wantedGender));
+                                break;
+                            case "Fish":
+                                buyer.addToOwnedAnimals(new Fish(wantedName, wantedGender));
+                                break;
+                        }
                         buyer.setAmountOfMoney((buyer.getAmountOfMoney() - animalsToOffer.get(index).getValue()));
 
                         System.out.println(buyer.getName() + " bought a " + animalsToOffer.get(index).getGender() +
