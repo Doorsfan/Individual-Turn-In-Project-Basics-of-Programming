@@ -69,7 +69,7 @@ public class Game {
                 System.out.println("Round " + currentRound + ", " + playersPlaying.get(currentPlayer).getName() + "'s turn.");
                 System.out.print(playersPlaying.get(currentPlayer).getName() + "'s Owned Animals: \n");
                 for(Animal ownedAnimal: playersPlaying.get(currentPlayer).getOwnedAnimals()){
-                    System.out.print(ownedAnimal.getName() + " the " + ownedAnimal.getClass().getSimpleName() + ", who is at: "
+                    System.out.print(ownedAnimal.getName() + " the " + ownedAnimal.getClass().getSimpleName() + "(" + ownedAnimal.getGender() + "), who is at: "
                             + ownedAnimal.getHealth() + " health (Lost " + ownedAnimal.getLostHealth() + " health last round, was at: " +
                             ownedAnimal.getWasAtHealth() + " health.)\n");
                 }
@@ -94,6 +94,12 @@ public class Game {
                     break;
                 case "2":
                     //TO DO - SELL ANIMALS
+                    if(ourStore.sellAnimal(playersPlaying.get(currentPlayer)) == -2){
+                        playersPlaying.get(currentPlayer).setTurnIsOver(false); //Tried to Sell animals to the shop with no animals
+                    }
+                    else{
+                        playersPlaying.get(currentPlayer).setTurnIsOver(true); //Successfully sold animals to the SHop
+                    }
                     break;
                 case "3":
                     //TO DO - FEED ANIMALS
@@ -103,10 +109,10 @@ public class Game {
                     break;
                 case "5":
                     if(ourStore.buyAnimalorFood(playersPlaying.get(currentPlayer), "Buy Food") == -2){
-                        playersPlaying.get(currentPlayer).setTurnIsOver(false);
+                        playersPlaying.get(currentPlayer).setTurnIsOver(false); //Tried to enter shop with no funds
                     }
                     else{
-                        playersPlaying.get(currentPlayer).setTurnIsOver(true);
+                        playersPlaying.get(currentPlayer).setTurnIsOver(true); //Exited by choise or ran out of funds to buy anything in the shop
                     }
                     break;
                 case "6":
