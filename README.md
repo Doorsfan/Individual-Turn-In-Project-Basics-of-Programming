@@ -61,7 +61,7 @@ and a amount of players that they wish to play with. These numbers must be withi
 
 # TO-DO LIST
 - Buy an amount of food (As long as it's afforded) - Food is bought in kilos
-    and the price is defined as per kilo. //Current implementation allows for Grams to be specified, will be updated
+    and the price is defined as per kilo. [DONE] //Current implementation is harder than baseline difficulty of task, allowed due to added complexity
     
 - Feed their animals (What kind of food is specified for each animal on an individual basis) //About 50% Done
 
@@ -74,11 +74,11 @@ and a amount of players that they wish to play with. These numbers must be withi
 - I.e, 100 (OLD_VALUE) - 23 (DECAY) = 77 (NEW_HEALTH_VALUE). To replenish the
       HEALTH_VALUE - a player must feed their animals. //Not fully implemented, since eating is not fully integrated yet
       
-- Each player gets to do actions from **ONE** of the categories above, then their turn is over. //Waiting for clarification on Corner case of insufficient resources
+- Each player gets to do actions from **ONE** of the categories above, then their turn is over. [DONE] //Cornercase of Insufficient resources clarified
 
 - If an animal reaches HEALTH_VALUE 0 - It dies. //Not started
 
-- A player is removed from the game, when they have no animals and no money left. //Waiting for clarification on Corner case of having enough resources to not be eliminated but not sufficient to buy something
+- A player is removed from the game, when they have no animals and no money left. //Case clarified - Should be eliminated if in Resource Limbo - Not started
 
 - Each animal can only eat between 1-3 types of food within the game. A player is not allowed to feed an Animal with a 
   food type that is not within it's given food types. //Eating is not fully implemented yet
