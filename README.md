@@ -23,9 +23,8 @@ and a amount of players that they wish to play with. These numbers must be withi
       base price associated to them [DONE]
     
     - Buy an amount of food (As long as it's afforded) - Food is bought in kilos
-    and the price is defined as per kilo. 
+    and the price is defined as per kilo. [DONE]
     
-      
     - Feed their animals (What kind of food is specified for each animal on an individual basis)
     
     - Attempt to breed **ONE** set of animals. There is a 50% chanse that a new animal will be
@@ -40,7 +39,7 @@ and a amount of players that they wish to play with. These numbers must be withi
      I.e, 100 (OLD_VALUE) - 23 (DECAY) = 77 (NEW_HEALTH_VALUE). To replenish the
       HEALTH_VALUE - a player must feed their animals. 
       
-    - Each player gets to do actions from **ONE** of the categories above, then their turn is over.
+    - Each player gets to do actions from **ONE** of the categories above, then their turn is over. [DONE]
     
 - If an animal reaches HEALTH_VALUE 0 - It dies.
 
