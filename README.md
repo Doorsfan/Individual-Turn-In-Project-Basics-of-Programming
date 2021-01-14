@@ -4,10 +4,10 @@ This is the first graded turn in project, that we were tasked to create.
 We are tasked to implement a Game, that allows us to raise animals 
 and allow for playing with 1-4 players.
 
-This is the first draft and is subject to change - most rules apply and will not change, but some additional
+This is a work in development - most rules apply and will not change, but some additional
 rules can come to be implemented - Which is yet to be determined.
 
-This is the base code structure and is a work in development.
+This is the third code draft structure and is a work in development.
 
 **RULES:**
 
