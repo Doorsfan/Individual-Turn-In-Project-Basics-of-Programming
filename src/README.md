@@ -58,7 +58,7 @@ and a amount of players that they wish to play with. These numbers must be withi
   
 - A player cannot sell food. [DONE]
 
-- Animals can become Sick - 20% per Animal on each Round - Incurrs a Veterinary bill tto pay,
+- Animals can become Sick - 20% per Animal on each Round - Incurrs a Veterinary bill to pay,
   price varying based on the Animal - They have a 50% chanse of recovering - If this fails, they die.
   
 - The user can save a running game to file on Disk and resume it at a later Date. Filename is chosen
