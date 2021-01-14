@@ -36,8 +36,8 @@ and a amount of players that they wish to play with. These numbers must be withi
       
     - Sell one or more animals, the selling price is (BASE_RATE * HEALTH_VALUE) - The HEALTH_VALUE 
     is tracked during the game - starting at 100 - and decays between rounds by 10-30 units of % [DONE]
-      
-      I.e, 100 (OLD_VALUE) - 23 (DECAY) = 77 (NEW_HEALTH_VALUE). To replenish the
+    
+     I.e, 100 (OLD_VALUE) - 23 (DECAY) = 77 (NEW_HEALTH_VALUE). To replenish the
       HEALTH_VALUE - a player must feed their animals. 
       
     - Each player gets to do actions from **ONE** of the categories above, then their turn is over.
@@ -68,7 +68,7 @@ and a amount of players that they wish to play with. These numbers must be withi
 - Attempt to breed **ONE** set of animals. There is a 50% chanse that a new animal will be
     made from doing this (This requires the same type of animal and different genders on each animal). 
       
-      In case a baby animal is made, the player can name the baby/babies. Each respective
+    In case a baby animal is made, the player can name the baby/babies. Each respective
     baby has a 50:50 chanse of being Male or Female. //Not started
     
 - I.e, 100 (OLD_VALUE) - 23 (DECAY) = 77 (NEW_HEALTH_VALUE). To replenish the
