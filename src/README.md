@@ -4,10 +4,10 @@ This is the first graded turn in project, that we were tasked to create.
 We are tasked to implement a Game, that allows us to raise animals 
 and allow for playing with 1-4 players.
 
-This is the first draft and is subject to change - most rules apply and will not change, but some additional
+This is a work in development - most rules apply and will not change, but some additional
 rules can come to be implemented - Which is yet to be determined.
 
-This is the base code structure and is a work in development.
+This is the third code draft structure and is a work in development.
 
 **RULES:**
 
@@ -86,3 +86,5 @@ and a amount of players that they wish to play with. These numbers must be withi
 - After the last round, all animals are sold off and the Player receives currency equal to the value of their sold animals. //Not started
 
 - The one player who has the most money at the end of the game, wins. //Not started
+
+- Write Changelog
