@@ -59,24 +59,12 @@ public class Store {
         return -1;
     }
 
-    public int buyAnimalorFood(Player buyer, String purpose){
-        int shopCounter = 0;
+    public int buyFood(Player buyer){
         boolean boughtFood = false;
         boolean wantedFoodIsCorrect = false;
         String wantedFood = "";
         String wantedAmount = "";
-
-        ArrayList<Animal> animalsToOffer = new ArrayList<>();
-        animalsToOffer.add(new Bird("", "Male"));
-        animalsToOffer.add(new Bird("", "Female"));
-        animalsToOffer.add(new Cat("", "Male"));
-        animalsToOffer.add(new Cat("", "Female"));
-        animalsToOffer.add(new Dog("", "Male"));
-        animalsToOffer.add(new Dog("", "Female"));
-        animalsToOffer.add(new Elephant("", "Male"));
-        animalsToOffer.add(new Elephant("", "Female"));
-        animalsToOffer.add(new Fish("", "Male"));
-        animalsToOffer.add(new Fish("", "Female"));
+        int shopCounter = 0;
 
         ArrayList<Food> foodToOffer = new ArrayList<>();
         foodToOffer.add(new cowMeat());
@@ -90,32 +78,17 @@ public class Store {
         foodToOffer.add(new mysteryMeat());
 
         ArrayList<Integer> prices = new ArrayList<>();
-        if(purpose.equals("Buy Food")){
-            for(Food pieceOfFood : foodToOffer){
-                prices.add(pieceOfFood.getValue());
-            }
-            Collections.sort(prices);
-            if(buyer.getAmountOfMoney() < prices.get(0)){
-                System.out.println(buyer.getName() + " cannot afford any food in the store at the moment. The lowest price of an food item in the shop is: " +
-                        prices.get(0) + " coins.");
-                return -2;
-            }
 
+        for(Food pieceOfFood : foodToOffer){
+            prices.add(pieceOfFood.getValue());
         }
-        if(purpose.equals("Buy Animal")){
-
-            for(Animal animal : animalsToOffer){
-                prices.add(animal.getValue());
-            }
-            Collections.sort(prices);
-            if(buyer.getAmountOfMoney() < prices.get(0)){
-                System.out.println(buyer.getName() + " cannot afford any animal in the store at the moment. The lowest price of an animal in the shop is: " +
-                        prices.get(0) + " coins.");
-                return -2;
-            }
+        Collections.sort(prices);
+        if(buyer.getAmountOfMoney() < prices.get(0)){
+            System.out.println(buyer.getName() + " cannot afford any food in the store at the moment. The lowest price of an food item in the shop is: " +
+                    prices.get(0) + " coins.");
+            return -2;
         }
 
-        System.out.println("Welcome " + buyer.getName() + " to The Emporium of Animals! We sell Animals/Food for animals!");
         Scanner input = new Scanner(System.in);
         while(buyer.getAmountOfMoney() >= prices.get(0)) {
             boughtFood = false;
@@ -124,12 +97,12 @@ public class Store {
             try {
                 System.out.println("Your current funds are: " + buyer.getAmountOfMoney());
 
-                if(purpose.equals("Buy Food")){
+
                     for(Food foodInStore: foodToOffer){
                         System.out.println("[" + (shopCounter+1) + "]. " + foodInStore.getClass().getSimpleName() +
                                 " - Costs: " + foodInStore.getValue() + " coins per kilo.");
                         shopCounter += 1;
-                    }
+
                     System.out.println("[" + (shopCounter+1) + "]. Exit shop.");
                     shopCounter = 0;
 
@@ -199,63 +172,105 @@ public class Store {
                                 buyer.getAmountOfMoney() + " coins left!");
                     }
                 }
-                if(purpose.equals("Buy Animal")){
-                    for(Animal animalInStore: animalsToOffer){
-                        System.out.println("[" + (shopCounter+1) + "]. " + animalInStore.getClass().getSimpleName() +
-                                "(" + animalInStore.getGender() + ") - Costs: " + animalInStore.getValue() + " coins.");
-                        shopCounter += 1;
-                    }
-                    System.out.println("[" + (shopCounter+1) + "]. Exit shop.");
-                    System.out.println("Which animal would you like to buy?");
-                    shopCounter = 0;
-                    String wantedAnimal = input.next();
-
-                    if (Integer.valueOf(wantedAnimal) == 11) {
-                        System.out.println(buyer.getName() + " decided to leave the shop.");
-                        return -1;
-                    }
-                    //This variable represents the Menu choise of the player
-                    //it is named index because it's frequency of writing is so high, that i wanted to have a shorthand name
-                    //for when i had to repeat it constantly
-                    int index = Integer.valueOf(wantedAnimal) - 1;
-                    if (animalsToOffer.get(index).getValue() <= buyer.getAmountOfMoney()) {
-                        System.out.println("What would you like to name your new " + animalsToOffer.get(index).getClass().getSimpleName() + "?");
-                        String wantedName = input.next();
-                        String wantedGender = animalsToOffer.get(index).getGender();
-                        switch(animalsToOffer.get(index).getClass().getSimpleName()){
-                            case "Bird":
-                                buyer.addToOwnedAnimals(new Bird(wantedName, wantedGender));
-                                break;
-                            case "Cat":
-                                buyer.addToOwnedAnimals(new Cat(wantedName, wantedGender));
-                                break;
-                            case "Dog":
-                                buyer.addToOwnedAnimals(new Dog(wantedName, wantedGender));
-                                break;
-                            case "Elephant":
-                                buyer.addToOwnedAnimals(new Elephant(wantedName, wantedGender));
-                                break;
-                            case "Fish":
-                                buyer.addToOwnedAnimals(new Fish(wantedName, wantedGender));
-                                break;
-                        }
-                        buyer.pay(animalsToOffer.get(index).getValue());
-
-                        System.out.println(buyer.getName() + " bought a " + animalsToOffer.get(index).getGender() +
-                                " " + animalsToOffer.get(index).getClass().getSimpleName() + " for " +
-                                animalsToOffer.get(index).getValue() + " coins. " + buyer.getName() + " now has " +
-                                buyer.getAmountOfMoney() + " coins left.");
-
-                    } else {
-                        System.out.println(buyer.getName() + " cannot afford the " + animalsToOffer.get(index).getClass().getSimpleName() + ". It costs " +
-                                animalsToOffer.get(index).getValue() + " and " + buyer.getName() + " only has " +
-                                buyer.getAmountOfMoney() + " coins left!");
-                    }
-                }
             } catch (Exception e) {
                 System.out.println("Could not afford that item. Please try again.");
             }
 
+        }
+        return -1;
+
+
+
+    }
+
+    public int buyAnimal(Player buyer){
+        int shopCounter = 0;
+
+        ArrayList<Animal> animalsToOffer = new ArrayList<>();
+        animalsToOffer.add(new Bird("", "Male"));
+        animalsToOffer.add(new Bird("", "Female"));
+        animalsToOffer.add(new Cat("", "Male"));
+        animalsToOffer.add(new Cat("", "Female"));
+        animalsToOffer.add(new Dog("", "Male"));
+        animalsToOffer.add(new Dog("", "Female"));
+        animalsToOffer.add(new Elephant("", "Male"));
+        animalsToOffer.add(new Elephant("", "Female"));
+        animalsToOffer.add(new Fish("", "Male"));
+        animalsToOffer.add(new Fish("", "Female"));
+
+        ArrayList<Integer> prices = new ArrayList<>();
+
+        for(Animal animal : animalsToOffer){
+            prices.add(animal.getValue());
+        }
+        Collections.sort(prices);
+        if(buyer.getAmountOfMoney() < prices.get(0)){
+            System.out.println(buyer.getName() + " cannot afford any animal in the store at the moment. The lowest price of an animal in the shop is: " +
+                    prices.get(0) + " coins.");
+            return -2;
+        }
+
+
+        System.out.println("Welcome " + buyer.getName() + " to The Emporium of Animals! We sell Animals/Food for animals!");
+        Scanner input = new Scanner(System.in);
+        while(buyer.getAmountOfMoney() >= prices.get(0)) {
+            try {
+                System.out.println("Your current funds are: " + buyer.getAmountOfMoney());
+
+                for(Animal animalInStore: animalsToOffer){
+                    System.out.println("[" + (shopCounter+1) + "]. " + animalInStore.getClass().getSimpleName() +
+                            "(" + animalInStore.getGender() + ") - Costs: " + animalInStore.getValue() + " coins.");
+                    shopCounter += 1;
+                }
+                System.out.println("[" + (shopCounter+1) + "]. Exit shop.");
+                System.out.println("Which animal would you like to buy?");
+                shopCounter = 0;
+                String wantedAnimal = input.next();
+
+                if (Integer.valueOf(wantedAnimal) == 11) {
+                    System.out.println(buyer.getName() + " decided to leave the shop.");
+                    return -1;
+                }
+                //This variable represents the Menu choise of the player
+                //it is named index because it's frequency of writing is so high, that i wanted to have a shorthand name
+                //for when i had to repeat it constantly
+                int index = Integer.valueOf(wantedAnimal) - 1;
+                if (animalsToOffer.get(index).getValue() <= buyer.getAmountOfMoney()) {
+                    System.out.println("What would you like to name your new " + animalsToOffer.get(index).getClass().getSimpleName() + "?");
+                    String wantedName = input.next();
+                    String wantedGender = animalsToOffer.get(index).getGender();
+                    switch(animalsToOffer.get(index).getClass().getSimpleName()){
+                        case "Bird":
+                            buyer.addToOwnedAnimals(new Bird(wantedName, wantedGender));
+                            break;
+                        case "Cat":
+                            buyer.addToOwnedAnimals(new Cat(wantedName, wantedGender));
+                            break;
+                        case "Dog":
+                            buyer.addToOwnedAnimals(new Dog(wantedName, wantedGender));
+                            break;
+                        case "Elephant":
+                            buyer.addToOwnedAnimals(new Elephant(wantedName, wantedGender));
+                            break;
+                        case "Fish":
+                            buyer.addToOwnedAnimals(new Fish(wantedName, wantedGender));
+                            break;
+                    }
+                    buyer.pay(animalsToOffer.get(index).getValue());
+
+                    System.out.println(buyer.getName() + " bought a " + animalsToOffer.get(index).getGender() +
+                            " " + animalsToOffer.get(index).getClass().getSimpleName() + " for " +
+                            animalsToOffer.get(index).getValue() + " coins. " + buyer.getName() + " now has " +
+                            buyer.getAmountOfMoney() + " coins left.");
+
+                } else {
+                    System.out.println(buyer.getName() + " cannot afford the " + animalsToOffer.get(index).getClass().getSimpleName() + ". It costs " +
+                            animalsToOffer.get(index).getValue() + " and " + buyer.getName() + " only has " +
+                            buyer.getAmountOfMoney() + " coins left!");
+                }
+            } catch (Exception e) {
+                System.out.println("Could not afford that item. Please try again.");
+            }
         }
         return -1;
     }

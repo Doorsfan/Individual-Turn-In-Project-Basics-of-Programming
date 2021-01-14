@@ -121,20 +121,12 @@ public class Game {
             String gameMenyInput = gameMenyScanner.next();
             switch(gameMenyInput){
                 case "1":
-                    if(ourStore.buyAnimalorFood(playersPlaying.get(currentPlayer), "Buy Animal") == -2){
-                        playersPlaying.get(currentPlayer).setTurnIsOver(false); //Tried to enter shop with no funds
-                    }
-                    else{
-                        playersPlaying.get(currentPlayer).setTurnIsOver(true); //Exited by choise or ran out of funds to buy anything in the shop
-                    }
+                    ourStore.buyAnimal(playersPlaying.get(currentPlayer));
+                    playersPlaying.get(currentPlayer).setTurnIsOver(true); //Tried to enter shop with no funds
                     break;
                 case "2":
-                    if(ourStore.sellAnimal(playersPlaying.get(currentPlayer)) == -2){
-                        playersPlaying.get(currentPlayer).setTurnIsOver(false); //Tried to Sell animals to the shop with no animals
-                    }
-                    else{
-                        playersPlaying.get(currentPlayer).setTurnIsOver(true); //Successfully sold animals to the SHop
-                    }
+                    ourStore.sellAnimal(playersPlaying.get(currentPlayer));
+                    playersPlaying.get(currentPlayer).setTurnIsOver(true); //Tried to Sell animals to the shop with no animals
                     break;
                 case "3":
                     //TO DO - FEED ANIMALS - ABOUT 50% DONE
@@ -144,12 +136,8 @@ public class Game {
                     //TO DO - BREED ANIMALS
                     break;
                 case "5":
-                    if(ourStore.buyAnimalorFood(playersPlaying.get(currentPlayer), "Buy Food") == -2){
-                        playersPlaying.get(currentPlayer).setTurnIsOver(false); //Tried to enter shop with no funds
-                    }
-                    else{
-                        playersPlaying.get(currentPlayer).setTurnIsOver(true); //Exited by choise or ran out of funds to buy anything in the shop
-                    }
+                    ourStore.buyFood(playersPlaying.get(currentPlayer));
+                    playersPlaying.get(currentPlayer).setTurnIsOver(true); //Tried to enter shop with no funds
                     break;
                 case "6":
                     //TO DO - SAVE GAME AND EXIT
