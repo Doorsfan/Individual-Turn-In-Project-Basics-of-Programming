@@ -23,7 +23,7 @@ and a amount of players that they wish to play with. These numbers must be withi
       base price associated to them [DONE]
     
     - Buy an amount of food (As long as it's afforded) - Food is bought in kilos
-    and the price is defined as per kilo. [DONE]
+    and the price is defined as per kilo. [DONE] - Implemented in 100 grams steps
     
     - Feed their animals (What kind of food is specified for each animal on an individual basis)
     
@@ -58,7 +58,7 @@ and a amount of players that they wish to play with. These numbers must be withi
   
 - A player cannot sell food. [DONE]
 
-- Animals can become Sick - 20% per Animal on each Round - Incurrs a Veterinary bill to pay,
+- Animals can become Sick - 20% per Animal on each Round - Incurrs a Veterinary bill tto pay,
   price varying based on the Animal - They have a 50% chanse of recovering - If this fails, they die.
   
 - The user can save a running game to file on Disk and resume it at a later Date. Filename is chosen
@@ -94,7 +94,7 @@ and a amount of players that they wish to play with. These numbers must be withi
 
 - Add Changelog //Not started - will do after Refactoring and all commits have been done - Will implement on next project from Start
 
-- Animals can become Sick - 20% per Animal on each Round - Incurrs a Veterinary bill to pay,
+- Animals can become Sick - 20% per Animal on each Round - Incurrs a Veterinary bill tto pay,
   price varying based on the Animal - They have a 50% chanse of recovering - If this fails, they die. //Not started
   
 - The user can save a running game to file on Disk and resume it at a later Date. Filename is chosen
