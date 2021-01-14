@@ -98,10 +98,11 @@ public class Store {
                 System.out.println("Your current funds are: " + buyer.getAmountOfMoney());
 
 
-                    for(Food foodInStore: foodToOffer){
-                        System.out.println("[" + (shopCounter+1) + "]. " + foodInStore.getClass().getSimpleName() +
+                    for(Food foodInStore: foodToOffer) {
+                        System.out.println("[" + (shopCounter + 1) + "]. " + foodInStore.getClass().getSimpleName() +
                                 " - Costs: " + foodInStore.getValue() + " coins per kilo.");
                         shopCounter += 1;
+                    }
 
                     System.out.println("[" + (shopCounter+1) + "]. Exit shop.");
                     shopCounter = 0;
@@ -134,7 +135,7 @@ public class Store {
                         try{
                             System.out.println("How many grams? (Specify in steps of 100 grams, so 100,200 or 300 etc.)");
                             wantedAmount = input.next();
-                            if(Integer.valueOf(wantedAmount) % 100 == 0){
+                            if(Integer.valueOf(wantedAmount) % 100 == 0 && Integer.valueOf(wantedAmount) != 0){
                                 boughtFood = true;
                             }
                             else{
@@ -171,7 +172,6 @@ public class Store {
                                 (int) toPay + " and " + buyer.getName() + " only has " +
                                 buyer.getAmountOfMoney() + " coins left!");
                     }
-                }
             } catch (Exception e) {
                 System.out.println("Could not afford that item. Please try again.");
             }

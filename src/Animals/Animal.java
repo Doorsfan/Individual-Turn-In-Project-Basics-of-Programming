@@ -15,7 +15,7 @@ public abstract class Animal {
     protected int value;
     protected int wasAtHealth = 100;
     protected int lostHealth = 0;
-    protected int sellsFor = 0;
+    protected int portionSize = 0;
 
     protected ArrayList<Food> whatItEats(Food firstItem, Food secondItem, Food thirdItem){
         ArrayList<Food> toReturn = new ArrayList<>();
@@ -30,6 +30,10 @@ public abstract class Animal {
         toReturn.add(firstItem);
         toReturn.add(secondItem);
         return toReturn;
+    }
+
+    public int getPortionSize(){
+        return this.portionSize;
     }
 
     protected ArrayList<Food> whatItEats(Food firstItem){
@@ -81,24 +85,26 @@ public abstract class Animal {
         return this.lostHealth;
     }
 
-    public int eat(int kilosOfFood, Food fedWith){
-        if(eats.contains(fedWith)){
-            if(fedWith.getClass().getSimpleName().equals("mysteryMeat")){
-                mysteryMeat theMeat = (mysteryMeat) fedWith;
-                for(Food contents : theMeat.getContentsOfMeat()){
-                    if(contents instanceof Plant || contents instanceof ratMeat){
-                        return -2; //Did not like the mysteryMeat, because it smelled funny or is not a fan of plants
+    public int eat(int gramsFedWith, Food fedWith){
+        for(Food iEat : eats){
+            if(iEat.getName().equals(fedWith.getName())){
+                if(fedWith.getClass().getSimpleName().equals("mysteryMeat")){
+                    mysteryMeat theMeat = (mysteryMeat) fedWith;
+                    for(Food contents : theMeat.getContentsOfMeat()){
+                        if(contents instanceof Plant || contents instanceof ratMeat){
+                            return -3; //Eats Mystery meat, but it had plants or rat meat in it
+                        }
                     }
                 }
+                fedWith.reduceFromStock(gramsFedWith);
+                this.health += ((gramsFedWith/getPortionSize()) * 10);
+                if(this.health > 100){
+                    this.health = 100;
+                }
+                return 1; //Went through fine, the Animal ate the food
             }
-            this.health += (kilosOfFood * 10);
-            if(this.health > 100){
-                this.health = 100;
-            }
-            return -1; //Went through fine, the Animal ate the food
         }
-
-        return -2; //Went through fine, the Animal ate the food
+        return -2; //The animal did not like the type of food being  served
     }
 
     public int getValue(){

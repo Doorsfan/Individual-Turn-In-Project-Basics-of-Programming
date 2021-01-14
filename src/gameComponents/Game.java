@@ -65,13 +65,21 @@ public class Game {
         int counter = 1;
         boolean finishedFeeding = false;
         Scanner input = new Scanner(System.in);
-        if(playerFeeding.getOwnedFood().size() == 0){
-            System.out.println(playerFeeding.getName() + " has no food to feed with. Returning to main menu.");
+
+        if(playerFeeding.getOwnedAnimals().size() == 0){
+            System.out.println(playerFeeding.getName() + " has no Animals to feed. Returning to main menu.");
             return -2;
         }
-        System.out.println("Which one of your animals would you like to feed?");
+        if(playerFeeding.getOwnedAnimals().size() > 0 && playerFeeding.getOwnedFood().size() > 0){
+            System.out.println("Which one of your animals would you like to feed?");
+        }
 
         while(!finishedFeeding){
+            if(playerFeeding.getOwnedFood().size() == 0){
+                System.out.println(playerFeeding.getName() + " has no food left to feed with. Returning to main menu.");
+                return -2;
+            }
+
             for(Animal ownedAnimal: playerFeeding.getOwnedAnimals()){
                 System.out.println("[" + counter + "] " + ownedAnimal.getName() + " the " + ownedAnimal.getClass().getSimpleName() + " (" + ownedAnimal.getGender()
                         + ") Health: " +
@@ -81,19 +89,77 @@ public class Game {
                     System.out.print(foodEaten.getClass().getSimpleName() + " ");
                 }
                 System.out.print("]\n");
+                System.out.print("\tPortion size: " + ownedAnimal.getPortionSize() + " grams\n");
                 counter += 1;
             }
+            System.out.println("[" + counter + "] Back to Main Menu");
 
             System.out.println("Which animal do you wish to feed?");
             int chosenAnimal = Integer.valueOf(input.next());
+
+            if(chosenAnimal == (playerFeeding.getOwnedAnimals().size()+1)){
+                System.out.println(playerFeeding.getName() + " returned back to the Main Menu.");
+                return 1;
+            }
+
             Animal toBeFed = playerFeeding.getOwnedAnimals().get((chosenAnimal-1));
             System.out.println("With what do you wish to feed " + toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() +
                     "(" + toBeFed.getGender() + ", " + " Health: " + toBeFed.getHealth() + ")?");
-            //TO DO
+            counter = 1;
+            for(Food pieceOfFood : playerFeeding.getOwnedFood()){
+                System.out.println("[" + counter + "] " + pieceOfFood.getClass().getSimpleName() + " ( " + pieceOfFood.getGrams() + " grams left in stock )");
+                counter += 1;
+            }
+
+            System.out.println("[" + (counter) + "] Exit to Main Menu");
+
+            int chosenFoodIndex = input.nextInt();
+            if(chosenFoodIndex == (playerFeeding.getOwnedFood().size()+1)){
+                System.out.println(playerFeeding.getName() + " returned back to the Main Menu.");
+                return 1;
+            }
+            Food foodToFeedWith = playerFeeding.getOwnedFood().get(chosenFoodIndex-1);
+            for(Food foodItEats : toBeFed.getWhatItEats()){
+                if(foodItEats.getName().equals(foodToFeedWith.getName())){
+                    if(toBeFed.getPortionSize() > foodToFeedWith.getGrams()){
+                        System.out.println("There is not enough grams of " + foodToFeedWith.getName() + " left to feed " +
+                                toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() + ") Health: " +
+                                toBeFed.getHealth() + " (" + foodToFeedWith.getGrams() + " left, needs " + toBeFed.getPortionSize() + " grams per meal.)");
+                    }
+                    else{
+                        int resultCode = toBeFed.eat(toBeFed.getPortionSize(),foodToFeedWith);
+                        if(resultCode == 1){ //The animal liked the food
+                            System.out.println(toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() +")" +
+                                    " happily eats the " + foodToFeedWith.getName() + "!");
+                        }
+                        else if(resultCode == -3){ //Mystery meat that did not seem appealing..
+                            System.out.println(toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() + ")" +
+                                    " seems to think there's something funny with the " + foodToFeedWith.getClass().getSimpleName() +"..");
+                        }
+                        else if(resultCode == -2){ //The Animal did not like the food
+                            System.out.println(toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() +")" +
+                                    " doesn't seem to like the " + foodToFeedWith.getName() + "..");
+                        }
+                        break;
+                    }
+
+                }
+            }
+            int indexToRemove = 0;
+            boolean shouldRemoveFood = false;
+            for(Food playersFood : playerFeeding.getOwnedFood()){
+                if(playersFood.getGrams() == 0){
+                    shouldRemoveFood = true;
+                    break;
+                }
+                indexToRemove += 1;
+            }
+            if(shouldRemoveFood){
+                playerFeeding.getOwnedFood().remove(indexToRemove);
+            }
 
             counter = 1;
         }
-
         return -1;
     }
 
@@ -122,15 +188,16 @@ public class Game {
             switch(gameMenyInput){
                 case "1":
                     ourStore.buyAnimal(playersPlaying.get(currentPlayer));
-                    playersPlaying.get(currentPlayer).setTurnIsOver(true); //Tried to enter shop with no funds
+                    playersPlaying.get(currentPlayer).setTurnIsOver(true);
                     break;
                 case "2":
                     ourStore.sellAnimal(playersPlaying.get(currentPlayer));
-                    playersPlaying.get(currentPlayer).setTurnIsOver(true); //Tried to Sell animals to the shop with no animals
+                    playersPlaying.get(currentPlayer).setTurnIsOver(true);
                     break;
                 case "3":
-                    //TO DO - FEED ANIMALS - ABOUT 50% DONE
+                    //TO DO - FEED ANIMALS - ABOUT 90% DONE - Works, but needs refinement on Input elements
                     feedAnimal(playersPlaying.get(currentPlayer));
+                    playersPlaying.get(currentPlayer).setTurnIsOver(true);
                     break;
                 case "4":
                     //TO DO - BREED ANIMALS

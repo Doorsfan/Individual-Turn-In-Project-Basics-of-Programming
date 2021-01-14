@@ -1,7 +1,5 @@
 package Animals;
 
-import Animals.Animal;
-import Plants.Apple;
 import Plants.Seed;
 
 public class Bird extends Animal {
@@ -10,5 +8,6 @@ public class Bird extends Animal {
         this.gender = gender;
         this.eats = whatItEats(new Seed());
         this.value = 50;
+        this.portionSize = 25;
     }
 }

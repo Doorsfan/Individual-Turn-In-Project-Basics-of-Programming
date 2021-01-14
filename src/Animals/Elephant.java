@@ -1,6 +1,5 @@
 package Animals;
 
-import Animals.Animal;
 import Plants.Peanut;
 
 public class Elephant extends Animal {
@@ -9,5 +8,6 @@ public class Elephant extends Animal {
         this.gender = gender;
         this.value = 200;
         this.eats = whatItEats(new Peanut());
+        this.portionSize = 100;
     }
 }
