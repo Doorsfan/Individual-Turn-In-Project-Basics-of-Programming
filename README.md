@@ -58,9 +58,17 @@ and a amount of players that they wish to play with. These numbers must be withi
   
 - A player cannot sell food. [DONE]
 
+- Animals can become Sick - 20% per Animal on each Round - Incurrs a Veterinary bill tto pay,
+  price varying based on the Animal - They have a 50% chanse of recovering - If this fails, they die.
+  
+- The user can save a running game to file on Disk and resume it at a later Date. Filename is chosen
+  by the User and several different instances of the game can be saved.
+  
+- Players can Sell animals amongst each other
+
+- Animals age and their sell value declines as they Age - When they get older than their max age, they die. 
+
 # TO-DO LIST
-- Buy an amount of food (As long as it's afforded) - Food is bought in kilos
-    and the price is defined as per kilo. [DONE] //Current implementation is harder than baseline difficulty of task, allowed due to added complexity
     
 - Feed their animals (What kind of food is specified for each animal on an individual basis) //About 50% Done
 
@@ -72,8 +80,6 @@ and a amount of players that they wish to play with. These numbers must be withi
     
 - I.e, 100 (OLD_VALUE) - 23 (DECAY) = 77 (NEW_HEALTH_VALUE). To replenish the
       HEALTH_VALUE - a player must feed their animals. //Not fully implemented, since eating is not fully integrated yet
-      
-- Each player gets to do actions from **ONE** of the categories above, then their turn is over. [DONE] //Cornercase of Insufficient resources clarified
 
 - If an animal reaches HEALTH_VALUE 0 - It dies. //Not started
 
@@ -85,3 +91,15 @@ and a amount of players that they wish to play with. These numbers must be withi
 - After the last round, all animals are sold off and the Player receives currency equal to the value of their sold animals. //Not started
 
 - The one player who has the most money at the end of the game, wins. //Not started
+
+- Add Changelog //Not started - will do after Refactoring and all commits have been done - Will implement on next project from Start
+
+- Animals can become Sick - 20% per Animal on each Round - Incurrs a Veterinary bill tto pay,
+  price varying based on the Animal - They have a 50% chanse of recovering - If this fails, they die. //Not started
+  
+- The user can save a running game to file on Disk and resume it at a later Date. Filename is chosen
+  by the User and several different instances of the game can be saved. //Not started
+  
+- Players can Sell animals amongst each other //Not started
+
+- Animals age and their sell value declines as they Age - When they get older than their max age, they die. //Not started
