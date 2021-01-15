@@ -62,6 +62,8 @@ public abstract class Animal {
         return this.name;
     }
 
+    public String getClassName(){ return this.getClass().getSimpleName(); }
+
     public String getGender(){
         return this.gender;
     }
@@ -88,7 +90,7 @@ public abstract class Animal {
     public int eat(int gramsFedWith, Food fedWith){
         for(Food iEat : eats){
             if(iEat.getName().equals(fedWith.getName())){
-                if(fedWith.getClass().getSimpleName().equals("mysteryMeat")){
+                if(fedWith.getName().equals("mysteryMeat")){
                     mysteryMeat theMeat = (mysteryMeat) fedWith;
                     for(Food contents : theMeat.getContentsOfMeat()){
                         if(contents instanceof Plant || contents instanceof ratMeat){
@@ -97,8 +99,14 @@ public abstract class Animal {
                     }
                 }
                 fedWith.reduceFromStock(gramsFedWith);
+
+
                 this.health += ((gramsFedWith/getPortionSize()) * 10);
-                if(this.health > 100){
+                if(this.health <= 100){
+                    System.out.println(this.getName() + "'s health increased by 10.");
+                }
+                else{
+                    System.out.println(this.getName() + "'s health increased by " + (10 - (this.health - 100)) + ".");
                     this.health = 100;
                 }
                 return 1; //Went through fine, the Animal ate the food

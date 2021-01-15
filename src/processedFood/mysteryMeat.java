@@ -5,7 +5,7 @@ import Meats.horseMeat;
 import Meats.ratMeat;
 import Plants.Apple;
 import Plants.Peanut;
-import Plants.Seed;
+import Plants.Seeds;
 import gameComponents.Food;
 import processedFood.processedFood;
 
@@ -36,7 +36,7 @@ public class mysteryMeat extends processedFood{
                 contains.add(new Peanut());
             }
             if(plantRandomizer > 33 && plantRandomizer <= 67){
-                contains.add(new Seed());
+                contains.add(new Seeds());
             }
             if(plantRandomizer > 67){
                 contains.add(new Apple());
@@ -56,7 +56,7 @@ public class mysteryMeat extends processedFood{
                 contains.add(new Peanut());
             }
             if(plantRandomizer > 33 && plantRandomizer <= 67){
-                contains.add(new Seed());
+                contains.add(new Seeds());
             }
             if(plantRandomizer > 67){
                 contains.add(new Apple());
