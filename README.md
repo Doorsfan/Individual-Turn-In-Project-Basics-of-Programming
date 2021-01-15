@@ -70,8 +70,6 @@ and a amount of players that they wish to play with. These numbers must be withi
 
 # TO-DO LIST
     
-- Feed their animals (What kind of food is specified for each animal on an individual basis) //About 90% Done - need to implement Secure input structures
-
 - Attempt to breed **ONE** set of animals. There is a 50% chanse that a new animal will be
     made from doing this (This requires the same type of animal and different genders on each animal). 
       
