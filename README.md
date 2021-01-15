@@ -23,7 +23,7 @@ and a amount of players that they wish to play with. These numbers must be withi
       base price associated to them [DONE]
     
     - Buy an amount of food (As long as it's afforded) - Food is bought in kilos
-    and the price is defined as per kilo. [DONE] - Food is bought in Grams (100 min - <Amount of What Player can Afford>)
+    and the price is defined as per kilo. [DONE] - Food is bought in Grams (100 min - Amount of What Player can Afford)
     
     - Feed their animals (What kind of food is specified for each animal on an individual basis) [DONE]
     
