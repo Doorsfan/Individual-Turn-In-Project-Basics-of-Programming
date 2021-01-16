@@ -11,5 +11,8 @@ public class Dog extends Animal {
         this.value = 100;
         this.eats = whatItEats(new dogFood(), new mysteryMeat(), new cowMeat());
         this.portionSize = 75;
+        this.minimumOffspring = 3;
+        this.maximumOffspring = 10;
+        this.maxAge = 11;
     }
 }

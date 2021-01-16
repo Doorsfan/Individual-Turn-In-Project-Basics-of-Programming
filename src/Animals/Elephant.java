@@ -9,5 +9,8 @@ public class Elephant extends Animal {
         this.value = 200;
         this.eats = whatItEats(new Peanut());
         this.portionSize = 100;
+        this.minimumOffspring = 1;
+        this.maximumOffspring = 3;
+        this.maxAge = 65;
     }
 }

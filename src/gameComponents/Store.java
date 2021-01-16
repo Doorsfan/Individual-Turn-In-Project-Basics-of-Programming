@@ -173,7 +173,7 @@ public class Store extends utilityFunctions{
             System.out.println("Which animal would you like to buy?");
             shopCounter = 0;
 
-            String wantedAnimal;
+            String wantedAnimal = "";
             while(!(safeIntInput(1, animalsToOffer.size()+1,wantedAnimal = userInput.next()) == 1));
             if (Integer.parseInt(wantedAnimal) == animalsToOffer.size()+1) {
                 System.out.println(buyer.getName() + " decided to leave the shop.");
@@ -184,8 +184,10 @@ public class Store extends utilityFunctions{
             //for when i had to repeat it constantly
             int index = Integer.parseInt(wantedAnimal) - 1;
             if (animalsToOffer.get(index).getValue() <= buyer.getAmountOfMoney()) {
+                Scanner nameScanner = new Scanner(System.in);
                 System.out.println("What would you like to name your new " + animalsToOffer.get(index).getClassName() + "?");
-                String wantedName = userInput.next();
+                String wantedName = nameScanner.nextLine();
+
                 String wantedGender = animalsToOffer.get(index).getGender();
                 switch(animalsToOffer.get(index).getClassName()){
                     case "Bird":

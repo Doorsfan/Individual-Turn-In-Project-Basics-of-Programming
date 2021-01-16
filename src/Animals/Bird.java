@@ -9,5 +9,10 @@ public class Bird extends Animal {
         this.eats = whatItEats(new Seeds());
         this.value = 50;
         this.portionSize = 25;
+        this.minimumOffspring = 2;
+        this.maximumOffspring = 7;
+        this.maxAge = 4;
     }
+
+
 }

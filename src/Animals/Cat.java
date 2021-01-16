@@ -11,5 +11,8 @@ public class Cat extends Animal {
         this.value = 60;
         this.eats = whatItEats(new mysteryMeat(), new catFood(), new cowMeat());
         this.portionSize = 50;
+        this.minimumOffspring = 1;
+        this.maximumOffspring = 14;
+        this.maxAge = 9;
     }
 }

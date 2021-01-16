@@ -16,6 +16,13 @@ public abstract class Animal {
     protected int wasAtHealth = 100;
     protected int lostHealth = 0;
     protected int portionSize = 0;
+    protected Random random = new Random();
+    protected int minimumOffspring;
+    protected int maximumOffspring;
+    protected int age = 0;
+    protected int maxAge;
+    private boolean alive = true;
+    protected int perishedAtRound = 0;
 
     protected ArrayList<Food> whatItEats(Food firstItem, Food secondItem, Food thirdItem){
         ArrayList<Food> toReturn = new ArrayList<>();
@@ -32,20 +39,22 @@ public abstract class Animal {
         return toReturn;
     }
 
+    public int getMinimumOffspring() { return this.minimumOffspring; }
+
+    public int getMaximumOffspring() { return this.maximumOffspring; }
+
     public int getPortionSize(){
         return this.portionSize;
+    }
+
+    public void age(){
+        this.age += 1;
     }
 
     protected ArrayList<Food> whatItEats(Food firstItem){
         ArrayList<Food> toReturn = new ArrayList<>();
         toReturn.add(firstItem);
         return toReturn;
-    }
-    public boolean checkIfAlive(){
-        if(this.health <= 0) {
-            return false;
-        }
-        return true;
     }
 
     public int getSellsFor(){
@@ -62,6 +71,12 @@ public abstract class Animal {
         return this.name;
     }
 
+    public int getAge(){
+        return this.age;
+    }
+
+    public int getMaxAge() { return this.maxAge; }
+
     public String getClassName(){ return this.getClass().getSimpleName(); }
 
     public String getGender(){
@@ -76,6 +91,15 @@ public abstract class Animal {
         lostHealth = decayFactor;
     }
 
+    public void die(String cause){
+        System.out.println("Die was called at: " + this.perishedAtRound + " from " + cause);
+        this.alive = false;
+    }
+
+    public boolean isAlive(){
+        return this.alive;
+    }
+
     public int getWasAtHealth(){
         return this.wasAtHealth;
     }
@@ -85,6 +109,10 @@ public abstract class Animal {
     }
     public int getLostHealth(){
         return this.lostHealth;
+    }
+
+    public void setPerishedAtRound(int diedAtRound){
+        this.perishedAtRound = diedAtRound;
     }
 
     public int eat(int gramsFedWith, Food fedWith){
@@ -115,6 +143,9 @@ public abstract class Animal {
         return -2; //The animal did not like the type of food being  served
     }
 
+    public int getPerishedAtRound(){
+        return this.perishedAtRound;
+    }
     public int getValue(){
         return this.value;
     }
