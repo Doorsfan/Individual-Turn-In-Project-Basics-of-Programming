@@ -28,10 +28,10 @@ and a amount of players that they wish to play with. These numbers must be withi
     - Feed their animals (What kind of food is specified for each animal on an individual basis) [DONE]
     
     - Attempt to breed **ONE** set of animals. There is a 50% chanse that a new animal will be
-    made from doing this (This requires the same type of animal and different genders on each animal). 
+    made from doing this (This requires the same type of animal and different genders on each animal). [DONE]
       
       In case a baby animal is made, the player can name the baby/babies. Each respective
-    baby has a 50:50 chanse of being Male or Female.
+    baby has a 50:50 chanse of being Male or Female. [DONE]
       
     - Sell one or more animals, the selling price is (BASE_RATE * HEALTH_VALUE) - The HEALTH_VALUE 
     is tracked during the game - starting at 100 - and decays between rounds by 10-30 units of % [DONE]
@@ -41,12 +41,12 @@ and a amount of players that they wish to play with. These numbers must be withi
       
     - Each player gets to do actions from **ONE** of the categories above, then their turn is over. [DONE]
     
-- If an animal reaches HEALTH_VALUE 0 - It dies.
+- If an animal reaches HEALTH_VALUE 0 - It dies. [DONE]
 
 - A player is removed from the game, when they have no animals and no money left.
 
 - Each animal can only eat between 1-3 types of food within the game. A player is not allowed to feed an Animal with a 
-  food type that is not within it's given food types. [WAITING_ON_CLARIFICATION]
+  food type that is not within it's given food types. [DONE]
   
 - After the last round, all animals are sold off and the Player receives currency equal to the value of their sold animals.
 
@@ -66,22 +66,11 @@ and a amount of players that they wish to play with. These numbers must be withi
   
 - Players can Sell animals amongst each other
 
-- Animals age and their sell value declines as they Age - When they get older than their max age, they die. 
+- Animals age and their sell value declines as they Age - When they get older than their max age, they die. [80% Done - Age sell value not implemented]
 
 # TO-DO LIST
-    
-- Attempt to breed **ONE** set of animals. There is a 50% chanse that a new animal will be
-    made from doing this (This requires the same type of animal and different genders on each animal). 
-      
-    In case a baby animal is made, the player can name the baby/babies. Each respective
-    baby has a 50:50 chanse of being Male or Female. //Not started
-
-- If an animal reaches HEALTH_VALUE 0 - It dies. //Not started
-
+          
 - A player is removed from the game, when they have no animals and no money left. //Case clarified - Should be eliminated if in Resource Limbo - Not started
-
-- Each animal can only eat between 1-3 types of food within the game. A player is not allowed to feed an Animal with a 
-  food type that is not within it's given food types. //Waiting on clarification if Animal can be attempted to be fed with an erronous food type (but it won't eat it)
 
 - After the last round, all animals are sold off and the Player receives currency equal to the value of their sold animals. //Not started
 
@@ -97,4 +86,4 @@ and a amount of players that they wish to play with. These numbers must be withi
   
 - Players can Sell animals amongst each other //Not started
 
-- Animals age and their sell value declines as they Age - When they get older than their max age, they die. //Not started
+- Animals age and their sell value declines as they Age - When they get older than their max age, they die. [80% Done - Age sell value not implemented]
