@@ -4,15 +4,26 @@ import Animals.*;
 import Plants.*;
 import Meats.*;
 import processedFood.*;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 
+/**
+ * The class that acts as a Store to Sell animals to, Buy animals from or Buy Food from
+ */
 public class Store extends utilityFunctions implements Serializable {
-    Scanner userInput = getMyScanner();
-    int shopCounter = 0;
+
+    Scanner userInput = getMyScanner(); //Utilize a separate scanner for each place to avoid bugs in parsing Tokens
+    int shopCounter = 0; //Just a simple counter ot showcase Index of items in Store
+
+    /**
+     * Let's the player specify an Animal they wish to Sell to the Shop. The sell value is defined by
+     * factors such as it's Health and Age.
+     *
+     *
+     * @param seller A player object who is the Seller selling Animals to the Store
+     */
     public void sellAnimal(Player seller){
         ArrayList<Animal> animalsToSell = seller.getOwnedAnimals();
 
@@ -20,7 +31,7 @@ public class Store extends utilityFunctions implements Serializable {
 
         if(animalsToSell.size() == 0){
             System.out.println(seller.getName() + " has no animals to sell currently.");
-            return; //Exit code for unsuccessful entry attempt
+            return;
         }
 
         printSellAnimalMenu(seller);
@@ -45,6 +56,16 @@ public class Store extends utilityFunctions implements Serializable {
         };
     }
 
+    /**
+     * A method that is responsible for handling the purchasing of Food from the Store
+     *
+     * Food is bought in a range of 100 grams to MAX AFFORDED AMOUNT in grams,  If the player runs
+     * out of money while in the shop - or cannot afford anything to begin with from the Shop, he/she
+     * is removed/not allowed into the shop.
+     *
+     * @param buyer A player object that is the Buyer of the food from the Store
+     * @return An int, a status code message
+     */
     public int buyFood(Player buyer){
         String wantedFood = "";
         String wantedAmount = "";
@@ -136,6 +157,16 @@ public class Store extends utilityFunctions implements Serializable {
         return -1;
     }
 
+    /**
+     * A method that is responsible for handling the Purchase of Animals from the Shop
+     *
+     * While the Buyer still has funds left to purchase the cheapest animal in the Shop,
+     * they are allowed to stay - Upon purchase of each Animal, they are prompted to give
+     * a name to the Animal.
+     *
+     * @param buyer A player object, the buyer of Animals from the Shop
+     * @return An int, a status code message
+     */
     public int buyAnimal(Player buyer){
         ArrayList<Animal> animalsToOffer = new ArrayList<>();
         animalsToOffer.add(new Bird("", "Male"));

@@ -1,7 +1,6 @@
 package gameComponents;
 
 import Animals.Animal;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +8,10 @@ import java.util.Scanner;
 import java.util.Random;
 import Animals.*;
 
+/**
+ * The class Game is responsible for most of the Game logic that occurs, the Game loop
+ * and other pieces of interactions - Such as announcing the winner, presenting the highscores etc.
+ */
 public class Game extends utilityFunctions implements Serializable{
     private int rounds = 0;
     private int players = 0;
@@ -18,15 +21,21 @@ public class Game extends utilityFunctions implements Serializable{
     private int currentPlayer = 0;
     private boolean showedMenu = false;
     private Random random = new Random();
-
-
     private ArrayList<Player> playersPlaying = new ArrayList<>();
+
+    /**
+     * When a new Game is made, we kick things off by asking for amount of players and
+     * names - and then Run the actual Game logic loop
+     */
     public Game(){
         askForInput();
         runGame();
     }
 
 
+    /**
+     * Ask for input in regards to how many players and how many rounds.
+     */
     public void askForInput(){
         Scanner userInput = new Scanner(System.in);
 
@@ -51,6 +60,22 @@ public class Game extends utilityFunctions implements Serializable{
 
     }
 
+    /**
+     * The function that is responsible for the behavior of breeding Animals -
+     * Requires at least 2 owned animals, and that there is at least 1 of each Sex
+     * in terms of Animals. If not - the user is moved back to the main menu.
+     *
+     * Different species are not allowed to interbreed - if the two sexes are
+     * compatible (one female and one male) - and the races are correct - there
+     * is a 50% chanse for offspring in a Random range based on the breed of the
+     * Animal.
+     *
+     * @param playerBreeding the player breeding
+     * @return An int, a Status code that tells of how the events transpired:
+     *      -2: Player had less than 2 Animals in total or player commited peaceful exit
+     *      1: Method ran it's course
+     *
+     */
     public int breedAnimal(Player playerBreeding){
         Scanner userInput = new Scanner(System.in);
         ArrayList<Animal> ownedAnimals = playerBreeding.getOwnedAnimals();
@@ -170,11 +195,26 @@ public class Game extends utilityFunctions implements Serializable{
                 System.out.println("Cannot breed two different Animals of different breeds.");
             }
         }
-        return -1;
+        return 1;
     }
 
+    /**
+     * A method that is responsible for handling purchases of Animals from Other Players
+     * Creates a list of potential Sellers based on active Players Owned Animals - and only
+     * keeps the purchasing loop active as long as there are other animals to buy.
+     *
+     * If the Buyer attempts to buy an Animal he/she cannot afford, they are sent back to the
+     * main menu.
+     *
+     * @param buyer The current Player who is buying Animals from other Players
+     * @return An status code that conveys how the events transpired:
+     *      -2 : An attempt at an transaction was made, but it failed due ot insufficient funds
+     *      -1 : There were no other players left in the game to purchase Animals from
+     *           There were no other players with Any Animals left in the Game to purchase from
+     *      1 : Peaceful exit
+     *      3 : Method ran it's course
+     */
     public int buyFromOtherPlayer(Player buyer){
-        //TO DO
         int counter = 1;
         ArrayList<Player> sellers = new ArrayList<Player>();
         String targetPlayerIndex;
@@ -249,13 +289,12 @@ public class Game extends utilityFunctions implements Serializable{
                 return 1; //Exited selling menu by will
             }
             Animal animalBeingBought = seller.getOwnedAnimals().get(Integer.valueOf(animalToBuyIndex)-1);
-            System.out.println("THE ANIMAL BEING BOUGHT IS : " + animalBeingBought.getInfo());
 
             if(animalBeingBought.getSellsFor() > buyer.getAmountOfMoney()){
                 System.out.println(buyer.getName() + " cannot afford " + animalBeingBought.getInfo() + "! (Needed: " + animalBeingBought.getSellsFor() +
                         " coins, has only " + buyer.getAmountOfMoney() + " coins)");
                 System.out.println("Returning back to main menu.");
-                return -1;  //A transaction failed due to insufficient funds, aborting buying operations
+                return -2;  //A transaction failed due to insufficient funds, aborting buying operations
             }
 
             System.out.println(buyer.getName() + " bought " + animalBeingBought.getInfo() + " for "
@@ -274,9 +313,30 @@ public class Game extends utilityFunctions implements Serializable{
             animalToBuyIndex = "";
 
         }
-        return 1;
+        return 3;
     }
 
+    /**
+     * A method that is responsible for selling Animals to other Players
+     *
+     * Checks that there are at least 2 players in the game left, then checks
+     * that the seller has Animals left to sell.
+     *
+     * Prompts what Player the Seller wishes to sell to, and then prompts for what
+     * Animal the Seller wishes to sell.
+     *
+     * If an Animal is sold to a person who had done their turn earlier this round,
+     * the Animals decay and Aging occurs to avoid a possible "Juggling of Animals" bug
+     * to avoid Aging and Decay mechanics.
+     *
+     * @param seller A player Object that is the Seller selling Animals
+     * @return An int, a Status code that concludes what occurred:
+     *
+     *      -1 : No other players left in the game to Sell to
+     *           Does not have any Animals left to sell
+     *           A transaction was attempted with insufficient funds
+     *      1  : Peaceful exit or Peaceful resolution of the Method
+     */
     public int sellToOtherPlayer(Player seller){
         int counter = 1;
         int buyersIndex = 0;
@@ -313,9 +373,7 @@ public class Game extends utilityFunctions implements Serializable{
             }
 
             System.out.println("[" + counter + "] Back to main menu");
-            //2 players
-            // [1] Buyer
-            // [2] Main menu
+
             while(!(safeIntInput(1, playersPlaying.size(), targetPlayerIndex = userInput.next()) == 1)){
                 //Break when the input is within a valid range and is a Number
             }
@@ -387,6 +445,22 @@ public class Game extends utilityFunctions implements Serializable{
         return 1;
     }
 
+    /**
+     * A method that is responsible for handling the Feeding of Animals
+     *
+     * Showcases information about the owned animals and their eating habits (Food, portion size)
+     * Prompts user to which Animal the Player wishes to Feed
+     * Prompts user to specify what they wish to feed the Animal with
+     * Checks that there is enough food left to serve the chosen Animal with the chosen Food
+     *
+     *
+     * @param playerFeeding A player object, the player who is feeding it's animals
+     * @return An int - a Status code that reports what occurred during the Method call:
+     *      -2 : Exited due to no Animals to feed
+     *           Exited due to no food left to feed animals with
+     *      -1 : Player did not yield any food left that the specified Animal would like ot eat
+     *       1 : Peaceful exit
+     */
     public int feedAnimal(Player playerFeeding){
         int counter = 1;
         boolean finishedFeeding = false;
@@ -516,56 +590,121 @@ public class Game extends utilityFunctions implements Serializable{
             }
             counter = 1;
         }
-        return -1;
+        return 1;
     }
 
+    /**
+     * Returns the amount of Players
+     * @return An int, the amount of players
+     */
     public int getPlayers(){
         return this.players;
     }
 
+    /**
+     * Sets the amount of Players
+     * @param players An int, the amount of players to be set to
+     */
     public void setPlayers(int players){
         this.players = players;
     }
+
+    /**
+     * Get current player numeral
+     * @return An int, that depicts who the current player is based on Index
+     */
     public int getCurrentPlayer(){
         return this.currentPlayer;
     }
 
+    /**
+     * Setter for Setting the current Player index
+     * @param currentPlayer An int, the index that one wishes to set the current Player to be
+     */
     public void setCurrentPlayer(int currentPlayer){
         this.currentPlayer = currentPlayer;
     }
 
+    /**
+     * Gets the Numeral of the current Round
+     * @return An int, the current round of the Game
+     */
     public int getCurrentRound(){
         return this.currentRound;
     }
 
+    /**
+     * Sets the current round
+     * @param currentRound An int, sets the current round
+     */
     public void setCurrentRound(int currentRound){
         this.currentRound = currentRound;
     }
 
+    /**
+     * Getter of rounds, rounds being the total amount of rounds to play
+     *
+     * @return An int, returns the amount of Rounds to be played in total
+     */
     public int getRounds(){
         return this.rounds;
     }
 
+    /**
+     * Setter of rounds, rounds being the total amount of rounds to play
+     * @param rounds An int, sets the total amount of rounds to this value
+     */
     public void setRounds(int rounds){
         this.rounds = rounds;
     }
 
+    /**
+     * Get players playing array list
+     * @return An arraylist of Player objects, all of whom are the players still in the game
+     */
     public ArrayList<Player> getPlayersPlaying(){
         return this.playersPlaying;
     }
 
+    /**
+     * Setter for players playing.
+     * @param playersPlaying An arrayList of players, which is the one which the user wishes to set the new current players
+     *                       to be
+     */
     public void setPlayersPlaying(ArrayList<Player> playersPlaying){
         this.playersPlaying = playersPlaying;
     }
 
+    /**
+     * Getter for showedMenu - primarily used in not printing out redundant information/repeating information
+     * @return A boolean, wether the Menu was shown already or not
+     */
     public boolean getShowedMenu(){
         return this.showedMenu;
     }
 
+    /**
+     * Setter for Showed menu Boolean
+     * @param showedMenu A boolean, wether the Menu has been shown or not yet
+     */
     public void setShowedMenu(boolean showedMenu){
         this.showedMenu = showedMenu;
     }
 
+    /**
+     * The method responsible for actually saving the Game - After the Save Filepath has been
+     * vetted and confirmed - the actual saving process is executed
+     * @param filePath A string input that is a vetted/sanitized form of Input of the User,
+     *                 can for instance take the form of:
+     *
+     *                      D:\\myGames\\Savestates\\MyJavaGameSave
+     *                      Will Create the Dirs myGames and Savestates if needed,
+     *                      and then create the save game file named MyJavaGameSave
+     *
+     * @throws FileNotFoundException Since we are working with FileOutputStreams, we have
+     *                  to account for the fact that it might not be able to find the filePath - so the
+     *                  method demands that we declare that the Method can throw this Exception
+     */
     public void saveGame(String filePath) throws FileNotFoundException{
         Scanner userInput = new Scanner(System.in);
         try{
@@ -580,6 +719,19 @@ public class Game extends utilityFunctions implements Serializable{
         }
     }
 
+    /**
+     * The method responsible for loading the relevant game save, based on the filePath
+     * Uses an ObjectInputStream to read a serialized File and sets current values to that
+     * of the save state.
+     *
+     * Do note: Usage of objectInputStreams must conclude with the Stream being closed after
+     * usage is completed.
+     *
+     * @param filePath A string that is a User written Filepath input, which has been forcefully
+     *                 checked to vet that it's possible to load a game save from the wished destination
+     * @throws FileNotFoundException The method must be declared as being able ot throw a FileNotFoundException,
+     *                 as there is no guarantee that it can open a FileInputStream if the Filepath is not valid.
+     */
     public void loadGame(String filePath) throws FileNotFoundException{
         boolean holdLoop = true;
         while(holdLoop){
@@ -597,6 +749,7 @@ public class Game extends utilityFunctions implements Serializable{
                 if(!this.getShowedMenu()){
                     printAnimals(true);
                 }
+                objectIn.close();
                 break;
             } catch (Exception ex) {
                 break; //Stream closed
@@ -605,6 +758,15 @@ public class Game extends utilityFunctions implements Serializable{
     }
 
 
+    /**
+     * A helper Function that helps in printing out Menu Options
+     *
+     * @param loadedGame A boolean that keeps track of wether it's a loaded game or not, as a Loaded game should
+     *                   present the death archives for dead Animals, as their death announcements are removed
+     *                   when they die - To work around this, a death archive is stored - keeping track of death
+     *                   announcements for 1 round after their death - after that, the death archive is purged
+     *                   of older Entries as well
+     */
     public void printAnimals(boolean loadedGame) {
         System.out.println("Round " + currentRound + ", " + playersPlaying.get(currentPlayer).getName() + "'s turn.");
 
@@ -636,6 +798,14 @@ public class Game extends utilityFunctions implements Serializable{
         }
     }
 
+    /**
+     * A method that handles the Game Loop logic, such as Announcing deaths, Turns, Rounds,
+     * Eliminations, Printing Menus, Directing player choices from the main menu, etc.
+     *
+     * Also handles end of game Mechanics such as sorting out the highscore, announcing
+     * the Winner etc.
+     *
+     */
     public void runGame() {
         Store ourStore = new Store();
         System.out.println("Welcome to the Raising your Animal Game.");
@@ -686,7 +856,6 @@ public class Game extends utilityFunctions implements Serializable{
                     break;
                 case "8":
                     Scanner saveInput = new Scanner(System.in);
-                    filePathtoSaveOrLoad = "";
                     keepAskingForSaveOrLoad = true;
                     boolean check = false;
                     int returnCode = 0;
@@ -694,11 +863,7 @@ public class Game extends utilityFunctions implements Serializable{
                         System.out.println("Please write the System path you'd like to save your game to (Exit to abort - Case insensitive): ");
                         try{
                             //While the returnCode from forceValidSavingPath is not 1
-                            while(!((returnCode = (forceValidSavingPath(filePathtoSaveOrLoad = saveInput.nextLine(),
-                                    this))) == 1)
-                            ){
-
-                                //Breaks when the input is within a valid range and is a Number
+                            while(!((returnCode = (forceValidSavingPath(filePathtoSaveOrLoad = saveInput.nextLine(), this))) == 1)){
                                 if(!filePathtoSaveOrLoad.toLowerCase().equals("exit")){
                                     if(returnCode == 2){
                                         System.out.println("User chose to not overwrite file at: " + filePathtoSaveOrLoad);

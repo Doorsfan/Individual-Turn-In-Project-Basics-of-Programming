@@ -6,14 +6,19 @@ import gameComponents.Food;
 import gameComponents.Player;
 import gameComponents.utilityFunctions;
 import processedFood.mysteryMeat;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
+/**
+ * The main abstract class that all Animals inherit from - Implements a interface to allow for easy Serialization,
+ * and inherits utilityFunctions to allow for enforcing of certain inputs/cleaning of certain inputs.
+ */
 public abstract class Animal extends utilityFunctions implements Serializable {
-    protected String name, gender;
+    //Initialize all of the variables that we will need
+    //These attributes are all inherited and accessed in Child classes, so they are protected
+    protected String name,gender;
     protected int health = 100;
     protected ArrayList<Food> eats;
     protected int value;
@@ -27,12 +32,21 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     protected int maxAge;
     protected int perishedAtRound = 0;
     protected int vetCost = 0;
+
+    //These should not be inherited and are singularly unique to the Animal/Has interactions that should only apply to them
     private String causeOfDeath = "";
     private boolean decayedThisRound = false;
-
     private boolean alive = true;
     private boolean sick = false;
 
+    /**
+     * A method that aids in Construction of children of the Animal class - Accepts 3 Food Items
+     *
+     * @param firstItem  A food Object used in helping with constructing the Constructor for Animals
+     * @param secondItem A food Object used in helping with constructing the Constructor for Animals
+     * @param thirdItem  A food Object used in helping with constructing the Constructor for Animals
+     * @return An ArrayList of Food object type, used for the Constructor of Animals
+     */
     protected ArrayList<Food> whatItEats(Food firstItem, Food secondItem, Food thirdItem){
         ArrayList<Food> toReturn = new ArrayList<>();
         toReturn.add(firstItem);
@@ -41,6 +55,13 @@ public abstract class Animal extends utilityFunctions implements Serializable {
         return toReturn;
     }
 
+    /**
+     * A method that aids in Construction of children of the Animal class - Accepts 2 Food Items
+     *
+     * @param firstItem  A food Object used in helping with constructing the Constructor for Animals
+     * @param secondItem A food Object used in helping with constructing the Constructor for Animals
+     * @return An ArrayList of Food object type, used for the Constructor of Animals
+     */
     protected ArrayList<Food> whatItEats(Food firstItem, Food secondItem){
         ArrayList<Food> toReturn = new ArrayList<>();
         toReturn.add(firstItem);
@@ -48,26 +69,76 @@ public abstract class Animal extends utilityFunctions implements Serializable {
         return toReturn;
     }
 
+    /**
+     * A method that aids in Construction of children of the Animal class - Accepts 1 Food Item
+     *
+     * @param firstItem A food Object used in helping with constructing the Constructor for Animals
+     * @return An ArrayList of Food object type, used for the Constructor of Animals
+     */
+    protected ArrayList<Food> whatItEats(Food firstItem){
+        ArrayList<Food> toReturn = new ArrayList<>();
+        toReturn.add(firstItem);
+        return toReturn;
+    }
+
+    /**
+     * Getter for decayedThisRound
+     *
+     * @return A boolean saying wether this is true or not
+     */
     public boolean hasDecayedThisRound() { return this.decayedThisRound; }
 
+    /**
+     * Setter for decayedThisRound
+     *
+     * @param decayedThisRound A boolean saying if the animal decayed this round
+     */
     public void setDecayedThisRound(boolean decayedThisRound) { this.decayedThisRound = decayedThisRound; }
 
+    /**
+     * Gets minimum offspring.
+     *
+     * @return the minimum offspring
+     */
     public int getMinimumOffspring() { return this.minimumOffspring; }
 
+    /**
+     * Gets maximum offspring.
+     *
+     * @return the maximum offspring
+     */
     public int getMaximumOffspring() { return this.maximumOffspring; }
 
+    /**
+     * Get portion size int.
+     *
+     * @return the portionsize of the animal
+     */
     public int getPortionSize(){
         return this.portionSize;
     }
 
-    public void setCauseOfDeath(String in){
-        this.causeOfDeath = in;
+    /**
+     * Set cause of death.
+     *
+     * @param diedFrom the cause of death for the Animal
+     */
+    public void setCauseOfDeath(String diedFrom){
+        this.causeOfDeath = diedFrom;
     }
 
+    /**
+     * Get cause of death string.
+     *
+     * @return the string
+     */
     public String getCauseOfDeath(){
         return this.causeOfDeath;
     }
 
+    /**
+     * Ages the Animal, if it goes above it's max age, it dies and the cause of death is aging
+     */
     public void age(){
         this.age += 1;
         if(this.age > this.maxAge){
@@ -76,12 +147,12 @@ public abstract class Animal extends utilityFunctions implements Serializable {
         }
     }
 
-    protected ArrayList<Food> whatItEats(Food firstItem){
-        ArrayList<Food> toReturn = new ArrayList<>();
-        toReturn.add(firstItem);
-        return toReturn;
-    }
 
+    /**
+     * Gets the value that the animal sells for currently - depends on age and health value
+     *
+     * @return An int that is the relative value of the Animal
+     */
     public int getSellsFor(){
         double valueMultiplicator = (double) this.health / 100.0;
         double toReturn = this.value * valueMultiplicator;
@@ -99,27 +170,49 @@ public abstract class Animal extends utilityFunctions implements Serializable {
         return (int) toReturn;
     }
 
+    /**
+     * Sets wether the animal is sick
+     *
+     * @param isSick A boolean that  denotes wether this Animal is sick
+     */
     public void setSick(boolean isSick){
         this.sick = isSick;
     }
 
+    /**
+     * Gets wether this animal is sick or not
+     *
+     * @return A boolean to denote if this animal is sick
+     */
     public boolean isSick(){
         return this.sick;
     }
 
+    /**
+     * Gets cost of a veterniary
+     *
+     * @return An int, the cost of the Vet for this Animal
+     */
     public int getVetCost(){
         return this.vetCost;
     }
-    // Animals can become Sick - 20% per Animal on each Round -
-    // Incurrs a Veterinary bill tto pay, price varying based on the Animal -
-    // They have a 50% chanse of recovering - If this fails, they die. //Not started
+
+    /**
+     * The method to simulate getting sick - 20% chance per call that the respective Animal gets sick,
+     * if this happens - a player is prompted to pay a Vet bill to possibly cure the Animal - if not done,
+     * the Animal will remain sick until the end of the Round and die afterwards.
+     *
+     * If the player pays for the Vet bill, there is a 50% chance that the treatment will work, and the
+     * animal is no longer sick. If this fails, however, the Animal perishes.
+     *
+     * @param owner the owner
+     * @return An int that acts as Status code, wether said Animal got sick or other events. (Such as not paying Vet cost, etc.)
+     */
     public int chanseForDisease(Player owner){
         String answer;
         Scanner diseaseScanner = new Scanner(System.in);
-
         Random random = new Random();
         int diseaseChanse = random.ints(1, 101).findFirst().getAsInt();
-
 
         if(diseaseChanse <= 20){ //20% chanse of being diseased, 20 out of 100
             this.setSick(true);
@@ -164,31 +257,73 @@ public abstract class Animal extends utilityFunctions implements Serializable {
         return 0; //No disease occurred
     }
 
+    /**
+     * A more general getter to get some info about this Animal in general, used in Menus for Shorthand writing
+     *
+     * @return The string with information about the animal
+     */
     public String getInfo(){
         return (this.getName() + " the " + this.getClassName() + " (" + this.getGender() +
                 "), (Health: " + this.getHealth() + ", Age: " + this.getAge() + ") (SicK: " + isSick() + ")");
     }
 
+    /**
+     * Get what it eats array list.
+     *
+     * @return the array list
+     */
     public ArrayList<Food> getWhatItEats(){
         return this.eats;
     }
 
+    /**
+     * Get name string.
+     *
+     * @return the string
+     */
     public String getName(){
         return this.name;
     }
 
+    /**
+     * Get age int.
+     *
+     * @return the int
+     */
     public int getAge(){
         return this.age;
     }
 
+    /**
+     * Gets max age.
+     *
+     * @return the max age
+     */
     public int getMaxAge() { return this.maxAge; }
 
+    /**
+     * Shorthand getter for getting the SimpleName of the Class
+     *
+     * @return A string with the simpleName of the Class
+     */
     public String getClassName(){ return this.getClass().getSimpleName(); }
 
+    /**
+     * Get gender string.
+     *
+     * @return the string
+     */
     public String getGender(){
         return this.gender;
     }
 
+    /**
+     * Simulates the health loss of animals for each turn - Yields a random number between 10 and 30 (inclusive),
+     * saves the amount of health this Animal lost - deducts from the current Health - and if the Health is below 0,
+     * this animal dies - cause of death being Starvation.
+     *
+     * @param round the round
+     */
     public void decay(int round){
         wasAtHealth = health;
         Random random = new Random();
@@ -201,29 +336,71 @@ public abstract class Animal extends utilityFunctions implements Serializable {
         }
     }
 
+    /**
+     * Is alive boolean.
+     *
+     * @return the boolean
+     */
     public boolean isAlive(){
         return this.alive;
     }
 
+    /**
+     * Set alive.
+     *
+     * @param status the status
+     */
     public void setAlive(boolean status){
         this.alive = status;
     }
 
+    /**
+     * Get was at health int.
+     *
+     * @return the int
+     */
     public int getWasAtHealth(){
         return this.wasAtHealth;
     }
 
+    /**
+     * Set name.
+     *
+     * @param name the name
+     */
     public void setName(String name){
         this.name= name;
     }
+
+    /**
+     * Get lost health int.
+     *
+     * @return the int
+     */
     public int getLostHealth(){
         return this.lostHealth;
     }
 
+    /**
+     * Set perished at round.
+     *
+     * @param diedAtRound the died at round
+     */
     public void setPerishedAtRound(int diedAtRound){
         this.perishedAtRound = diedAtRound;
     }
 
+    /**
+     * The method for an Animal to eat Food - Checks if this Animal eats what it is being fed,
+     * if it is something it likes and wants - it eats it and the amount of Grams it takes is
+     * reduced from the owning players Stock of food.
+     *
+     * Heals the animal for 10 health if at or under 90 Health, otherwise sets health to 100
+     *
+     * @param gramsFedWith An int, the amount of grams fed with
+     * @param fedWith      A food object, the Food the Animal was fed with
+     * @return An status code     An int, that acts as a Status code for events transpiring
+     */
     public int eat(int gramsFedWith, Food fedWith){
         for(Food iEat : eats){
             if(iEat.getName().equals(fedWith.getName())){
@@ -252,13 +429,29 @@ public abstract class Animal extends utilityFunctions implements Serializable {
         return -2; //The animal did not like the type of food being  served
     }
 
+    /**
+     * Get perished at round int.
+     *
+     * @return An int, the round the animal died at
+     */
     public int getPerishedAtRound(){
         return this.perishedAtRound;
     }
+
+    /**
+     * Getter for the base value of the Animal
+     *
+     * @return An int, the base value of the Animal
+     */
     public int getValue(){
         return this.value;
     }
 
+    /**
+     * Getter for the Health of the Animal
+     *
+     * @return An int, the current health of the Animal
+     */
     public int getHealth(){
         return this.health;
     }
