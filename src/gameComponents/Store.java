@@ -5,11 +5,12 @@ import Plants.*;
 import Meats.*;
 import processedFood.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 
-public class Store extends utilityFunctions{
+public class Store extends utilityFunctions implements Serializable {
     Scanner userInput = getMyScanner();
     int shopCounter = 0;
     public void sellAnimal(Player seller){

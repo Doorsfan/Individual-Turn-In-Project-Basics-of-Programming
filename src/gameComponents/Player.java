@@ -1,9 +1,11 @@
 package gameComponents;
 
 import Animals.Animal;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Player {
+public class Player implements Serializable {
     private String name;
     private int amountOfMoney;
     private boolean playing = true;
@@ -12,10 +14,27 @@ public class Player {
     private boolean turnIsOver = false;
     private ArrayList<Integer> diedAtRoundList = new ArrayList<Integer>();
     private ArrayList<String> deathMessageList = new ArrayList<String>();
+    private ArrayList<Animal> shouldBeRemoved = new ArrayList<>();
+    private boolean addedToHighScore = false;
+    private ArrayList<String> savedDeathList = new ArrayList<String>();
 
     public Player(String name, int amountOfMoney){
         this.name = name;
         this.amountOfMoney = amountOfMoney;
+    }
+
+    public boolean getAddedToHighScore(){
+        return this.addedToHighScore;
+    }
+    public void setAddedToHighScore(boolean wasAdded){
+        this.addedToHighScore = wasAdded;
+    }
+    public ArrayList<Animal> getShouldBeRemoved(){
+        return this.shouldBeRemoved;
+    }
+
+    public void addToShouldBeRemoved(Animal toAdd){
+        this.shouldBeRemoved.add(toAdd);
     }
 
     public void addDeathAnnouncement(int timeOfDeath, String message){
@@ -23,6 +42,30 @@ public class Player {
         deathMessageList.add(message);
     }
 
+
+    public ArrayList<String> getSavedDeathList(){
+        return this.savedDeathList;
+    }
+    public void addToPlayerDeathList(String toAdd){
+        this.savedDeathList.add(toAdd);
+    }
+
+    public int purgeSavedDeathList(int round){
+        ArrayList<String> toRemove = new ArrayList<String>();
+        for(int i = 0; i < this.savedDeathList.size(); i++){
+            if(savedDeathList.get(i).contains(String.valueOf("round of " + round))){
+                toRemove.add(savedDeathList.get(i));
+            }
+        }
+        for(int i = savedDeathList.size()-1; i > -1; i--){
+            for(String shouldBeRemoved: toRemove){
+                if(savedDeathList.get(i).equals(shouldBeRemoved)){
+                    savedDeathList.remove(shouldBeRemoved);
+                }
+            }
+        }
+        return -1;
+    }
     public void announceDeaths(int currentRound){
         ArrayList<Integer> removeRound = new ArrayList<Integer>();
         ArrayList<String> removeMessage = new ArrayList<String>();
@@ -83,5 +126,10 @@ public class Player {
 
     public void addToOwnedFood(Food toAdd){
         this.ownedFood.add(toAdd);
+    }
+
+    @Override
+    public String toString(){
+        return "Name: " + this.getName();
     }
 }

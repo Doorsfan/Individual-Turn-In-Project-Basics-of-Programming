@@ -14,5 +14,6 @@ public class Cat extends Animal {
         this.minimumOffspring = 1;
         this.maximumOffspring = 14;
         this.maxAge = 9;
+        this.vetCost = 13;
     }
 }

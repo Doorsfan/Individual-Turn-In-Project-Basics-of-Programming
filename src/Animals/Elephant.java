@@ -12,5 +12,6 @@ public class Elephant extends Animal {
         this.minimumOffspring = 1;
         this.maximumOffspring = 3;
         this.maxAge = 65;
+        this.vetCost = 26;
     }
 }

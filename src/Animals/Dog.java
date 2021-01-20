@@ -14,5 +14,6 @@ public class Dog extends Animal {
         this.minimumOffspring = 3;
         this.maximumOffspring = 10;
         this.maxAge = 11;
+        this.vetCost = 20;
     }
 }

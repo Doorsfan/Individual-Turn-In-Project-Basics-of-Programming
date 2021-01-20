@@ -12,7 +12,6 @@ public class Bird extends Animal {
         this.minimumOffspring = 2;
         this.maximumOffspring = 7;
         this.maxAge = 4;
+        this.vetCost = 8;
     }
-
-
 }

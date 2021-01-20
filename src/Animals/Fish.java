@@ -12,5 +12,6 @@ public class Fish extends Animal {
         this.minimumOffspring = 1;
         this.maximumOffspring = 12;
         this.maxAge = 4;
+        this.vetCost = 2;
     }
 }
