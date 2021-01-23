@@ -2,5 +2,7 @@ package processedFood;
 
 import gameComponents.Food;
 
-public abstract class processedFood extends Food {
+import java.io.Serializable;
+
+public abstract class processedFood extends Food implements Serializable {
 }

@@ -7,6 +7,7 @@ import Plants.Apple;
 import Plants.Peanut;
 import Plants.Seeds;
 import gameComponents.Food;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -27,7 +28,7 @@ import java.util.Random;
  *       33% chance each for one of the respective meats and 33% chance each for one of the respective plants
  *
  */
-public class mysteryMeat extends processedFood{
+public class mysteryMeat extends processedFood implements Serializable {
     private ArrayList<Food> contains = new ArrayList<>();
     Random random = new Random();
     private int contentInMeat = random.ints(1, 4).findFirst().getAsInt();

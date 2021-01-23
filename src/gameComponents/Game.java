@@ -6,435 +6,194 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 import java.util.Random;
-import Animals.*;
 
 /**
  * The class Game is responsible for most of the Game logic that occurs, the Game loop
- * and other pieces of interactions - Such as announcing the winner, presenting the highscores etc.
+ * and other pieces of interactions - Such as announcing the winner, presenting the high-scores etc.
  */
 public class Game extends utilityFunctions implements Serializable{
-    private int rounds = 0;
-    private int players = 0;
-    private String wantedRoundsInput = "";
-    private String wantedPlayersInput = "";
-    private int currentRound = 1;
-    private int currentPlayer = 0;
+    //Initialize our variables that we are going to need
+    private int rounds = 0, players = 0, currentRound = 1, currentPlayer = 0;
+    private String wantedRoundsInput = "", wantedPlayersInput = "";
     private boolean showedMenu = false;
     private Random random = new Random();
     private ArrayList<Player> playersPlaying = new ArrayList<>();
+    private Store ourStore;
+    private ArrayList<String> winner = new ArrayList<>();
+    //Every class that is to be Serialized, must implement the Serializable interface - however, Scanners don't -their
+    //state cannot be Serialized - To circumvent this, i declare my Scanners as Transient - i.e, not included to be Serialized
+    transient Scanner userInput = new Scanner(System.in); //user input
+    transient Scanner nameScanner = new Scanner(System.in); //name input
+    transient Scanner forceSavingPathScanner = new Scanner(System.in); //ForceSavingPathInput
+    transient Scanner forceLoadingPathScanner = new Scanner(System.in);
+    transient Scanner gameMenuScanner = new Scanner(System.in);
 
     /**
      * When a new Game is made, we kick things off by asking for amount of players and
      * names - and then Run the actual Game logic loop
      */
     public Game(){
-        askForInput();
-        runGame();
+        askForInput(); //Ask for User input
+        runGame(); //Boot the game up
     }
-
-
     /**
-     * Ask for input in regards to how many players and how many rounds.
+     * The method responsible for handling amount of rounds and players to be played with - delegates repsonsibilities of
+     * input to Sub-methods
      */
     public void askForInput(){
-        Scanner userInput = new Scanner(System.in);
-
         System.out.println("How many rounds would you like to play?");
-        while(!(safeIntInput(5, 30, wantedRoundsInput = userInput.next()) == 1)){
+        while(!(safeIntInput(5, 30, wantedRoundsInput = userInput.next(), false) == 1)){
             //Breaks when the input is within a valid range and is a Number
         }
-        rounds = Integer.parseInt(wantedRoundsInput);
-
+        rounds = Integer.parseInt(wantedRoundsInput); //Amount of Rounds
         System.out.println("How many players will be playing?");
-        while(!(safeIntInput(1, 4, wantedPlayersInput = userInput.next()) == 1)){
+        while(!(safeIntInput(1, 4, wantedPlayersInput = userInput.next(), false) == 1)){
             //Break when the input is within a valid range and is a Number
         }
-        players = Integer.parseInt(wantedPlayersInput);
+        players = Integer.parseInt(wantedPlayersInput); //Amount of players
+        for(int i = 0; i < players; i++){ //Create the Players
 
-        for(int i = 0; i < players; i++){
-            Scanner nameScanner = new Scanner(System.in);
             System.out.print("Please write the name for player " + (i+1) + ": ");
             String name = nameScanner.nextLine();
-            playersPlaying.add(new Player(name, 1000));
+            playersPlaying.add(new Player(name, 1000)); //Add them to the list of players playing
         }
-
     }
 
     /**
-     * The function that is responsible for the behavior of breeding Animals -
-     * Requires at least 2 owned animals, and that there is at least 1 of each Sex
-     * in terms of Animals. If not - the user is moved back to the main menu.
-     *
-     * Different species are not allowed to interbreed - if the two sexes are
-     * compatible (one female and one male) - and the races are correct - there
-     * is a 50% chanse for offspring in a Random range based on the breed of the
-     * Animal.
-     *
-     * @param playerBreeding the player breeding
-     * @return An int, a Status code that tells of how the events transpired:
-     *      -2: Player had less than 2 Animals in total or player commited peaceful exit
-     *      1: Method ran it's course
-     *
+     * The method responsible for breeding of Animals - delegates responsibilities to Sub-methods
+     * @param playerBreeding A player object, the player Breeding animals
      */
-    public int breedAnimal(Player playerBreeding){
-        Scanner userInput = new Scanner(System.in);
-        ArrayList<Animal> ownedAnimals = playerBreeding.getOwnedAnimals();
-        String firstAnimalWanted;
-        String secondAnimalWanted;
+    public void breedAnimal(Player playerBreeding){
+        //Owned animals/Females/males
+        ArrayList<Animal> ownedAnimals = playerBreeding.getOwnedAnimals(), males = new ArrayList<>(), females = new ArrayList<>();
+        String firstAnimalWanted,secondAnimalWanted; //wanted Animals indexes
+        int returnCode = 0; //status code from handling input, used to check for exit
 
-        if(playerBreeding.getOwnedAnimals().size() <= 1){
-            System.out.println(playerBreeding.getName() + " needs to have at least 2 Animals to breed. Returning to main menu.\n");
-            return -2;
+        if(ownedAnimals.size() <= 1){ System.out.println(playerBreeding.getName() + //Need at least 2 animals to breed
+                " needs to have at least 2 Animals to breed. Returning to main menu.\n"); return;}
+        for(Animal inspectedAnimal : ownedAnimals){ //inspect animals
+            if( inspectedAnimal.getGender().equals("Male") ) { males.add(inspectedAnimal); } //Males get added to male List
+            else{ females.add(inspectedAnimal); } //Females get added to female list
         }
-
-        ArrayList<Animal> males = new ArrayList<>();
-        ArrayList<Animal> females = new ArrayList<>();
-
-        for(Animal inspectedAnimal : ownedAnimals){
-            if(inspectedAnimal.getGender().equals("Male")){
-                males.add(inspectedAnimal);
-            }
-            else{
-                females.add(inspectedAnimal);
-            }
-        }
-        if(males.size() == 0){ System.out.println("Found no males to breed with, Returning to main menu.\n"); return -2;}
-        else if(females.size() == 0){ System.out.println("Found no females to breed with, Returning to main menu.\n"); return -2; }
+        if(males.size() == 0 || females.size() == 0){ System.out.println("Found no males/females to breed with, Returning to main menu.\n"); return;}
         else {
             System.out.println("Which two animals do you wish to breed?");
 
-            System.out.println("Please choose a male: ");
-            int firstAnimal;
-            int counter = 1;
-            for(Animal male : males){
-                System.out.println("[" + counter + "] " + male.getName() + " the " + male.getClassName() + ", (Health: " + male.getHealth() + " " +
-                        ", " + male.getGender() + ")");
-                counter += 1;
-            }
-            System.out.println("[" + counter + "] Back to Main Menu");
-            while(!(safeIntInput(1, males.size()+1, firstAnimalWanted = userInput.next()) == 1)){
-                //Break when the input is within a valid range and is a Number
-            }
+            printMales(males); //Print the menu of relevant males
+            while(!((returnCode = (safeIntInput(1, males.size()+1, firstAnimalWanted = userInput.next(),
+                    true))) == 1)){ if(returnCode == 2) return; }
+            //Force index boundary between 1 and males.size()+1, highest index is exit - returnCode is 2 if the input is the Exit index
 
-            firstAnimal = Integer.parseInt(firstAnimalWanted);
-            if(firstAnimal == males.size()+1){
-                System.out.println(playerBreeding.getName() + " chose to exit. Returning to main menu.\n");
-                return -2;
-            }
+            printFemales(females); //Print the menu of relevant females
+            while(!((returnCode = (safeIntInput(1, females.size()+1, secondAnimalWanted = userInput.next(),
+                    true))) == 1)){ if(returnCode == 2) return; }
+            //Force index boundary between 1 and females.size()+1,
+            // highest index is exit highest index is exit - returnCode is 2 if the input is the Exit index
 
-            System.out.println("Please choose a female: ");
-            int secondAnimal;
-            counter = 1;
-            for(Animal female : females){
-                System.out.println("[" + counter + "] " + female.getName() + " the " + female.getClassName() + ", (Health: " +female.getHealth() + " " +
-                        ", " + female.getGender() + ")");
-                counter += 1;
-            }
-            System.out.println("[" + counter + "] Back to Main Menu");
-            while(!(safeIntInput(1, females.size()+1, secondAnimalWanted = userInput.next()) == 1)){
-                //Break when the input is within a valid range and is a Number
-            }
+            Animal theMale = males.get(Integer.valueOf(firstAnimalWanted) - 1); //The wanted Male
+            Animal theFemale = females.get(Integer.valueOf(secondAnimalWanted) - 1); //The wanted female
 
-            secondAnimal = Integer.parseInt(secondAnimalWanted);
-            if(secondAnimal == females.size()+1){
-                System.out.println(playerBreeding.getName() + " chose to exit. Returning to main menu.\n");
-                return -2;
-            }
-            if(males.get(firstAnimal-1).getClassName().equals(females.get(secondAnimal-1).getClassName())){
-                int madeOffspring = random.ints(1,3).findFirst().getAsInt();
-                if(madeOffspring == 1){
-                    int amountOfBabies = random.ints(females.get(secondAnimal-1).getMinimumOffspring(),
-                            females.get(secondAnimal-1).getMaximumOffspring()).findFirst().getAsInt();
-                    System.out.println(males.get(firstAnimal-1).getName() + " the " + males.get(firstAnimal-1).getClassName() +
-                                    " (Male) and " + females.get(secondAnimal-1).getName() +
-                                    " the " + females.get(secondAnimal-1).getClassName() +
-                            " (Female) produced " + amountOfBabies + " baby " + males.get(firstAnimal-1).getClassName() +
-                            (amountOfBabies > 1 ? "s." : "."));
-                    for(int i = 0; i < amountOfBabies; i++){
-                        int genderChance = random.ints(1,3).findFirst().getAsInt();
-                        String gender;
-                        if(genderChance == 1){
-                            gender = "Male";
-                            System.out.println("It's a boy!");
-                        }
-                        else{
-                            gender = "Female";
-                            System.out.println("It's a girl!");
-                        }
-                        System.out.println("What would you like to name your new baby " + females.get(secondAnimal-1).getClassName() + " " +
-                                "(" + gender + ")?");
-                        Scanner nameScanner = new Scanner(System.in);
-                        String name = nameScanner.nextLine();
-
-                        switch(females.get(secondAnimal-1).getClassName()){
-                            case "Bird":
-                                playerBreeding.addToOwnedAnimals(new Bird(name,gender));
-                                break;
-                            case "Cat":
-                                playerBreeding.addToOwnedAnimals(new Cat(name,gender));
-                                break;
-                            case "Dog":
-                                playerBreeding.addToOwnedAnimals(new Dog(name,gender));
-                                break;
-                            case "Elephant":
-                                playerBreeding.addToOwnedAnimals(new Elephant(name,gender));
-                                break;
-                            case "Fish":
-                                playerBreeding.addToOwnedAnimals(new Fish(name,gender));
-                                break;
-                        }
-                    }
-                }
+            if(theMale.getClassName().equals(theFemale.getClassName())){ //If they're both of the same race
+                int madeOffspring = random.ints(1,3).findFirst().getAsInt(); //NR of Offspring
+                if(madeOffspring > 1)
+                    { System.out.println(theFemale.getInfo() + " and " + theMale.getInfo() + " did not manage to make any babies.."); }
                 else{
-                    System.out.println(females.get(secondAnimal-1).getName() + " the " + females.get(secondAnimal-1).getClassName()
-                            + " and " + males.get(firstAnimal-1).getName() + " the " + males.get(firstAnimal-1).getClassName()
-                            + " did not manage to make any babies..");
-                }
-            }
-            else{
-                System.out.println("Cannot breed two different Animals of different breeds.");
-            }
-        }
-        return 1;
+                    int amountOfBabies = random.ints(theFemale.getMinimumOffspring(),theFemale.getMaximumOffspring()).findFirst().getAsInt();
+                    System.out.println(theMale.getInfo() + " " + theFemale.getInfo() + " made " + amountOfBabies + " babies.");
+                    createBabies(amountOfBabies, females, playerBreeding, Integer.valueOf(secondAnimalWanted)); } } //Create the babies
+            else{ System.out.println("Cannot breed two different Animals of different breeds."); } }
     }
 
     /**
-     * A method that is responsible for handling purchases of Animals from Other Players
-     * Creates a list of potential Sellers based on active Players Owned Animals - and only
-     * keeps the purchasing loop active as long as there are other animals to buy.
-     *
-     * If the Buyer attempts to buy an Animal he/she cannot afford, they are sent back to the
-     * main menu.
-     *
-     * @param buyer The current Player who is buying Animals from other Players
-     * @return An status code that conveys how the events transpired:
-     *      -2 : An attempt at an transaction was made, but it failed due ot insufficient funds
-     *      -1 : There were no other players left in the game to purchase Animals from
-     *           There were no other players with Any Animals left in the Game to purchase from
-     *      1 : Peaceful exit
-     *      3 : Method ran it's course
+     * The method responsible for buying Animals from other players - Delegates most responsibilities
+     * to sub-methods
+     * @param buyer A player object, the Buyer in question
+     * @return A int, the status code to return
      */
     public int buyFromOtherPlayer(Player buyer){
-        int counter = 1;
-        ArrayList<Player> sellers = new ArrayList<Player>();
-        String targetPlayerIndex;
-        String animalToBuyIndex;
-
+        int counter = 1, returnCode = 0;
+        ArrayList<Player> sellers = new ArrayList<Player>(); //List of sellers
+        String targetPlayerIndex, animalToBuyIndex; //Indexes the player wishes to target (player and Animal)
         boolean doneBuying = false;
-
         while(!doneBuying) {
+            if( playersPlaying.size() < 2 ){
+                System.out.println("No other players in game. Returning to main menu.");
+                return -1;
+            } //Too few players
+            sellers = buildSellersList(buyer, sellers, playersPlaying);
+            if ( sellers.size() == 0 ) return -1; //No other player with Animals to buy from is available
+            else{ printSalesMenu(buyer, sellers); } //Otherwise, just print the sellers
 
-            if(playersPlaying.size() < 2){
-                System.out.println("There are no other players left in the game to buy Animals from. Returning to main menu.");
-                return -1; //Failed due to trying to buy when there are no other players left in the game
-            }
-            Scanner userInput = new Scanner(System.in);
+            while(!((returnCode = (safeIntInput(1, sellers.size()+1, targetPlayerIndex = userInput.next(),
+                    true))) == 1)){ if(returnCode == 2) return 1; }
+            //Which player the Player wants to buy from - forces a valid index, returnCode is 2 if it's the exit index
+            Player seller = sellers.get(Integer.valueOf(targetPlayerIndex)-1); //Save the seller
 
-            for(Player players : playersPlaying){
-                if(!players.equals(buyer)){
-                    counter += 1;
-                    if(players.getOwnedAnimals().size() > 0){
-                        sellers.add(players);
-                    }
-                }
-            }
+            printBuyFromOtherPlayerMenu(buyer, seller); //print the Menu
 
-            if(sellers.size() == 0){
-                System.out.println("There are no animals to purchase from other players right now. Returning to main menu.");
-                return -1; //Failed finding any seller who owns an Animal
-            }
-            else{
-                counter = 1;
-                System.out.println("Which Player does " + buyer.getName() + " wish to buy Animals from?");
-                for(Player players: sellers){
-                    System.out.println("[" + counter + "] " + players.getName() + " - Owns " + players.getOwnedAnimals().size() + " animal(s): ");
-                    for(Animal ownedAnimals : players.getOwnedAnimals()){
-                        System.out.println("\t" + ownedAnimals.getInfo() + " Costs: " + ownedAnimals.getSellsFor() + " coins");
-                    }
-                    counter += 1;
-                }
-            }
-
-            System.out.println("[" + counter + "] Back to main menu");
-            while(!(safeIntInput(1, sellers.size()+1, targetPlayerIndex = userInput.next()) == 1)){
-                //Break when the input is within a valid range and is a Number
-            }
-
-            if(Integer.valueOf(targetPlayerIndex) == sellers.size()+1){
-                System.out.println(buyer.getName() + " returned back to the main menu.");
-                return 1; //Exited selling menu by will
-            }
-
-            Player seller = sellers.get(Integer.valueOf(targetPlayerIndex)-1);
-
-            counter = 0;
-            for(Player player: playersPlaying){
-                counter += 1;
-            }
-
-            System.out.println("Which animal does " + buyer.getName() + " wish to buy from:" + seller.getName() + " (" + buyer.getName() +"'s funds: "
-                    + buyer.getAmountOfMoney() + " coins)" + "?");
-            counter = 1;
-            for(Animal sellersAnimals: seller.getOwnedAnimals()){
-                System.out.println("[" + counter + "] " + sellersAnimals.getInfo() + " Costs: " + sellersAnimals.getSellsFor() + " coins");
-                counter += 1;
-            }
-            System.out.println("[" + counter + "]" + " Back to main menu");
-
-            while(!(safeIntInput(1, seller.getOwnedAnimals().size()+1, animalToBuyIndex = userInput.next()) == 1)){
-                //Break when the input is within a valid range and is a Number
-            }
-            if(Integer.valueOf(animalToBuyIndex) == seller.getOwnedAnimals().size()+1){
-                System.out.println(buyer.getName() + " returned back to the main menu.");
-                return 1; //Exited selling menu by will
-            }
-            Animal animalBeingBought = seller.getOwnedAnimals().get(Integer.valueOf(animalToBuyIndex)-1);
-
-            if(animalBeingBought.getSellsFor() > buyer.getAmountOfMoney()){
-                System.out.println(buyer.getName() + " cannot afford " + animalBeingBought.getInfo() + "! (Needed: " + animalBeingBought.getSellsFor() +
-                        " coins, has only " + buyer.getAmountOfMoney() + " coins)");
-                System.out.println("Returning back to main menu.");
-                return -2;  //A transaction failed due to insufficient funds, aborting buying operations
-            }
-
-            System.out.println(buyer.getName() + " bought " + animalBeingBought.getInfo() + " for "
-                    + animalBeingBought.getSellsFor() + " coins from " + seller.getName() + ".");
-
+            while(!((returnCode = (safeIntInput(1, seller.getOwnedAnimals().size()+1, animalToBuyIndex = userInput.next(),
+                    true))) == 1)){ if(returnCode == 2) return 1; } //Which animal the player wants to Buy
+            Animal animalBeingBought = seller.getOwnedAnimals().get(Integer.valueOf(animalToBuyIndex)-1); //Animal being Bought
+            if(animalBeingBought.getSellsFor() > buyer.getAmountOfMoney()) {
+                printFailedTransaction(buyer, animalBeingBought); //Print the failed Transaction section
+                return -2;
+            } //Not enough money
+            System.out.println(buyer.getName() + " bought " + animalBeingBought.getInfo() + " for " + animalBeingBought.getSellsFor()
+                    + " coins from " + seller.getName() + ".");
 
             buyer.pay(animalBeingBought.getSellsFor()); //buyer pays
             seller.getPaid(animalBeingBought.getSellsFor()); //Seller gets paid
-
-            buyer.addToOwnedAnimals(animalBeingBought);
-            seller.getOwnedAnimals().remove(animalBeingBought);
-
-            counter = 1;
-            sellers = new ArrayList<Player>();
-            targetPlayerIndex = "";
-            animalToBuyIndex = "";
-
+            buyer.addToOwnedAnimals(animalBeingBought); //Buyer gets Animal
+            seller.getOwnedAnimals().remove(animalBeingBought); //Seller removes ANimal
+            sellers = new ArrayList<Player>(); //Sellers list is reset
         }
         return 3;
     }
-
     /**
-     * A method that is responsible for selling Animals to other Players
-     *
-     * Checks that there are at least 2 players in the game left, then checks
-     * that the seller has Animals left to sell.
-     *
-     * Prompts what Player the Seller wishes to sell to, and then prompts for what
-     * Animal the Seller wishes to sell.
-     *
-     * If an Animal is sold to a person who had done their turn earlier this round,
-     * the Animals decay and Aging occurs to avoid a possible "Juggling of Animals" bug
-     * to avoid Aging and Decay mechanics.
-     *
-     * @param seller A player Object that is the Seller selling Animals
-     * @return An int, a Status code that concludes what occurred:
-     *
-     *      -1 : No other players left in the game to Sell to
-     *           Does not have any Animals left to sell
-     *           A transaction was attempted with insufficient funds
-     *      1  : Peaceful exit or Peaceful resolution of the Method
+     * Method that handles Selling to other players - delegates most responsibilities to sub-methods
+     * @return An int, the status code of what happened
      */
     public int sellToOtherPlayer(Player seller){
-        int counter = 1;
-        int buyersIndex = 0;
-        int sellersIndex = 0;
-        ArrayList<Player> buyers = new ArrayList<Player>();
-        String targetPlayerIndex;
-        String animalToSellIndex;
+        int counter = 1; //Shopcounter to keep track of indexes
+        int buyersIndex = 0, sellersIndex = 0, returnCode = 0; //Indexes and the returnCode from selling
+        ArrayList<Player> buyers = new ArrayList<Player>(); //List of Buyers
+        String targetPlayerIndex, animalToSellIndex; //Inputs from Users to convert to Integers
         boolean doneSelling = false;
-
         while(!doneSelling){
+            boolean result = playersPlaying.size() < 2 || seller.getOwnedAnimals().size() == 0; //1 player or no Animals
+            if(result){ System.out.println("Too few players left or no animals to sell. Returning to main menu."); return -1; }
 
-            if(playersPlaying.size() < 2){
-                System.out.println("There are no other players left in the game to sell Animals to. Returning to main menu.");
-                return -1; //Failed due to trying to sell when there are no other players left in the game
-            }
-            if(seller.getOwnedAnimals().size() == 0){
-                System.out.println(seller.getName() + " does not have any animals left to sell. Returning to main menu.");
-                return -1; //Failed due to having no animals to sell
-            }
 
-            Scanner userInput = new Scanner(System.in);
+            sellersIndex = listOfBuyersInSellToOtherPlayer(seller, buyers, playersPlaying); //Index of the Seller
+            //Index of the player to sell to, returnCode is 2 if the Index is the Exit index
+            while(!((returnCode = (safeIntInput(1, buyers.size()+1, targetPlayerIndex = userInput.next(),
+                    true))) == 1)){ if(returnCode == 2) return 1; }
+            Player buyer = buyers.get(Integer.valueOf(targetPlayerIndex)-1); //Get the buyer
 
-            //Put in while loop to be able to keep selling
-            System.out.println("Which Player does " + seller.getName() + " wish to sell Animals to?");
-            for(Player players : playersPlaying){
-                if(!players.equals(seller)){
-                    System.out.println("[" + counter + "] " + players.getName() + " - Funds: " + players.getAmountOfMoney() + " coins.");
-                    counter += 1;
-                    buyers.add(players);
-                }
-                else{
-                    sellersIndex = counter-1; //Keep track of when the sellers turn is
-                }
-            }
-
-            System.out.println("[" + counter + "] Back to main menu");
-
-            while(!(safeIntInput(1, playersPlaying.size(), targetPlayerIndex = userInput.next()) == 1)){
-                //Break when the input is within a valid range and is a Number
-            }
-
-            if(Integer.valueOf(targetPlayerIndex) == playersPlaying.size()){
-                System.out.println(seller.getName() + " returned back to the main menu.");
-                return 1; //Exited selling menu by will
-            }
-
-            Player buyer = buyers.get(Integer.valueOf(targetPlayerIndex)-1);
-
-            counter = 0;
-            for(Player player: playersPlaying){
-                if(player.equals(buyer)){
-                    buyersIndex = counter;
-                }
-                counter += 1;
-            }
-
-            System.out.println("What animal does " + seller.getName() + " wish to sell to: " + buyer.getName() + " (Funds: "
-                    + buyer.getAmountOfMoney() + " coins)" + "?");
-            counter = 1;
-            for(Animal sellersAnimals: seller.getOwnedAnimals()){
-                System.out.println("[" + counter + "] " + sellersAnimals.getInfo() + " Sells for: " + sellersAnimals.getSellsFor() + " coins");
-                counter += 1;
-            }
-            System.out.println("[" + counter + "]" + " Back to main menu");
-
-            while(!(safeIntInput(1, seller.getOwnedAnimals().size()+1, animalToSellIndex = userInput.next()) == 1)){
-                //Break when the input is within a valid range and is a Number
-            }
-            if(Integer.valueOf(animalToSellIndex) == seller.getOwnedAnimals().size()+1){
-                System.out.println(seller.getName() + " returned back to the main menu.");
-                return 1; //Exited selling menu by will
-            }
+            buyersIndex = sellingAnimalToOtherPlayerMenu(buyer, seller, playersPlaying); //index of the Buyer
+            //Index of the Animal to sell, returnCode is 2 if the index is the Exit index
+            while(!((returnCode = (safeIntInput(1, seller.getOwnedAnimals().size()+1, animalToSellIndex = userInput.next(),
+                    true))) == 1)){ if(returnCode == 2) return 1; }
             Animal animalBeingSold = seller.getOwnedAnimals().get(Integer.valueOf(animalToSellIndex)-1);
 
-            if(animalBeingSold.getSellsFor() > buyer.getAmountOfMoney()){
-                System.out.println(buyer.getName() + " cannot afford " + animalBeingSold.getInfo() + "! (Needed: " + animalBeingSold.getSellsFor() +
-                        " coins, has only " + buyer.getAmountOfMoney() + " coins)");
-                System.out.println("Returning back to main menu.");
-                return -1;  //A transaction failed due to insufficient funds, aborting selling operations
-            }
+            if(animalBeingSold.getSellsFor() > buyer.getAmountOfMoney()){ printCantAffordAnimal(buyer, animalBeingSold); return -1; }
+
             System.out.println(buyer.getName() + " bought " + animalBeingSold.getInfo() + " for "
                     + animalBeingSold.getSellsFor() + " coins from " + seller.getName() + ".");
 
             buyer.pay(animalBeingSold.getSellsFor()); //buyer pays
             seller.getPaid(animalBeingSold.getSellsFor()); //Seller gets paid
 
-            if(sellersIndex > buyersIndex){
-                //An animal that is sold "downwards" in the turn order, should age and decay to account for aging/decaying during a round
-                //as Decay and Aging occurs at the end of a Round, however - this would be skipped if sold downwards
+            //An animal that is sold "downwards" in the turn order, should age and decay to account for aging/decaying during a round
+            //as Decay and Aging occurs at the end of a Round, however - this would be skipped if sold downwards
+            if(sellersIndex > buyersIndex){ //Age and Decay the Animal if it would have circumvented this
                 animalBeingSold.age();
-                if(animalBeingSold.isAlive()){
-                    animalBeingSold.decay(currentRound);
-                }
+                if( animalBeingSold.isAlive() ) { animalBeingSold.decay(currentRound); }
             }
+            buyer.addToOwnedAnimals(animalBeingSold); //Buyer gets the Animal
+            seller.getOwnedAnimals().remove(animalBeingSold); //Seller removes his Animal
 
-            buyer.addToOwnedAnimals(animalBeingSold);
-            seller.getOwnedAnimals().remove(animalBeingSold);
-
+            //Reset the variables at the end of the While loop, so they're clean for the next run
             counter = 1;
             buyersIndex = 0;
             sellersIndex = 0;
@@ -446,151 +205,46 @@ public class Game extends utilityFunctions implements Serializable{
     }
 
     /**
-     * A method that is responsible for handling the Feeding of Animals
+     * The method responsible for handling feeding of Animals - delegates some responsibilities through
+     * sub-methods - such as Menu rendering, Input handling and Otherwise
      *
-     * Showcases information about the owned animals and their eating habits (Food, portion size)
-     * Prompts user to which Animal the Player wishes to Feed
-     * Prompts user to specify what they wish to feed the Animal with
-     * Checks that there is enough food left to serve the chosen Animal with the chosen Food
-     *
-     *
-     * @param playerFeeding A player object, the player who is feeding it's animals
-     * @return An int - a Status code that reports what occurred during the Method call:
-     *      -2 : Exited due to no Animals to feed
-     *           Exited due to no food left to feed animals with
-     *      -1 : Player did not yield any food left that the specified Animal would like ot eat
-     *       1 : Peaceful exit
+     * @param playerFeeding A player object, the player feeding the Animal
+     * @return An int - Just the status code of what heppened when feeding the Animal
      */
     public int feedAnimal(Player playerFeeding){
-        int counter = 1;
+        int counter = 1, returnCode = 0; //Shop index counter and the ReturnCode
         boolean finishedFeeding = false;
-        Scanner userInput = new Scanner(System.in);
-        String wantedAnimalToFeed;
-        String wantedFood;
+        String wantedAnimalToFeed, wantedFood;
 
-        if(playerFeeding.getOwnedAnimals().size() == 0){
+        if(playerFeeding.getOwnedAnimals().size() == 0){ //Has no Animals to feed, thrown back to main menu
             System.out.println(playerFeeding.getName() + " has no Animals to feed. Returning to main menu.\n");
-            return -2;
-        }
+            return -2; }
 
         while(!finishedFeeding){
             boolean foundFood = false;
-            if(playerFeeding.getOwnedFood().size() == 0){
+            if(playerFeeding.getOwnedFood().size() == 0){ //Ran out of Food to feed with
                 System.out.println(playerFeeding.getName() + " has no food left to feed with. Returning to main menu.\n");
-                return -2;
-            }
+                return -2; }
+            printAnimalsInFeedMenu(playerFeeding); //Print the Animals feeding menu
+            //The index of the Animal to feed - returnCode is 2 if the Index is the Exit index
+            // [1]
+            while(!((returnCode = (safeIntInput(1, playerFeeding.getOwnedAnimals().size()+1,
+                    wantedAnimalToFeed = userInput.next(), true))) == 1)){ if(returnCode == 2) return 1; }
+            Animal toBeFed = playerFeeding.getOwnedAnimals().get((Integer.valueOf(wantedAnimalToFeed)-1)); //The animal being fed
 
-            for(Animal ownedAnimal: playerFeeding.getOwnedAnimals()){
-                System.out.println("[" + counter + "] " + ownedAnimal.getName() +
-                        " the " + ownedAnimal.getClass().getSimpleName() + " (" + ownedAnimal.getGender()
-                        + ") Health: " +
-                        ownedAnimal.getHealth());
-                System.out.print("\tIt eats: [ ");
-                for(Food foodEaten: ownedAnimal.getWhatItEats()){
-                    System.out.print(foodEaten.getClass().getSimpleName() + " ");
-                }
-                System.out.print("]\n");
-                System.out.print("\tPortion size: " + ownedAnimal.getPortionSize() + " grams\n");
-                counter += 1;
-            }
-            System.out.println("[" + counter + "] Back to Main Menu");
-
-            System.out.println("Which animal do you wish to feed?");
-            int chosenAnimal;
-
-            while(!(safeIntInput(1, playerFeeding.getOwnedAnimals().size()+1, wantedAnimalToFeed = userInput.next()) == 1)){
-                //Break when the input is within a valid range and is a Number
-            }
-            chosenAnimal = Integer.parseInt(wantedAnimalToFeed);
-
-            if(chosenAnimal == (playerFeeding.getOwnedAnimals().size()+1)){
-                System.out.println(playerFeeding.getName() + " returned back to the Main Menu.");
-                return 1;
-            }
-
-            Animal toBeFed = playerFeeding.getOwnedAnimals().get((chosenAnimal-1));
-
-            for(Food whatTheAnimalEats: toBeFed.getWhatItEats()){
-                for(Food whatThePlayerHas: playerFeeding.getOwnedFood()){
-                    if(whatThePlayerHas.getName().equals(whatTheAnimalEats.getName())){
-                        foundFood = true;
-                    }
-                }
-            }
-            if(!foundFood){
+            if(!checkIfItEatsFood(toBeFed, playerFeeding)){ //If the player does not own any food the Animal would want, returns to main menu
                 System.out.println(playerFeeding.getName() + " does not have any food that a " + toBeFed.getClassName() + " would like.");
-                return -1;
-            }
-
-            System.out.println("With what do you wish to feed " + toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() +
-                    "(" + toBeFed.getGender() + ", " + " Health: " + toBeFed.getHealth() + ")?");
-            counter = 1;
-            ArrayList<Food> acceptedFood = toBeFed.getWhatItEats();
-            ArrayList<Food> filteredFood = new ArrayList<>();
-            for(Food ownedItems: playerFeeding.getOwnedFood()){
-                for(Food acceptedFoodItem: acceptedFood){
-                    if(ownedItems.getName().equals(acceptedFoodItem.getName())){
-                        filteredFood.add(ownedItems);
-                    }
-                }
-            }
-            for(Food pieceOfFood : filteredFood){
-                System.out.println("[" + counter + "] " + pieceOfFood.getClass().getSimpleName() + " ( " + pieceOfFood.getGrams() + " grams left in stock )");
-                counter += 1;
-            }
-
-            System.out.println("[" + (counter) + "] Back to Main");
-
-            int chosenFoodIndex;
-            while(!(safeIntInput(1, filteredFood.size()+1, wantedFood = userInput.next()) == 1)){
-                //Break when the input is within a valid range and is a Number
-            }
-            chosenFoodIndex = Integer.parseInt(wantedFood);
-
-            if(chosenFoodIndex == (filteredFood.size()+1)){
-                System.out.println(playerFeeding.getName() + " returned back to the Main Menu.");
-                return 1;
-            }
-            Food foodToFeedWith = filteredFood.get(chosenFoodIndex-1);
-            
-            for(Food foodItEats : toBeFed.getWhatItEats()){
-                if(foodItEats.getName().equals(foodToFeedWith.getName())){
-                    if(toBeFed.getPortionSize() > foodToFeedWith.getGrams()){
-                        System.out.println("There is not enough grams of " + foodToFeedWith.getName() + " left to feed " +
-                                toBeFed.getName() + " the " + toBeFed.getClassName() + "(" + toBeFed.getGender() + ") Health: " +
-                                toBeFed.getHealth() + " - (" + foodToFeedWith.getGrams() +
-                                " grams left, needs " + toBeFed.getPortionSize() + " grams per meal)");
-                    }
-                    else{
-                        foundFood = true;
-                        int resultCode = toBeFed.eat(toBeFed.getPortionSize(),foodToFeedWith);
-                        if(resultCode == 1){ //The animal liked the food
-                            System.out.println(toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() +")" +
-                                    " happily eats the " + foodToFeedWith.getName() + "!");
-                        }
-                        else if(resultCode == -3){ //Mystery meat that did not seem appealing..
-                            System.out.println(toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() + ")" +
-                                    " seems to think there's something funny with the " + foodToFeedWith.getClass().getSimpleName() +"..");
-                        }
-                        break;
-                    }
-                }
-            }
-            int indexToRemove = 0;
-            boolean shouldRemoveFood = false;
-            for(Food playersFood : playerFeeding.getOwnedFood()){
-                if(playersFood.getGrams() == 0){
-                    shouldRemoveFood = true;
-                    break;
-                }
-                indexToRemove += 1;
-            }
-            if(shouldRemoveFood){
-                playerFeeding.getOwnedFood().remove(indexToRemove);
-            }
+                return -1; }
+            ArrayList<Food> filteredFood = printFoodOptions(toBeFed, playerFeeding); //Relevant food items for the Specified Animal
+            //Handles a filtered list based on what the Animal wants - returnCode is 2 if the index is the Exit index
+            while(!((returnCode = (safeIntInput(1, filteredFood.size()+1, wantedFood = userInput.next(),
+                    true))) == 1)){ if(returnCode == 2) return 1; } //Which Animal to feed
+            Food foodToFeedWith = filteredFood.get(Integer.valueOf(wantedFood)-1); //The chosen food from filtered food items
+            checkingFoodFound(toBeFed, foodToFeedWith); //Checks amount of food left and attempts to feed the Animal - doesnt feed if not enough left
+            clearOutFood(playerFeeding); //Clears out food if there is 0 grams left of it in the Inventory
             counter = 1;
         }
-        return 1;
+        return 1; //Successfully fed Animals
     }
 
     /**
@@ -616,6 +270,18 @@ public class Game extends utilityFunctions implements Serializable{
     public int getCurrentPlayer(){
         return this.currentPlayer;
     }
+
+    /**
+     * Setter for the Store object, utilized in Loading the game
+     * @param ourStore A store object, our store
+     */
+    public void setOurStore(Store ourStore){ this.ourStore = ourStore; }
+
+    /**
+     * Getter for the Store object, utilized in Loading the game
+     * @return A store object, our store
+     */
+    public Store getOurStore(){ return this.ourStore; }
 
     /**
      * Setter for Setting the current Player index
@@ -677,7 +343,7 @@ public class Game extends utilityFunctions implements Serializable{
 
     /**
      * Getter for showedMenu - primarily used in not printing out redundant information/repeating information
-     * @return A boolean, wether the Menu was shown already or not
+     * @return A boolean, whether the Menu was shown already or not
      */
     public boolean getShowedMenu(){
         return this.showedMenu;
@@ -685,7 +351,7 @@ public class Game extends utilityFunctions implements Serializable{
 
     /**
      * Setter for Showed menu Boolean
-     * @param showedMenu A boolean, wether the Menu has been shown or not yet
+     * @param showedMenu A boolean, whether the Menu has been shown or not yet
      */
     public void setShowedMenu(boolean showedMenu){
         this.showedMenu = showedMenu;
@@ -706,16 +372,17 @@ public class Game extends utilityFunctions implements Serializable{
      *                  method demands that we declare that the Method can throw this Exception
      */
     public void saveGame(String filePath) throws FileNotFoundException{
-        Scanner userInput = new Scanner(System.in);
         try{
-            FileOutputStream fileOut = new FileOutputStream(filePath);
-            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
-            objectOut.writeObject(this);
-            objectOut.close();
+            FileOutputStream fileOut = new FileOutputStream(filePath); //Opens the FileOutputStream to the File path destination
+            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut); //Opens the ObjectOutputStream to the fileOutputStream
+            objectOut.writeObject(this); //Write the game Object to the Save
+            objectOut.close(); //Close the stream
             System.out.println("Successfully saved game to: " + filePath);
         }
         catch(Exception e){
-            e.printStackTrace();
+            System.out.println("Attempted to save with the filepath of: " + filePath + " but failed. Make sure the Filepath ends " +
+                    "in a Filename.");
+            System.out.println(e);
         }
     }
 
@@ -735,21 +402,23 @@ public class Game extends utilityFunctions implements Serializable{
     public void loadGame(String filePath) throws FileNotFoundException{
         boolean holdLoop = true;
         while(holdLoop){
-            FileInputStream fileIn = new FileInputStream(filePath);
-            try (ObjectInputStream objectIn = new ObjectInputStream(fileIn)) {
-                Object obj = objectIn.readObject();
-                Game loadedGame = (Game) obj;
-                this.setCurrentPlayer(loadedGame.getCurrentPlayer());
+            FileInputStream fileIn = new FileInputStream(filePath); //Open the FileInputStream on the given Filepath
+            try (ObjectInputStream objectIn = new ObjectInputStream(fileIn)) { //Open the ObjectInputStream on the filePath handle
+                Object obj = objectIn.readObject(); //Read the object in from the Save file
+                Game loadedGame = (Game) obj; //Convert it to a game object and save it
+                this.setCurrentPlayer(loadedGame.getCurrentPlayer()); //Retrieve the attributes and set them to the current Game
                 this.setCurrentRound(loadedGame.getCurrentRound());
                 this.setPlayers(loadedGame.getPlayers());
                 this.setRounds(loadedGame.getRounds());
                 this.setPlayersPlaying(loadedGame.getPlayersPlaying());
                 this.setShowedMenu(loadedGame.getShowedMenu());
+                this.setOurStore(loadedGame.getOurStore());
                 System.out.println("Successfully loaded save game from: " + filePath);
-                if(!this.getShowedMenu()){
-                    printAnimals(true);
+                if(!this.getShowedMenu()){ //When loading, re-create Menus printed as well - including Deaths from saved Turn
+                    removeAnimals(playersPlaying, currentPlayer);
+                    printAnimals(true, currentRound, currentPlayer, playersPlaying);
                 }
-                objectIn.close();
+                objectIn.close(); //Close the stream when Done
                 break;
             } catch (Exception ex) {
                 break; //Stream closed
@@ -757,309 +426,288 @@ public class Game extends utilityFunctions implements Serializable{
         }
     }
 
-
     /**
-     * A helper Function that helps in printing out Menu Options
-     *
-     * @param loadedGame A boolean that keeps track of wether it's a loaded game or not, as a Loaded game should
-     *                   present the death archives for dead Animals, as their death announcements are removed
-     *                   when they die - To work around this, a death archive is stored - keeping track of death
-     *                   announcements for 1 round after their death - after that, the death archive is purged
-     *                   of older Entries as well
+     * Method that handles user input in Attempts to load the game
      */
-    public void printAnimals(boolean loadedGame) {
-        System.out.println("Round " + currentRound + ", " + playersPlaying.get(currentPlayer).getName() + "'s turn.");
-
-        playersPlaying.get(currentPlayer).announceDeaths(currentRound);
-        if (loadedGame) {
-            for (String printedDeath : playersPlaying.get(currentPlayer).getSavedDeathList()) {
-                System.out.println(printedDeath);
+    public void forceLoadingPath(){
+        String returnCode, filePathToSaveOrLoad = ""; //Returncode and Filepath
+        System.out.println("Please write the System path you'd like to load a game from (Exit to abort - Case insensitive): ");
+        try{
+            //Will keep asking to validate a Filepath until it is resolved as Exit or Succeeded
+            while (!((returnCode = (forceValidLoadingPath(filePathToSaveOrLoad = forceLoadingPathScanner.nextLine()))).equals("exit"))) {
+                //Exit, succeeded or failed
+                boolean invalidPath = returnCode.equals("failed"); //is Failed if the Loading failed
+                if (!invalidPath) {
+                    loadGame(filePathToSaveOrLoad); //Passed with a valid Path
+                    break;
+                }
+                System.out.println("Attempted to load game from filePath of: " + filePathToSaveOrLoad + " but failed, please try again.");
             }
         }
-
-        System.out.print(playersPlaying.get(currentPlayer).getName() + "'s Owned Animals: \n");
-        if (playersPlaying.get(currentPlayer).getShouldBeRemoved().size() > 0) {
-            for (int i = playersPlaying.get(currentPlayer).getShouldBeRemoved().size() - 1; i > -1; i--) {
-                Animal toRemove = playersPlaying.get(currentPlayer).getShouldBeRemoved().get(i);
-                playersPlaying.get(currentPlayer).getOwnedAnimals().remove(toRemove);
-                playersPlaying.get(currentPlayer).getShouldBeRemoved().remove(i);
-            }
-        }
-
-        for (Animal ownedAnimal : playersPlaying.get(currentPlayer).getOwnedAnimals()) {
-            System.out.print(ownedAnimal.getName() + " the " + ownedAnimal.getClass().getSimpleName() +
-                    "(" + ownedAnimal.getGender() + "), who is at: "
-                    + ownedAnimal.getHealth() + " health (Lost " + ownedAnimal.getLostHealth() + " health last round, was at: " +
-                    ownedAnimal.getWasAtHealth() + " health.) (Age: " + ownedAnimal.getAge() + " of " + ownedAnimal.getMaxAge() + ")\n");
-        }
-        System.out.print(playersPlaying.get(currentPlayer).getName() + "'s Owned Food: \n");
-        for (Food ownedFood : playersPlaying.get(currentPlayer).getOwnedFood()) {
-            System.out.print(ownedFood.getGrams() + " Grams of " + ownedFood.getClass().getSimpleName() + "\n");
+        catch(Exception e){
+            System.out.println("Had an exception, retrying.");
         }
     }
 
     /**
-     * A method that handles the Game Loop logic, such as Announcing deaths, Turns, Rounds,
-     * Eliminations, Printing Menus, Directing player choices from the main menu, etc.
-     *
-     * Also handles end of game Mechanics such as sorting out the highscore, announcing
-     * the Winner etc.
-     *
+     * Method that handles user input in attempts to save the game
      */
-    public void runGame() {
-        Store ourStore = new Store();
-        System.out.println("Welcome to the Raising your Animal Game.");
-        Scanner gameMenuScanner = getMyScanner();
-        boolean playerGotEliminated = false;
-        boolean keepAskingForSaveOrLoad = true;
-        String filePathtoSaveOrLoad = "";
-
-        while (rounds > 0) {
-            if (!showedMenu) {
-                playerGotEliminated = false;
-                printAnimals(false);
-            }
-
-            System.out.println("\n" + playersPlaying.get(currentPlayer).getName() + "'s Funds: " + playersPlaying.get(currentPlayer).getAmountOfMoney()
-                    + "\nChoose: [1] Buy an Animal from Store, [2] Sell an Animal to Store, [3] Feed your animals, [4] Breed your animals, [5] Buy Food,\n " +
-                    "[6] Sell Animal to Other Player" +
-                    ", [7] Buy Animal from Other Player [8] Save game and Exit [9] Load game");
-            String gameMenuInput = gameMenuScanner.next();
-            switch (gameMenuInput) {
-                case "1":
-                    ourStore.buyAnimal(playersPlaying.get(currentPlayer));
-                    playersPlaying.get(currentPlayer).setTurnIsOver(true);
+    public void forceSavingPath(){
+        String returnCode, filePathToSaveOrLoad = ""; //The filePath and Returncode
+        System.out.println("Please write the System path you'd like to save your game to (Exit to abort - Case insensitive): ");
+        try{
+            //Keeps asking for a Save path until it is confirmed as being Exit or a Valid save path
+            while(!((returnCode = (forceValidSavingPath(filePathToSaveOrLoad = forceSavingPathScanner.nextLine()))).equals("exit"))){
+                boolean invalidPath = returnCode.equals("failed making dir"); //returnCode is failed making dir if making Directories failed
+                if(!invalidPath){ //If the path is valid
+                    saveGame(filePathToSaveOrLoad); //Save the file to the Filepath
                     break;
-                case "2":
-                    ourStore.sellAnimal(playersPlaying.get(currentPlayer));
-                    playersPlaying.get(currentPlayer).setTurnIsOver(true);
-                    break;
-                case "3":
-                    feedAnimal(playersPlaying.get(currentPlayer));
-                    playersPlaying.get(currentPlayer).setTurnIsOver(true);
-                    break;
-                case "4":
-                    breedAnimal(playersPlaying.get(currentPlayer));
-                    playersPlaying.get(currentPlayer).setTurnIsOver(true);
-                    break;
-                case "5":
-                    ourStore.buyFood(playersPlaying.get(currentPlayer));
-                    playersPlaying.get(currentPlayer).setTurnIsOver(true);
-                    break;
-                case "6":
-                    sellToOtherPlayer(playersPlaying.get(currentPlayer));
-                    playersPlaying.get(currentPlayer).setTurnIsOver(true);
-                    break;
-                case "7":
-                    buyFromOtherPlayer(playersPlaying.get(currentPlayer));
-                    playersPlaying.get(currentPlayer).setTurnIsOver(true);
-                    break;
-                case "8":
-                    Scanner saveInput = new Scanner(System.in);
-                    keepAskingForSaveOrLoad = true;
-                    boolean check = false;
-                    int returnCode = 0;
-                    while(keepAskingForSaveOrLoad){
-                        System.out.println("Please write the System path you'd like to save your game to (Exit to abort - Case insensitive): ");
-                        try{
-                            //While the returnCode from forceValidSavingPath is not 1
-                            while(!((returnCode = (forceValidSavingPath(filePathtoSaveOrLoad = saveInput.nextLine(), this))) == 1)){
-                                if(!filePathtoSaveOrLoad.toLowerCase().equals("exit")){
-                                    if(returnCode == 2){
-                                        System.out.println("User chose to not overwrite file at: " + filePathtoSaveOrLoad);
-                                    }
-                                    System.out.println("Please write a different System path " +
-                                            "you'd like to save your game to " +
-                                            "(Exit to abort - Case insensitive): "); //In case of not wanting to overwrite the filepath
-                                }
-                                //the user is still asked for another input
-                                if(returnCode == -5){
-                                    System.out.println("You are not allowed to save a game without a name, " +
-                                            "the filepath cannot end in '\\\\', please try again.");
-                                }
-                                if(returnCode == -6){
-                                    System.out.println("Could not create a directory with the file path of: " + filePathtoSaveOrLoad);
-                                }
-                            }
-                            if(!filePathtoSaveOrLoad.toLowerCase().equals("exit")){
-                                saveGame(filePathtoSaveOrLoad);
-                            }
-
-                            keepAskingForSaveOrLoad = false; //passed with a valid saving path
-                        }
-                        catch(Exception e){
-                            System.out.println("Error in saving file: " + e.getMessage());
-                        }
-                    }
-                    break;
-                case "9":
-                    Scanner loadInput = new Scanner(System.in);
-                    filePathtoSaveOrLoad = "";
-                    keepAskingForSaveOrLoad = true;
-                    returnCode = 0;
-                    while(keepAskingForSaveOrLoad){
-                        System.out.println("Please write the System path you'd like to load a game from (Exit to abort - Case insensitive): ");
-                        try{
-                            while(!((returnCode = forceValidLoadingPath(filePathtoSaveOrLoad = loadInput.next())) == 1)){
-                                //Breaks when the input is within a valid range and is a Number
-                                if(returnCode == -1){
-                                    System.out.println("Could not find find a saveFile to load at the path of: " + filePathtoSaveOrLoad + ", please " +
-                                            "specify another one (Exit to abort - Case insensitive): ");
-                                }
-                            }
-                            if(filePathtoSaveOrLoad.toLowerCase().equals("exit")){
-                                System.out.println("User chose to abort loading a save game.");
-                                break;
-                            }
-
-                            loadGame(filePathtoSaveOrLoad);
-                            keepAskingForSaveOrLoad = false; //passed with a valid loading name
-                        }
-                        catch(Exception e){
-                            System.out.println("Error in loading file: " + e.getMessage());
-                        }
-                    }
-                    break;
-                default:
-                    System.out.println("That input was not one of the valid options. Please try again.");
-            }
-            showedMenu = true;
-            if (playersPlaying.get(currentPlayer).getTurnIsOver()) {
-                playersPlaying.get(currentPlayer).setTurnIsOver(false);
-                showedMenu = false;
-                for (Animal eachPlayerAnimal : playersPlaying.get(currentPlayer).getOwnedAnimals()) {
-                    if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) {
-                        eachPlayerAnimal.decay(currentRound);
-                    }
-                    if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) {
-                        eachPlayerAnimal.age();
-                    }
-                    if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) {
-                        eachPlayerAnimal.chanseForDisease(playersPlaying.get(currentPlayer));
-                    }
-                    eachPlayerAnimal.setDecayedThisRound(true);
                 }
-                for (int i = 0; i < playersPlaying.get(currentPlayer).getOwnedAnimals().size(); i++) {
-                    if (!playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).isAlive()) {
-                        //Died of starvation or Old Age or Disease
-                        playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).setPerishedAtRound(currentRound);
-                        playersPlaying.get(currentPlayer).addDeathAnnouncement(currentRound,
-                                playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getName()
-                                        + " the " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getClassName()
-                                        + " (" + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getGender() + ")"
-                                        + " perished at the game round of "
-                                        + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getPerishedAtRound()
-                                        + ", died of " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getCauseOfDeath()
-                                        + ", became : " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getAge()
-                                        + " years old. Rest in peace, " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getName());
-                        playersPlaying.get(currentPlayer).addToPlayerDeathList(playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getName()
+            }
+        }
+        catch(Exception e){
+            System.out.println("Had an exception, retrying.");
+        }
+    }
+
+    /**
+     * Method that handles aging,decaying and disease at the end of the turn
+     */
+    public void ageDecayAndDiseaseAtEndofTurn(){
+        for (Animal eachPlayerAnimal : playersPlaying.get(currentPlayer).getOwnedAnimals()) {
+            if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) { //If the Animal is alive and hasn't decayed, decay
+                eachPlayerAnimal.decay(currentRound);
+            }
+            if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) { //If the Animal is alive and hasn't decayed, age
+                eachPlayerAnimal.age();
+            }
+            if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) { //If the Animal is alive and hasn't decayed, roll for Disease
+                eachPlayerAnimal.chanceForDisease(playersPlaying.get(currentPlayer));
+            }
+            eachPlayerAnimal.setDecayedThisRound(true); //The animal has had it's decay/age/disease for the Turn
+        }
+    }
+
+    /**
+     * The method that handles game menu choices
+     * @param gameMenuInput The player choice in menu options
+     * @param ourStore The store that the player can buy from
+     */
+    public void makePlayerChoice(String gameMenuInput, Store ourStore){
+        switch (gameMenuInput) {
+            case "1":
+                ourStore.buyAnimal(playersPlaying.get(currentPlayer)); //Buy an Animal from the Store
+                playersPlaying.get(currentPlayer).setTurnIsOver(true); //Turn is over
+                break;
+            case "2":
+                ourStore.sellAnimal(playersPlaying.get(currentPlayer)); //Sell an Animal to the Store
+                playersPlaying.get(currentPlayer).setTurnIsOver(true); //Turn is over
+                break;
+            case "3":
+                feedAnimal(playersPlaying.get(currentPlayer)); //Feed their animals
+                playersPlaying.get(currentPlayer).setTurnIsOver(true); //Turn is over
+                break;
+            case "4":
+                breedAnimal(playersPlaying.get(currentPlayer)); //Breed a set of Animals
+                playersPlaying.get(currentPlayer).setTurnIsOver(true); //Turn is over
+                break;
+            case "5":
+                ourStore.buyFood(playersPlaying.get(currentPlayer)); //Buy some food from the Store
+                playersPlaying.get(currentPlayer).setTurnIsOver(true); //Turn is over
+                break;
+            case "6":
+                sellToOtherPlayer(playersPlaying.get(currentPlayer)); //Sell Animals to other players
+                playersPlaying.get(currentPlayer).setTurnIsOver(true); //Turn is over
+                break;
+            case "7":
+                buyFromOtherPlayer(playersPlaying.get(currentPlayer)); //Buy Animals from other players
+                playersPlaying.get(currentPlayer).setTurnIsOver(true); //Turn is over
+                break;
+            case "8":
+                forceSavingPath(); //Start the process to validate a Filepath for Saving - to then Save the Game
+                break;
+            case "9":
+                forceLoadingPath(); //Start the process to validate a Filepath for Loading - to then Load the Game
+                break;
+            default:
+                System.out.println("That input was not one of the valid options. Please try again.");
+        }
+    }
+
+    /**
+     * The method that handles death announcements and Death list of Players
+     */
+    public void handleDeathsOfAnimals(){
+        for (int i = 0; i < playersPlaying.get(currentPlayer).getOwnedAnimals().size(); i++) {
+            if (!playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).isAlive()) {
+                //Died of starvation or Old Age or Disease
+                playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).setPerishedAtRound(currentRound);
+                //Add a death Announcement
+                playersPlaying.get(currentPlayer).addDeathAnnouncement(currentRound,
+                        playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getName()
                                 + " the " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getClassName()
                                 + " (" + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getGender() + ")"
                                 + " perished at the game round of "
-                                + currentRound
+                                + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getPerishedAtRound()
                                 + ", died of " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getCauseOfDeath()
                                 + ", became : " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getAge()
                                 + " years old. Rest in peace, " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getName());
-                        playersPlaying.get(currentPlayer).getShouldBeRemoved().add(playersPlaying.get(currentPlayer).getOwnedAnimals().get(i));
-
-                    }
-                }
-
-                //Think of way to get lowest price of both animal and Food that is Smooth
-                if (playersPlaying.get(currentPlayer).getAmountOfMoney() < 10 &&
-                        playersPlaying.get(currentPlayer).getOwnedAnimals().size() == 0) {
-                    System.out.println(playersPlaying.get(currentPlayer).getName() + " was eliminated at Round: " + currentRound + " due to not having" +
-                            " enough money to buy anything and no animals left.");
-                    playersPlaying.remove(currentPlayer);
-
-                    if(playersPlaying.size() > 1){
-                        currentPlayer -= 1;
-                    }
-                    playerGotEliminated = true;
-                }
-                if (playersPlaying.size() == 0) {
-                    System.out.println("Game is over. No players remaining.");
-                    break;
-                }
-
-                if (currentPlayer == playersPlaying.size() - 1 && playerGotEliminated){ //Compensate to balance out eliminated player
-                    rounds += 1;
-                    currentRound -= 1;
-                }
-                if (currentPlayer == playersPlaying.size() - 1) { //Round is advanced to the next one
-                    rounds -= 1;
-                    currentRound += 1;
-                    for(Player players: playersPlaying){
-                        for(Animal eachPlayerAnimal : players.getOwnedAnimals()){
-                            eachPlayerAnimal.setDecayedThisRound(false);
-                        }
-                        players.purgeSavedDeathList(currentRound-2);
-                    }
-                }
-                if (currentPlayer < playersPlaying.size() - 1) {
-                    currentPlayer += 1;
-                } else {
-                    currentPlayer = 0;
-                }
+                //Add to the players death List - used in Loading games to archive old deaths and re-construct death messages
+                playersPlaying.get(currentPlayer).addToPlayerDeathList(playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getName()
+                        + " the " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getClassName()
+                        + " (" + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getGender() + ")"
+                        + " perished at the game round of "
+                        + currentRound
+                        + ", died of " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getCauseOfDeath()
+                        + ", became : " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getAge()
+                        + " years old. Rest in peace, " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getName());
+                //Add Animal to should be removed list - utilized when Animal dies, it is then purged
+                playersPlaying.get(currentPlayer).getShouldBeRemoved().add(playersPlaying.get(currentPlayer).getOwnedAnimals().get(i));
             }
         }
+    }
 
-        if (playersPlaying.size() > 0){
-            if (playersPlaying.get(currentPlayer).getShouldBeRemoved().size() > 0) {
+    /**
+     * Checks if a Player fulfills the criteria of being eliminated
+     * @return A boolean, true if they were eliminated - False if not
+     */
+    public boolean checkIfPlayerIsEliminated(){
+        if (playersPlaying.get(currentPlayer).getAmountOfMoney() < 10 &&
+                playersPlaying.get(currentPlayer).getOwnedAnimals().size() == 0) { //If the player cannot afford anything and has no Animals
+            System.out.println(playersPlaying.get(currentPlayer).getName() + " was eliminated at Round: " + currentRound + " due to not having" +
+                    " enough money to buy anything and no animals left.");
+            playersPlaying.remove(currentPlayer); //Remove the player
+            if(playersPlaying.size() > 1){ currentPlayer -= 1; } //Compensate who the current player is, upon removal of a Player
+            return true; //Player was Eliminated
+        }
+        return false; //player was not eliminated
+    }
+
+    /**
+     * The method responsible for purging Animals that should be removed
+     */
+    public void purgeDeadAnimals(){
+        if (playersPlaying.size() > 0){ //To avoid a out of bounds bug when there are no players left
+            if (playersPlaying.get(currentPlayer).getShouldBeRemoved().size() > 0) { //If there are any Animals to purge
                 for (int i = playersPlaying.get(currentPlayer).getShouldBeRemoved().size() - 1; i > -1; i--) {
-                    Animal toRemove = playersPlaying.get(currentPlayer).getShouldBeRemoved().get(i);
-                    playersPlaying.get(currentPlayer).getOwnedAnimals().remove(toRemove);
-                    playersPlaying.get(currentPlayer).getShouldBeRemoved().remove(i);
+                    Animal toRemove = playersPlaying.get(currentPlayer).getShouldBeRemoved().get(i); //get the Animal to remove
+                    playersPlaying.get(currentPlayer).getOwnedAnimals().remove(toRemove); //Remove it from ownership
+                    playersPlaying.get(currentPlayer).getShouldBeRemoved().remove(i); //Remove it from the Purging list
                 }
             }
         }
-        ArrayList<Integer> moneyOfPlayers = new ArrayList<>();
-        ArrayList<String> namesOfPlayers = new ArrayList<>();
-        ArrayList<String> highScore = new ArrayList<>();
-        ArrayList<String> winner = new ArrayList<>();
+    }
 
-        for(Player player : playersPlaying){
+    /**
+     * Handles advancements in rounds as the game progresses
+     * @param playerGotEliminated A boolean, if a player Got eliminated this turn or not
+     */
+    public void advanceRound(boolean playerGotEliminated){
+        if (currentPlayer == playersPlaying.size() - 1 && playerGotEliminated){ //Compensate to balance out eliminated player
+            rounds += 1;
+            currentRound -= 1;
+        }
+        if (currentPlayer == playersPlaying.size() - 1) { //Round is advanced to the next one
+            rounds -= 1;
+            currentRound += 1;
+            for(Player players: playersPlaying){
+                for(Animal eachPlayerAnimal : players.getOwnedAnimals()){
+                    eachPlayerAnimal.setDecayedThisRound(false); //Reset the state of Animals having decayed, as its reset between Rounds
+                }
+                players.purgeSavedDeathList(currentRound-2); //Purge old death archives, to keep them up to date - relevant for Loading
+            }
+        }
+        if (currentPlayer < playersPlaying.size() - 1) { currentPlayer += 1; }
+        else { currentPlayer = 0; } //If it's the last player in the turn order, reset it to the first player again
+    }
+
+    public ArrayList<Integer> sellOffAnimalsAtEndOfGame(){
+        ArrayList<Integer> moneyOfPlayers = new ArrayList<>(); //The money of the Players
+
+        for(Player player : playersPlaying){ //Sell off the Animal of each player at the end of the game
             for(int i = player.getOwnedAnimals().size()-1; i > -1; i--){
                 System.out.println(player.getName() + " sold off " + player.getOwnedAnimals().get(i).getInfo()
                         + " for " + player.getOwnedAnimals().get(i).getSellsFor() + " coins.");
-                player.getPaid(player.getOwnedAnimals().get(i).getSellsFor());
-                player.getOwnedAnimals().remove(i);
+                player.getPaid(player.getOwnedAnimals().get(i).getSellsFor()); //Sells the Animal
+                player.getOwnedAnimals().remove(i); //removes it
             }
-            moneyOfPlayers.add(player.getAmountOfMoney());
-            namesOfPlayers.add(player.getName());
+            moneyOfPlayers.add(player.getAmountOfMoney()); //Add to a list of Money, how much money each player had
         }
         Collections.sort(moneyOfPlayers);
+        return moneyOfPlayers;
+    }
+    /**
+     * A method that sells off all the animals at the end of the Game and builds the High-score
+     * @return An Arraylist of Strings, which is the players highscore
+     */
+    public ArrayList<String> buildHighScore(){
+        ArrayList<Integer> moneyOfPlayers; //The money of the Players
+        ArrayList<String> namesOfPlayers = new ArrayList<>(), highScore = new ArrayList<>(); //names and the Highscore
+
+        for(Player player : playersPlaying){ //
+            namesOfPlayers.add(player.getName()); //Add to a list, the names of the remaining players
+        }
+        moneyOfPlayers = sellOffAnimalsAtEndOfGame();
+        Collections.sort(moneyOfPlayers); //Sort the money list, lowest to highest
         int spot = 1;
-        for(int i = moneyOfPlayers.size()-1; i > -1; i--){
-            for(Player player: playersPlaying){
-                if(player.getAmountOfMoney() == moneyOfPlayers.get(i) && !player.getAddedToHighScore()){
+        for(int i = moneyOfPlayers.size()-1; i > -1; i--){ //For each amount of Money to be looked at
+            for(Player player: playersPlaying){ //For each player, look if they correspond to the amount of money
+                if(player.getAmountOfMoney() == moneyOfPlayers.get(i) && !player.getAddedToHighScore()){ //If it's a match, add them to the highscore
                     highScore.add("[" + spot + "] - " + player.getName() + " : " + player.getAmountOfMoney() + " coins.");
-                    if(spot == 1){
+                    if(spot == 1){ //The last element in the sorted list is the winner, so on the first looping through, thats the winner
+                        //Add the winner to the winners list
                         winner.add("The winner is: " + player.getName() + " with a whopping amount of " + player.getAmountOfMoney() + " coins!");
                     }
-                    player.setAddedToHighScore(true);
+                    player.setAddedToHighScore(true); //player was added to the highscore
                 }
             }
-            spot += 1;
+            spot += 1; //keep running tally of how many elements we've gone through
         }
+        return highScore; //return the high score
+    }
+    /**
+     * A method that hosts and interacts with the main set of Game mechanics in play,
+     * such as Deaths, Menus, player choices etc, through Sub-methods
+     */
+    public void runGame() {
+        ourStore = new Store(); //Create our store
+        System.out.println("Welcome to the Raising your Animal Game.");
+        boolean playerGotEliminated = false;
+
+        while (rounds > 0) {
+            if (!showedMenu) { //If the menu has not been shown
+                playerGotEliminated = false;
+                removeAnimals(playersPlaying, currentPlayer);
+                printAnimals(false, currentRound, currentPlayer, playersPlaying); //Showcase the info menu
+            }
+
+            System.out.println("\n" + playersPlaying.get(currentPlayer).getName()
+                    + "'s Funds: " + playersPlaying.get(currentPlayer).getAmountOfMoney() + " coins "
+                    + "\nChoose: [1] Buy an Animal from Store, [2] Sell an Animal to Store, [3] Feed your animals, " +
+                    "[4] Breed your animals, [5] Buy Food,\n " + "[6] Sell Animal to Other Player" +
+                    ", [7] Buy Animal from Other Player [8] Save game and Exit [9] Load game");
+            String gameMenuInput = gameMenuScanner.next(); //User choise in the menu
+            makePlayerChoice(gameMenuInput, ourStore); //handle the player choise input
+            showedMenu = true; //menu was shown and input was processed
+            if (playersPlaying.get(currentPlayer).getTurnIsOver()) { //If the player turn is over
+                playersPlaying.get(currentPlayer).setTurnIsOver(false); //Reset variables for next round
+                showedMenu = false; //Reset variables
+                ageDecayAndDiseaseAtEndofTurn(); //Age, Decay and roll for Disease on Animals
+                handleDeathsOfAnimals(); //Handle death announcements of Animals
+                playerGotEliminated = checkIfPlayerIsEliminated(); //See if a player was eliminated
+                if (playersPlaying.size() == 0) { //Check if there are any players left
+                    System.out.println("Game is over. No players remaining.");
+                    break;
+                }
+                advanceRound(playerGotEliminated); //Advance a round, accounting for if a player got eliminated or not
+                purgeDeadAnimals(); //Purge the dead animals
+            }
+        }
+        ArrayList<String> highScore = buildHighScore(); //Build the highscore list
 
         System.out.println("At the end of the game, here are the results: ");
-        for(String highScoreSpots : highScore){
-            System.out.println(highScoreSpots);
-        }
-        if(winner.size() > 0){
-            System.out.println(winner.get(0));
-        }
-        else{
-            System.out.println("There were no players who made it to the end of the game.");
-        }
-
+        for(String highScoreSpots : highScore){ System.out.println(highScoreSpots); }
+        if(winner.size() > 0) { System.out.println(winner.get(0)); } //There was a winner
+        else{ System.out.println("There were no players who made it to the end of the game."); } //No player made it to the end
     }
 }
-
-
-/*
-        Add Changelog //Not started - will do after Refactoring and all commits have been done - Will implement on next project from Start
-
-        Refactor
-*/

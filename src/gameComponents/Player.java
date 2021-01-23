@@ -12,14 +12,11 @@ public class Player implements Serializable {
     private String name;
     private int amountOfMoney;
     private boolean playing = true;
-    private ArrayList<Animal> ownedAnimals = new ArrayList<>();
+    private ArrayList<Animal> ownedAnimals = new ArrayList<>(), shouldBeRemoved = new ArrayList<>();;
     private ArrayList<Food> ownedFood = new ArrayList<>();
-    private boolean turnIsOver = false;
+    private boolean turnIsOver = false, addedToHighScore = false;
     private ArrayList<Integer> diedAtRoundList = new ArrayList<Integer>();
-    private ArrayList<String> deathMessageList = new ArrayList<String>();
-    private ArrayList<Animal> shouldBeRemoved = new ArrayList<>();
-    private boolean addedToHighScore = false;
-    private ArrayList<String> savedDeathList = new ArrayList<String>();
+    private ArrayList<String> deathMessageList = new ArrayList<String>(), savedDeathList = new ArrayList<String>();
 
     /**
      * Instantiates a new Player.
@@ -102,13 +99,13 @@ public class Player implements Serializable {
      */
     public int purgeSavedDeathList(int round){
         ArrayList<String> toRemove = new ArrayList<String>();
-        for(int i = 0; i < this.savedDeathList.size(); i++){
+        for(int i = 0; i < this.savedDeathList.size(); i++){ //Loop through to find which elements to remove
             if(savedDeathList.get(i).contains(String.valueOf("round of " + round))){
                 toRemove.add(savedDeathList.get(i));
             }
         }
         for(int i = savedDeathList.size()-1; i > -1; i--){
-            for(String shouldBeRemoved: toRemove){
+            for(String shouldBeRemoved: toRemove){ //Then actually remove them
                 if(savedDeathList.get(i).equals(shouldBeRemoved)){
                     savedDeathList.remove(shouldBeRemoved);
                 }
@@ -130,17 +127,17 @@ public class Player implements Serializable {
         ArrayList<String> removeMessage = new ArrayList<String>();
         if(diedAtRoundList.size() > 0){
             for(int i = diedAtRoundList.size()-1; i > -1; i--){
-                if(diedAtRoundList.get(i) == currentRound-1){
-                    System.out.println(deathMessageList.get(i));
+                if(diedAtRoundList.get(i) == currentRound-1){ //Check deaths for corresponding to last round
+                    System.out.println(deathMessageList.get(i)); //Print it out
                     removeRound.add(diedAtRoundList.get(i));
                     removeMessage.add(deathMessageList.get(i));
                 }
             }
             for(String deathMessage: removeMessage){
-                deathMessageList.remove(deathMessage);
+                deathMessageList.remove(deathMessage); //Clean out the death logs
             }
             for(Integer roundOfDeath: removeRound){
-                diedAtRoundList.remove(roundOfDeath);
+                diedAtRoundList.remove(roundOfDeath); //Clean out the round of death logs
             }
         }
     }

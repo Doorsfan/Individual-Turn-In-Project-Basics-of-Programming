@@ -7,8 +7,7 @@ import java.io.Serializable;
  * (Saving and Loading of game state)
  */
 public abstract class Food implements Serializable {
-    protected int value;
-    protected int grams = 1000;
+    protected int value, grams = 1000;
 
     /**
      * Get value int.

@@ -2,7 +2,9 @@ package Animals;
 
 import Plants.Peanut;
 
-public class Elephant extends Animal {
+import java.io.Serializable;
+
+public class Elephant extends Animal implements Serializable {
     /**
      * Most of these values that are delegated in the Constructor are inherited from Animal.
      * Only Name and Gender are specified in Creation later, rest remain constant

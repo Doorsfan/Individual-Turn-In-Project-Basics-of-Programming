@@ -4,7 +4,9 @@ import Meats.cowMeat;
 import processedFood.dogFood;
 import processedFood.mysteryMeat;
 
-public class Dog extends Animal {
+import java.io.Serializable;
+
+public class Dog extends Animal implements Serializable {
     /**
      * Most of these values that are delegated in the Constructor are inherited from Animal.
      * Only Name and Gender are specified in Creation later, rest remain constant

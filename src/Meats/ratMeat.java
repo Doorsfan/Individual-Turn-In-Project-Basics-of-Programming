@@ -2,6 +2,8 @@ package Meats;
 
 import gameComponents.Food;
 
+import java.io.Serializable;
+
 /**
  * A simple constructor for the ratMeat class.
  * Most of these values that are delegated in the Constructor are inherited from Food.
@@ -11,7 +13,7 @@ import gameComponents.Food;
  * component of mysteryMeat, the chance of it being contained within, being random.
  */
 
-public class ratMeat extends Food {
+public class ratMeat extends Food implements Serializable {
     public ratMeat(){
         this.value = 100;
     }
