@@ -37,7 +37,7 @@ public class Game extends utilityFunctions implements Serializable{
         runGame(); //Boot the game up
     }
     /**
-     * The method responsible for handling amount of rounds and players to be played with - delegates repsonsibilities of
+     * The method responsible for handling amount of rounds and players to be played with - delegates tasks of
      * input to Sub-methods
      */
     public void askForInput(){
@@ -144,7 +144,7 @@ public class Game extends utilityFunctions implements Serializable{
             buyer.pay(animalBeingBought.getSellsFor()); //buyer pays
             seller.getPaid(animalBeingBought.getSellsFor()); //Seller gets paid
             buyer.addToOwnedAnimals(animalBeingBought); //Buyer gets Animal
-            seller.getOwnedAnimals().remove(animalBeingBought); //Seller removes ANimal
+            seller.getOwnedAnimals().remove(animalBeingBought); //Seller removes Animal
             sellers = new ArrayList<Player>(); //Sellers list is reset
         }
         return 3;
@@ -154,7 +154,7 @@ public class Game extends utilityFunctions implements Serializable{
      * @return An int, the status code of what happened
      */
     public int sellToOtherPlayer(Player seller){
-        int counter = 1; //Shopcounter to keep track of indexes
+        int counter = 1; //Shop counter to keep track of indexes
         int buyersIndex = 0, sellersIndex = 0, returnCode = 0; //Indexes and the returnCode from selling
         ArrayList<Player> buyers = new ArrayList<Player>(); //List of Buyers
         String targetPlayerIndex, animalToSellIndex; //Inputs from Users to convert to Integers
@@ -209,7 +209,7 @@ public class Game extends utilityFunctions implements Serializable{
      * sub-methods - such as Menu rendering, Input handling and Otherwise
      *
      * @param playerFeeding A player object, the player feeding the Animal
-     * @return An int - Just the status code of what heppened when feeding the Animal
+     * @return An int - Just the status code of what happened when feeding the Animal
      */
     public int feedAnimal(Player playerFeeding){
         int counter = 1, returnCode = 0; //Shop index counter and the ReturnCode
@@ -240,7 +240,7 @@ public class Game extends utilityFunctions implements Serializable{
             while(!((returnCode = (safeIntInput(1, filteredFood.size()+1, wantedFood = userInput.next(),
                     true))) == 1)){ if(returnCode == 2) return 1; } //Which Animal to feed
             Food foodToFeedWith = filteredFood.get(Integer.valueOf(wantedFood)-1); //The chosen food from filtered food items
-            checkingFoodFound(toBeFed, foodToFeedWith); //Checks amount of food left and attempts to feed the Animal - doesnt feed if not enough left
+            checkingFoodFound(toBeFed, foodToFeedWith); //Checks amount of food left and attempts to feed the Animal - doesn't feed if not enough left
             clearOutFood(playerFeeding); //Clears out food if there is 0 grams left of it in the Inventory
             counter = 1;
         }
@@ -364,7 +364,7 @@ public class Game extends utilityFunctions implements Serializable{
      *                 can for instance take the form of:
      *
      *                      D:\\myGames\\Savestates\\MyJavaGameSave
-     *                      Will Create the Dirs myGames and Savestates if needed,
+     *                      Will Create the Dirs myGames and Save states if needed,
      *                      and then create the save game file named MyJavaGameSave
      *
      * @throws FileNotFoundException Since we are working with FileOutputStreams, we have
@@ -430,7 +430,7 @@ public class Game extends utilityFunctions implements Serializable{
      * Method that handles user input in Attempts to load the game
      */
     public void forceLoadingPath(){
-        String returnCode, filePathToSaveOrLoad = ""; //Returncode and Filepath
+        String returnCode, filePathToSaveOrLoad = ""; //Return code and Filepath
         System.out.println("Please write the System path you'd like to load a game from (Exit to abort - Case insensitive): ");
         try{
             //Will keep asking to validate a Filepath until it is resolved as Exit or Succeeded
@@ -453,7 +453,7 @@ public class Game extends utilityFunctions implements Serializable{
      * Method that handles user input in attempts to save the game
      */
     public void forceSavingPath(){
-        String returnCode, filePathToSaveOrLoad = ""; //The filePath and Returncode
+        String returnCode, filePathToSaveOrLoad = ""; //The filePath and Return code
         System.out.println("Please write the System path you'd like to save your game to (Exit to abort - Case insensitive): ");
         try{
             //Keeps asking for a Save path until it is confirmed as being Exit or a Valid save path
@@ -638,11 +638,11 @@ public class Game extends utilityFunctions implements Serializable{
     }
     /**
      * A method that sells off all the animals at the end of the Game and builds the High-score
-     * @return An Arraylist of Strings, which is the players highscore
+     * @return An Arraylist of Strings, which is the players high score
      */
     public ArrayList<String> buildHighScore(){
         ArrayList<Integer> moneyOfPlayers; //The money of the Players
-        ArrayList<String> namesOfPlayers = new ArrayList<>(), highScore = new ArrayList<>(); //names and the Highscore
+        ArrayList<String> namesOfPlayers = new ArrayList<>(), highScore = new ArrayList<>(); //names and the High score
 
         for(Player player : playersPlaying){ //
             namesOfPlayers.add(player.getName()); //Add to a list, the names of the remaining players
@@ -652,13 +652,13 @@ public class Game extends utilityFunctions implements Serializable{
         int spot = 1;
         for(int i = moneyOfPlayers.size()-1; i > -1; i--){ //For each amount of Money to be looked at
             for(Player player: playersPlaying){ //For each player, look if they correspond to the amount of money
-                if(player.getAmountOfMoney() == moneyOfPlayers.get(i) && !player.getAddedToHighScore()){ //If it's a match, add them to the highscore
+                if(player.getAmountOfMoney() == moneyOfPlayers.get(i) && !player.getAddedToHighScore()){ //If it's a match, add them to the high score
                     highScore.add("[" + spot + "] - " + player.getName() + " : " + player.getAmountOfMoney() + " coins.");
-                    if(spot == 1){ //The last element in the sorted list is the winner, so on the first looping through, thats the winner
+                    if(spot == 1){ //The last element in the sorted list is the winner, so on the first looping through, that's the winner
                         //Add the winner to the winners list
                         winner.add("The winner is: " + player.getName() + " with a whopping amount of " + player.getAmountOfMoney() + " coins!");
                     }
-                    player.setAddedToHighScore(true); //player was added to the highscore
+                    player.setAddedToHighScore(true); //player was added to the high score
                 }
             }
             spot += 1; //keep running tally of how many elements we've gone through
@@ -686,8 +686,8 @@ public class Game extends utilityFunctions implements Serializable{
                     + "\nChoose: [1] Buy an Animal from Store, [2] Sell an Animal to Store, [3] Feed your animals, " +
                     "[4] Breed your animals, [5] Buy Food,\n " + "[6] Sell Animal to Other Player" +
                     ", [7] Buy Animal from Other Player [8] Save game and Exit [9] Load game");
-            String gameMenuInput = gameMenuScanner.next(); //User choise in the menu
-            makePlayerChoice(gameMenuInput, ourStore); //handle the player choise input
+            String gameMenuInput = gameMenuScanner.next(); //User choice in the menu
+            makePlayerChoice(gameMenuInput, ourStore); //handle the player choice input
             showedMenu = true; //menu was shown and input was processed
             if (playersPlaying.get(currentPlayer).getTurnIsOver()) { //If the player turn is over
                 playersPlaying.get(currentPlayer).setTurnIsOver(false); //Reset variables for next round
@@ -703,7 +703,7 @@ public class Game extends utilityFunctions implements Serializable{
                 purgeDeadAnimals(); //Purge the dead animals
             }
         }
-        ArrayList<String> highScore = buildHighScore(); //Build the highscore list
+        ArrayList<String> highScore = buildHighScore(); //Build the high score list
 
         System.out.println("At the end of the game, here are the results: ");
         for(String highScoreSpots : highScore){ System.out.println(highScoreSpots); }
