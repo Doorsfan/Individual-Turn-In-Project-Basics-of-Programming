@@ -68,8 +68,8 @@ and a amount of players that they wish to play with. These numbers must be withi
 
 - Animals age and their sell value declines as they Age - When they get older than their max age, they die. [DONE]
 
+- Refactor [DONE]
+
 # TO-DO LIST
 
 - Add Changelog //Not started - will do after Refactoring and all commits have been done - Will implement on next project from Start
-
-- Refactor
