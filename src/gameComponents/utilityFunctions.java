@@ -11,7 +11,6 @@ import java.util.Scanner;
  * A class that hosts useful methods in parsing Menu choices and Enforcing input elements
  */
 public class utilityFunctions implements Serializable{
-    private transient Scanner myScanner = new Scanner(System.in);
     private transient Scanner nameScanner = new Scanner(System.in);
 
     /**
@@ -48,102 +47,6 @@ public class utilityFunctions implements Serializable{
     public void printCantAffordAnimal(Player buyer, Animal animalBeingSold){
         System.out.println(buyer.getName() + " cannot afford " + animalBeingSold.getInfo() + "! (Needed: " + animalBeingSold.getSellsFor() +
                 " coins, has only " + buyer.getAmountOfMoney() + " coins)\n Returning back to main menu");
-    }
-
-    /**
-     * A method that is responsible for creating Directories - parses a FilePath and based on the amount of \\ seperators
-     * treats them as being places where it should create Directories past the first one, so:
-     *
-     *  D:\\myExample\\Path\\Way
-     *
-     *  Would create 2 folders, one in D:\\ called myExample and one in D:\\myExample called Path, with the file name being Way
-     *
-     * @param input A string, the pathway to handle and parse
-     * @return A string, the Filepath to go along after Directories have been made along that Path
-     */
-    public String makeDirectories(String input){
-        String[] splitInput = input.split("\\\\"); //Splits on \\ in File dir string, every split on \\ causes an element
-        int subFolders = -1;
-        String pathSoFar = "";
-        for(String split: splitInput){
-            if(split.equals("")){
-                subFolders += 1;
-                pathSoFar += "\\\\";
-                if(subFolders > 0){
-                    File f = new File(pathSoFar);
-                    if(f.mkdir()){
-                        System.out.println("Created a directory with the path of: " + pathSoFar);
-                    }
-                    else{
-                        System.out.println("Could not create a directory with the path of: " + pathSoFar);
-                        return "failed making dir";
-                    }
-                }
-            }
-            pathSoFar += split;
-        }
-        return pathSoFar;
-    }
-
-
-    /**
-     * The method responsible for forcing a valid Save path - First it attempts to make Directories along the Specified
-     * input path - It then attempts to load the Filepath specified - And if it succeeds - It will prompt the user to
-     * if they want to overwrite the file or not.
-     *
-     * If it could construct Folders up to this point - it most likely is a valid Save path, and as of such, is returned
-     * to be used by the actual Save Game method.
-     *
-     * @param input A string, the Filepath to attempt to actually parse as being the place to save the file
-     * @return A string, the filePath - or, if declined in terms of overwriting, it will return "exit" - or
-     *          if failed making a directory - is "failed making dir"
-     */
-    public String forceValidSavingPath(String input){
-        input = makeDirectories(input); //can be valid path, exit or failed making dir
-        try{
-            if(forceValidLoadingPath(input).equals("succeeded")){ //Exited or could load the file specified
-                String answer;
-                System.out.println("There seems to already exist a save game file at the path of: " + input);
-                System.out.println("Do you wish to overwrite the file at: " + input + "? (Y/N case-insensitive)");
-                while(!(forceYOrN(answer = myScanner.next()) == 1)){
-                    //Break when the input is Y,y,N or n
-                }
-                return input = (answer.toLowerCase().equals("y") ? input : "exit"); //y to return overwrite filepath, n to return exit
-            }
-            FileOutputStream fileOut = new FileOutputStream(input); //Attempts to open a fileOutputStream at the given filePath input
-            fileOut.close(); //If it gets here, it managed to do so - and we can safely close the FileOutputStream
-        }
-        catch(Exception e){
-            System.out.println("An error occurred while validating the saveFile Path: " + e.getMessage());
-        }
-        return input;
-    }
-
-    /**
-     * A method that is used in forcing a valid Filepath as a written input to where the
-     * player wishes to Load their files from.
-     *
-     * @param input A string, the input to sanitize and handle in regards to building a valid Filepath
-     * @return An String - important status code message that updates on what kind of event occurred in the Saving process
-     *      exit: user wanted to Abort loading a game
-     *      succeeded: Succeeded in loading a file
-     *      failed: Could not load the file
-     *
-     * @throws FileNotFoundException To verify that a file exists, it will be attempted to be opened in a FileOutputStream -
-     * Thus, it requires that the Exception is declared as being able to be thrown by this method.
-     */
-    public String forceValidLoadingPath(String input) throws FileNotFoundException {
-        if(input.toLowerCase().equals("exit")){
-            return "exit"; //User wanted to abort loading a game
-        }
-        try{
-            FileInputStream fileIn = new FileInputStream(input);
-            return "succeeded"; //Succeeded in loading a file
-        }
-        catch(Exception e)
-        {
-            return "failed"; //Could not load the file
-        }
     }
 
     /**
@@ -240,6 +143,7 @@ public class utilityFunctions implements Serializable{
      * @param secondAnimalIndex An int, the index for the chosen Female
      */
     public void createBabies(int amountOfBabies, ArrayList<Animal> females, Player playerBreeding, int secondAnimalIndex){
+        if(nameScanner == null){ this.nameScanner = new Scanner(System.in); }
         Random random = new Random();
         for(int i = 0; i < amountOfBabies; i++){ //Create amountOfBabies babies
             int genderChance = random.ints(1,3).findFirst().getAsInt(); //50% chanse of being female or male

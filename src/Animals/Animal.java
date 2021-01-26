@@ -206,6 +206,7 @@ public abstract class Animal extends utilityFunctions implements Serializable {
      */
     public void chanceForDisease(Player owner){
         String answer;
+        if(this.diseaseScanner == null){ this.diseaseScanner = new Scanner(System.in); }
 
         Random random = new Random();
         int diseaseChanse = random.ints(1, 101).findFirst().getAsInt();

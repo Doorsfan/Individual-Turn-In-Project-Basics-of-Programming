@@ -61,6 +61,7 @@ public class Store extends utilityFunctions implements Serializable {
      * @param seller A player object who is the Seller selling Animals to the Store
      */
     public void sellAnimal(Player seller){
+        if(userInput == null){ this.userInput = new Scanner(System.in); }
         ArrayList<Animal> animalsToSell = seller.getOwnedAnimals(); //The owned Animals that are available to be sold
         String wantedAnimal; //index of the wanted animal to be sold
         int returnCode;
@@ -172,6 +173,7 @@ public class Store extends utilityFunctions implements Serializable {
     public void buyFood(Player buyer){
         String wantedFood = "", wantedAmount = "";
         int returnCode;
+        if(userInput == null){ this.userInput = new Scanner(System.in); }
         while(buyer.getAmountOfMoney() >= pricesOfFood.get(0)/10) {
             printShopMenu(buyer);
             shopCounter = 0;
@@ -220,6 +222,7 @@ public class Store extends utilityFunctions implements Serializable {
      * @param index An int, the index of the chosen animal
      */
     public void choseAnimal(Player buyer, int index){
+        if(nameScanner == null){ this.nameScanner = new Scanner(System.in); }
         if (animalsToOffer.get(index).getValue() <= buyer.getAmountOfMoney()) {
             System.out.println("What would you like to name your new " + animalsToOffer.get(index).getClassName() + "?");
             String wantedName = nameScanner.nextLine(); //The wanted name
@@ -258,6 +261,7 @@ public class Store extends utilityFunctions implements Serializable {
      * @param buyer A player object who is the Buyer wanting to buy a Animal from the Shop
      */
     public void buyAnimal(Player buyer){
+        if(userInput == null){ this.userInput = new Scanner(System.in); }
         if(buyer.getAmountOfMoney() < pricesOfAnimals.get(0)){
             System.out.println(buyer.getName() + " cannot afford any animal in the store at the moment. " +
                     "The lowest price of an animal in the shop is: " + pricesOfAnimals.get(0) + " coins.");

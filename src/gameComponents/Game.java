@@ -15,32 +15,64 @@ public class Game extends utilityFunctions implements Serializable{
     //Initialize our variables that we are going to need
     private int rounds = 0, players = 0, currentRound = 1, currentPlayer = 0;
     private String wantedRoundsInput = "", wantedPlayersInput = "";
-    private boolean showedMenu = false;
+    private boolean showedMenu = false, deductedRounds = false;
     private Random random = new Random();
     private ArrayList<Player> playersPlaying = new ArrayList<>();
     private Store ourStore;
     private ArrayList<String> winner = new ArrayList<>();
     //Every class that is to be Serialized, must implement the Serializable interface - however, Scanners don't -their
     //state cannot be Serialized - To circumvent this, i declare my Scanners as Transient - i.e, not included to be Serialized
-    transient Scanner userInput = new Scanner(System.in); //user input
-    transient Scanner nameScanner = new Scanner(System.in); //name input
-    transient Scanner forceSavingPathScanner = new Scanner(System.in); //ForceSavingPathInput
-    transient Scanner forceLoadingPathScanner = new Scanner(System.in);
-    transient Scanner gameMenuScanner = new Scanner(System.in);
-
+    transient Scanner userInput = new Scanner(System.in), nameScanner = new Scanner(System.in), gameMenuScanner = new Scanner(System.in); //user input
+    transient Scanner loadingMenuScanner = new Scanner(System.in), saveGameScanner = new Scanner(System.in), loadGameScanner = new Scanner(System.in);
     /**
      * When a new Game is made, we kick things off by asking for amount of players and
      * names - and then Run the actual Game logic loop
      */
     public Game(){
-        askForInput(); //Ask for User input
-        runGame(); //Boot the game up
+        int result = showMainMenu();
+        if(result == 1){ runGame(); }//Boot the game up if we loaded a game successfully
+    }
+
+    /**
+     * The method that is responsible for handling input choices in the main menu - can start new game, load game
+     * or exit the game.
+     * @return An int based on success:
+     *          -1: Failed or exited
+     *           1: Successfully loaded a game
+     */
+    public int showMainMenu(){
+        int returnCode = 0;
+        if(loadingMenuScanner == null){ this.loadingMenuScanner = new Scanner(System.in); }
+        String userInput = "";
+        System.out.println("\tWelcome to the Pet Game!\n[1] New game\n[2] Load game\n[3] Exit");
+        while(!((returnCode = (safeIntInput(1, 3, userInput = loadingMenuScanner.next(),
+                false))) == 1)){} //Chose to exit on 3
+        if(userInput.equals("1")){ askForInput(); runGame(); } //If the user chose to create a new game, ask for input and run the  game
+        if(userInput.equals("2")){ //Try to load the game
+            try{
+                loadGame(); //Present the available saves and parse the user choice
+                return 1;
+            }
+            catch(Exception e){
+                System.out.println(e);
+                return -1;
+            }
+
+        }
+        if (userInput.equals("3")) { System.out.println("User chose to exit. Shutting down."); System.exit(1); }
+        return -1;
     }
     /**
      * The method responsible for handling amount of rounds and players to be played with - delegates tasks of
      * input to Sub-methods
      */
     public void askForInput(){
+        //To account for resetting the game state between saving/loading - we have to reset player lists, round and showed menu
+        //between calls of this method
+        if(this.nameScanner == null){ this.nameScanner = new Scanner(System.in); }
+        playersPlaying.clear();
+        setCurrentRound(1);
+        this.setShowedMenu(false);
         System.out.println("How many rounds would you like to play?");
         while(!(safeIntInput(5, 30, wantedRoundsInput = userInput.next(), false) == 1)){
             //Breaks when the input is within a valid range and is a Number
@@ -358,52 +390,52 @@ public class Game extends utilityFunctions implements Serializable{
     }
 
     /**
-     * The method responsible for actually saving the Game - After the Save Filepath has been
-     * vetted and confirmed - the actual saving process is executed
-     * @param filePath A string input that is a vetted/sanitized form of Input of the User,
-     *                 can for instance take the form of:
-     *
-     *                      D:\\myGames\\Savestates\\MyJavaGameSave
-     *                      Will Create the Dirs myGames and Save states if needed,
-     *                      and then create the save game file named MyJavaGameSave
-     *
-     * @throws FileNotFoundException Since we are working with FileOutputStreams, we have
-     *                  to account for the fact that it might not be able to find the filePath - so the
-     *                  method demands that we declare that the Method can throw this Exception
+     * Asks the player to input a name for a save game, checks if a File of the specified name exists already,
+     * if so - asks for confirmation to overwrite said file
+     * @throws FileNotFoundException Demanded due to possible IO error of File not Found
      */
-    public void saveGame(String filePath) throws FileNotFoundException{
-        try{
-            FileOutputStream fileOut = new FileOutputStream(filePath); //Opens the FileOutputStream to the File path destination
-            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut); //Opens the ObjectOutputStream to the fileOutputStream
-            objectOut.writeObject(this); //Write the game Object to the Save
-            objectOut.close(); //Close the stream
-            System.out.println("Successfully saved game to: " + filePath);
+    public void saveGame() throws FileNotFoundException{
+        String overwrite = "", newName = "", fullSavePath = "savedGames\\", answer = "", saveGameName;;
+        File[] gameFiles = new File("savedGames").listFiles();
+        if(this.saveGameScanner == null){ this.saveGameScanner = new Scanner(System.in); }
+        System.out.println("Saved games in savedGames folder: ");
+        for(File gameFile: gameFiles){
+            System.out.println(gameFile.getName().substring(0,gameFile.getName().length()-4));
         }
-        catch(Exception e){
-            System.out.println("Attempted to save with the filepath of: " + filePath + " but failed. Make sure the Filepath ends " +
-                    "in a Filename.");
-            System.out.println(e);
+        System.out.println("What would you like to name your save file?");
+        while(((saveGameName = saveGameScanner.nextLine()).length()) == 0){
+            System.out.println("The name of the save game cannot be empty. Please try again.");
         }
+        saveGameName = saveGameName.replaceAll("[^A-Za-z0-9]", "");
+        fullSavePath += saveGameName + ".ser";
+        for(File gameFile : gameFiles){
+            if(("savedGames\\" + gameFile.getName()).equals(fullSavePath)){
+                newName = fullSavePath;
+                System.out.println("There already is a saved game at the path of: " + fullSavePath + ", do you wish to overwrite it? (Y/N)");
+                while(!(forceYOrN(overwrite = saveGameScanner.nextLine()) == 1)){ } //Breaks when Y,y,N or n
+                if(overwrite.toLowerCase().equals("n")){
+                    while(newName.equals(fullSavePath)){
+                        System.out.println("Please provide another name for the file to save: ");
+                        newName = "savedGames\\" + saveGameScanner.nextLine() + ".ser";
+                    }
+                }
+            }
+        }
+        if(overwrite.toLowerCase().equals("n")){ fullSavePath = newName; }
+        saveFile(fullSavePath, saveGameName);
     }
 
     /**
-     * The method responsible for loading the relevant game save, based on the filePath
-     * Uses an ObjectInputStream to read a serialized File and sets current values to that
-     * of the save state.
-     *
-     * Do note: Usage of objectInputStreams must conclude with the Stream being closed after
-     * usage is completed.
-     *
-     * @param filePath A string that is a User written Filepath input, which has been forcefully
-     *                 checked to vet that it's possible to load a game save from the wished destination
-     * @throws FileNotFoundException The method must be declared as being able ot throw a FileNotFoundException,
-     *                 as there is no guarantee that it can open a FileInputStream if the Filepath is not valid.
+     * A method that handles loading of files based on a Filepath
+     * @param filePath A string, the Filepath
      */
-    public void loadGame(String filePath) throws FileNotFoundException{
+    public void loadFile(String filePath){
         boolean holdLoop = true;
         while(holdLoop){
-            FileInputStream fileIn = new FileInputStream(filePath); //Open the FileInputStream on the given Filepath
-            try (ObjectInputStream objectIn = new ObjectInputStream(fileIn)) { //Open the ObjectInputStream on the filePath handle
+             //Open the FileInputStream on the given Filepath
+            try { //Open the ObjectInputStream on the filePath handle
+                FileInputStream fileIn = new FileInputStream(filePath);
+                ObjectInputStream objectIn = new ObjectInputStream(fileIn);
                 Object obj = objectIn.readObject(); //Read the object in from the Save file
                 Game loadedGame = (Game) obj; //Convert it to a game object and save it
                 this.setCurrentPlayer(loadedGame.getCurrentPlayer()); //Retrieve the attributes and set them to the current Game
@@ -417,56 +449,74 @@ public class Game extends utilityFunctions implements Serializable{
                 if(!this.getShowedMenu()){ //When loading, re-create Menus printed as well - including Deaths from saved Turn
                     removeAnimals(playersPlaying, currentPlayer);
                     printAnimals(true, currentRound, currentPlayer, playersPlaying);
+                    this.setShowedMenu(true);
                 }
                 objectIn.close(); //Close the stream when Done
                 break;
             } catch (Exception ex) {
+                System.out.println(ex);
                 break; //Stream closed
             }
         }
     }
 
     /**
-     * Method that handles user input in Attempts to load the game
+     * Presents a menu of files in the savedGames dir and allows the user to make a choice of a saved file to load or
+     * allows the user to return to the main menu
+     * @throws FileNotFoundException An exception to be accounted for in case a file cannot be found
      */
-    public void forceLoadingPath(){
-        String returnCode, filePathToSaveOrLoad = ""; //Return code and Filepath
-        System.out.println("Please write the System path you'd like to load a game from (Exit to abort - Case insensitive): ");
-        try{
-            //Will keep asking to validate a Filepath until it is resolved as Exit or Succeeded
-            while (!((returnCode = (forceValidLoadingPath(filePathToSaveOrLoad = forceLoadingPathScanner.nextLine()))).equals("exit"))) {
-                //Exit, succeeded or failed
-                boolean invalidPath = returnCode.equals("failed"); //is Failed if the Loading failed
-                if (!invalidPath) {
-                    loadGame(filePathToSaveOrLoad); //Passed with a valid Path
-                    break;
-                }
-                System.out.println("Attempted to load game from filePath of: " + filePathToSaveOrLoad + " but failed, please try again.");
+    public void loadGame() throws FileNotFoundException{
+        boolean holdLoop = true;
+        int counter = 1, returnCode = 0;
+        String userInput = "", filePath;
+        File[] gameFiles = new File("savedGames").listFiles();
+        if(loadGameScanner == null){ this.loadGameScanner = new Scanner(System.in); }
+        if(gameFiles.length == 0){
+            System.out.println("There are no save games currently. Returning to main menu.");
+            showMainMenu();
+            return;
+        }
+        else{
+            System.out.println("Which game would you like to load?");
+            for(File saves : gameFiles){
+                System.out.println("[" + counter + "] " + saves.getName().substring(0, saves.getName().length()-4));
+                counter += 1;
             }
+            System.out.println("[" + counter + "] Exit");
+            while(!((returnCode = (safeIntInput(1, gameFiles.length+1, userInput = loadGameScanner.next(),
+                    false))) == 1)){ } //Chose to exit on 3
+            if(Integer.valueOf(userInput) == gameFiles.length+1){
+                System.out.println("Exiting from loading game menu.");
+                showMainMenu();
+                return;
+            }
+            filePath = "savedGames\\" + gameFiles[Integer.valueOf(userInput)-1].getName();
+            System.out.println("filePath is:" + filePath);
         }
-        catch(Exception e){
-            System.out.println("Had an exception, retrying.");
-        }
+        loadFile(filePath);
     }
 
     /**
-     * Method that handles user input in attempts to save the game
+     * Method that handles saving an actual file, based on the Save path and the name of the save game
+     * @param fullSavePath A string object handed down to the method, the full savePath
+     * @param saveGameName A string object handed down to the method, the name of the game being saved
+     * @return An int, based on it's success
      */
-    public void forceSavingPath(){
-        String returnCode, filePathToSaveOrLoad = ""; //The filePath and Return code
-        System.out.println("Please write the System path you'd like to save your game to (Exit to abort - Case insensitive): ");
+    public int saveFile(String fullSavePath, String saveGameName){
         try{
-            //Keeps asking for a Save path until it is confirmed as being Exit or a Valid save path
-            while(!((returnCode = (forceValidSavingPath(filePathToSaveOrLoad = forceSavingPathScanner.nextLine()))).equals("exit"))){
-                boolean invalidPath = returnCode.equals("failed making dir"); //returnCode is failed making dir if making Directories failed
-                if(!invalidPath){ //If the path is valid
-                    saveGame(filePathToSaveOrLoad); //Save the file to the Filepath
-                    break;
-                }
-            }
+            FileOutputStream fileOut = new FileOutputStream(fullSavePath); //Opens the FileOutputStream to the File path destination
+            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut); //Opens the ObjectOutputStream to the fileOutputStream
+            this.setShowedMenu(false);
+            objectOut.writeObject(this); //Write the game Object to the Save
+            objectOut.close(); //Close the stream
+            System.out.println("Successfully saved game to: savedGames\\" + saveGameName + ".ser - Returning to Main Menu.");
+
+            showMainMenu();
+            return 1;
         }
         catch(Exception e){
-            System.out.println("Had an exception, retrying.");
+            System.out.println(e);
+            return -1;
         }
     }
 
@@ -524,10 +574,12 @@ public class Game extends utilityFunctions implements Serializable{
                 playersPlaying.get(currentPlayer).setTurnIsOver(true); //Turn is over
                 break;
             case "8":
-                forceSavingPath(); //Start the process to validate a Filepath for Saving - to then Save the Game
-                break;
-            case "9":
-                forceLoadingPath(); //Start the process to validate a Filepath for Loading - to then Load the Game
+                try{
+                    saveGame(); //Start the process to validate a Filepath for Saving - to then Save the Game
+                }
+                catch(Exception e){
+                    System.out.println(e);
+                }
                 break;
             default:
                 System.out.println("That input was not one of the valid options. Please try again.");
@@ -577,7 +629,6 @@ public class Game extends utilityFunctions implements Serializable{
             System.out.println(playersPlaying.get(currentPlayer).getName() + " was eliminated at Round: " + currentRound + " due to not having" +
                     " enough money to buy anything and no animals left.");
             playersPlaying.remove(currentPlayer); //Remove the player
-            if(playersPlaying.size() > 1){ currentPlayer -= 1; } //Compensate who the current player is, upon removal of a Player
             return true; //Player was Eliminated
         }
         return false; //player was not eliminated
@@ -603,22 +654,22 @@ public class Game extends utilityFunctions implements Serializable{
      * @param playerGotEliminated A boolean, if a player Got eliminated this turn or not
      */
     public void advanceRound(boolean playerGotEliminated){
-        if (currentPlayer == playersPlaying.size() - 1 && playerGotEliminated){ //Compensate to balance out eliminated player
-            rounds += 1;
-            currentRound -= 1;
+        if(playersPlaying.size()-1 < currentPlayer){ //Would be out of bounds
+            currentPlayer -= 1;
         }
-        if (currentPlayer == playersPlaying.size() - 1) { //Round is advanced to the next one
-            rounds -= 1;
-            currentRound += 1;
-            for(Player players: playersPlaying){
-                for(Animal eachPlayerAnimal : players.getOwnedAnimals()){
-                    eachPlayerAnimal.setDecayedThisRound(false); //Reset the state of Animals having decayed, as its reset between Rounds
+        if (playersPlaying.get(currentPlayer).getTurnIsOver()) { //Round is advanced to the next one
+            currentPlayer += 1;
+            if(currentPlayer > playersPlaying.size()-1){
+                currentPlayer = 0;
+                currentRound += 1;
+                rounds -= 1; //Rounds remaining
+                for(Player players : playersPlaying){
+                    for(Animal animals: players.getOwnedAnimals()){
+                        animals.setDecayedThisRound(false);
+                    }
                 }
-                players.purgeSavedDeathList(currentRound-2); //Purge old death archives, to keep them up to date - relevant for Loading
             }
         }
-        if (currentPlayer < playersPlaying.size() - 1) { currentPlayer += 1; }
-        else { currentPlayer = 0; } //If it's the last player in the turn order, reset it to the first player again
     }
 
     public ArrayList<Integer> sellOffAnimalsAtEndOfGame(){
@@ -626,9 +677,11 @@ public class Game extends utilityFunctions implements Serializable{
 
         for(Player player : playersPlaying){ //Sell off the Animal of each player at the end of the game
             for(int i = player.getOwnedAnimals().size()-1; i > -1; i--){
-                System.out.println(player.getName() + " sold off " + player.getOwnedAnimals().get(i).getInfo()
-                        + " for " + player.getOwnedAnimals().get(i).getSellsFor() + " coins.");
-                player.getPaid(player.getOwnedAnimals().get(i).getSellsFor()); //Sells the Animal
+                if(player.getOwnedAnimals().get(i).getHealth() > 0){
+                    System.out.println(player.getName() + " sold off " + player.getOwnedAnimals().get(i).getInfo()
+                            + " for " + player.getOwnedAnimals().get(i).getSellsFor() + " coins.");
+                    player.getPaid(player.getOwnedAnimals().get(i).getSellsFor()); //Sells the Animal
+                }
                 player.getOwnedAnimals().remove(i); //removes it
             }
             moneyOfPlayers.add(player.getAmountOfMoney()); //Add to a list of Money, how much money each player had
@@ -673,7 +726,7 @@ public class Game extends utilityFunctions implements Serializable{
         ourStore = new Store(); //Create our store
         System.out.println("Welcome to the Raising your Animal Game.");
         boolean playerGotEliminated = false;
-
+        if(gameMenuScanner == null){ this.gameMenuScanner = new Scanner(System.in); }
         while (rounds > 0) {
             if (!showedMenu) { //If the menu has not been shown
                 playerGotEliminated = false;
@@ -685,12 +738,12 @@ public class Game extends utilityFunctions implements Serializable{
                     + "'s Funds: " + playersPlaying.get(currentPlayer).getAmountOfMoney() + " coins "
                     + "\nChoose: [1] Buy an Animal from Store, [2] Sell an Animal to Store, [3] Feed your animals, " +
                     "[4] Breed your animals, [5] Buy Food,\n " + "[6] Sell Animal to Other Player" +
-                    ", [7] Buy Animal from Other Player [8] Save game and Exit [9] Load game");
+                    ", [7] Buy Animal from Other Player, [8] Save game and Exit");
             String gameMenuInput = gameMenuScanner.next(); //User choice in the menu
             makePlayerChoice(gameMenuInput, ourStore); //handle the player choice input
             showedMenu = true; //menu was shown and input was processed
             if (playersPlaying.get(currentPlayer).getTurnIsOver()) { //If the player turn is over
-                playersPlaying.get(currentPlayer).setTurnIsOver(false); //Reset variables for next round
+                 //Reset variables for next round
                 showedMenu = false; //Reset variables
                 ageDecayAndDiseaseAtEndofTurn(); //Age, Decay and roll for Disease on Animals
                 handleDeathsOfAnimals(); //Handle death announcements of Animals
@@ -700,6 +753,7 @@ public class Game extends utilityFunctions implements Serializable{
                     break;
                 }
                 advanceRound(playerGotEliminated); //Advance a round, accounting for if a player got eliminated or not
+                playersPlaying.get(currentPlayer).setTurnIsOver(false);
                 purgeDeadAnimals(); //Purge the dead animals
             }
         }
