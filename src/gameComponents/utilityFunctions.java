@@ -337,7 +337,7 @@ public class utilityFunctions implements Serializable{
      * @param playersPlaying An ArrayList of Player objects, all of whom are Players still playing
      */
     public void printAnimals(boolean loadedGame, int currentRound, int currentPlayer, ArrayList<Player> playersPlaying) {
-        System.out.println("Round " + currentRound + ", " + playersPlaying.get(currentPlayer).getName() + "'s turn.");
+        System.out.println("\nRound " + currentRound + ", " + playersPlaying.get(currentPlayer).getName() + "'s turn.");
         playersPlaying.get(currentPlayer).announceDeaths(currentRound);
         if (loadedGame) {
             for (String printedDeath : playersPlaying.get(currentPlayer).getSavedDeathList()) {

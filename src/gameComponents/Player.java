@@ -228,6 +228,6 @@ public class Player implements Serializable {
 
     @Override
     public String toString(){
-        return "Name: " + this.getName();
+        return "Name: " + this.getName() + " Funds: " + this.getAmountOfMoney();
     }
 }

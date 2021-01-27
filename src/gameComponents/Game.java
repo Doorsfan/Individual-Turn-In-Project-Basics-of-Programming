@@ -73,12 +73,12 @@ public class Game extends utilityFunctions implements Serializable{
         playersPlaying.clear();
         setCurrentRound(1);
         this.setShowedMenu(false);
-        System.out.println("How many rounds would you like to play?");
+        System.out.println("How many rounds would you like to play? (Min 5, Max 30)");
         while(!(safeIntInput(5, 30, wantedRoundsInput = userInput.next(), false) == 1)){
             //Breaks when the input is within a valid range and is a Number
         }
         rounds = Integer.parseInt(wantedRoundsInput); //Amount of Rounds
-        System.out.println("How many players will be playing?");
+        System.out.println("How many players will be playing? (Min 1, Max 4)");
         while(!(safeIntInput(1, 4, wantedPlayersInput = userInput.next(), false) == 1)){
             //Break when the input is within a valid range and is a Number
         }
@@ -236,6 +236,8 @@ public class Game extends utilityFunctions implements Serializable{
         return 1;
     }
 
+    //TEST loading
+    //TEST new game after Saving
     /**
      * The method responsible for handling feeding of Animals - delegates some responsibilities through
      * sub-methods - such as Menu rendering, Input handling and Otherwise
@@ -629,6 +631,10 @@ public class Game extends utilityFunctions implements Serializable{
             System.out.println(playersPlaying.get(currentPlayer).getName() + " was eliminated at Round: " + currentRound + " due to not having" +
                     " enough money to buy anything and no animals left.");
             playersPlaying.remove(currentPlayer); //Remove the player
+            if(currentPlayer == playersPlaying.size()){
+                currentPlayer -= 1;
+            }
+            System.out.println("The players remaining are: " + playersPlaying);
             return true; //Player was Eliminated
         }
         return false; //player was not eliminated
@@ -654,9 +660,6 @@ public class Game extends utilityFunctions implements Serializable{
      * @param playerGotEliminated A boolean, if a player Got eliminated this turn or not
      */
     public void advanceRound(boolean playerGotEliminated){
-        if(playersPlaying.size()-1 < currentPlayer){ //Would be out of bounds
-            currentPlayer -= 1;
-        }
         if (playersPlaying.get(currentPlayer).getTurnIsOver()) { //Round is advanced to the next one
             currentPlayer += 1;
             if(currentPlayer > playersPlaying.size()-1){
@@ -728,6 +731,7 @@ public class Game extends utilityFunctions implements Serializable{
         boolean playerGotEliminated = false;
         if(gameMenuScanner == null){ this.gameMenuScanner = new Scanner(System.in); }
         while (rounds > 0) {
+            //Skriv ut boundaries för Rundor och mängd spelare
             if (!showedMenu) { //If the menu has not been shown
                 playerGotEliminated = false;
                 removeAnimals(playersPlaying, currentPlayer);
