@@ -61,23 +61,23 @@ public class Store extends utilityFunctions implements Serializable {
      * @param seller A player object who is the Seller selling Animals to the Store
      */
     public void sellAnimal(Player seller){
-        if(userInput == null){ this.userInput = new Scanner(System.in); }
-        ArrayList<Animal> animalsToSell = seller.getOwnedAnimals(); //The owned Animals that are available to be sold
+        if(userInput == null){ userInput = new Scanner(System.in); }
+        ArrayList<Animal> animalsToSell = seller.getHealthyAnimals(); //The owned Animals that are available to be sold
         String wantedAnimal; //index of the wanted animal to be sold
         int returnCode;
         boolean finishedSelling = false;
         while(!finishedSelling){
-            if(animalsToSell.size() == 0){ System.out.println(seller.getName() + " has no animals to sell currently."); return; }
+            if(animalsToSell.size() == 0){ System.out.println(seller.getName() + " has no healthy animals left to sell currently."); return; }
             printSellAnimalMenu(seller); //Print the Sales menu of animals based on the Seller
             //Keep asking for a input until it is a valid index - highest accepted Index is exit index, returns back to main menu
             while(!((returnCode = (safeIntInput(1, animalsToSell.size()+1, wantedAnimal = userInput.next(),
                     true))) == 1)){ if(returnCode == 2) return; }
-            seller.getPaid(seller.getOwnedAnimals().get(Integer.parseInt(wantedAnimal)-1).getSellsFor());
-            System.out.println(seller.getName() + " sold " + seller.getOwnedAnimals().get(Integer.parseInt(wantedAnimal)-1).getName() + " the "
-                    + seller.getOwnedAnimals().get(Integer.parseInt(wantedAnimal)-1).getClassName()
-                    + " for " + animalsToSell.get(Integer.parseInt(wantedAnimal)-1).getSellsFor() + " coins. " + seller.getName() + " now has: "
+            Animal animalBeingSold = animalsToSell.get(Integer.parseInt(wantedAnimal)-1);
+            seller.getPaid(animalBeingSold.getSellsFor());
+            System.out.println(seller.getName() + " sold " + animalBeingSold.getInfo()
+                    + " for " + animalBeingSold.getSellsFor() + " coins. " + seller.getName() + " now has: "
                     + seller.getAmountOfMoney() + " coins.");
-            seller.getOwnedAnimals().remove((Integer.parseInt(wantedAnimal)-1));
+            seller.getOwnedAnimals().remove(animalBeingSold);
         }
     }
 
@@ -173,12 +173,17 @@ public class Store extends utilityFunctions implements Serializable {
     public void buyFood(Player buyer){
         String wantedFood = "", wantedAmount = "";
         int returnCode;
-        if(userInput == null){ this.userInput = new Scanner(System.in); }
+        if(userInput == null){ userInput = new Scanner(System.in); }
         while(buyer.getAmountOfMoney() >= pricesOfFood.get(0)/10) {
             printShopMenu(buyer);
             shopCounter = 0;
             while(!((returnCode = (safeIntInput(1, foodToOffer.size()+1, wantedFood = userInput.next(),
                     true))) == 1)){ if(returnCode == 2) return; } //Index of Wanted food
+            if(getMaxAmountOfGrams(wantedFood, buyer) < 100){
+                System.out.println("Cannot afford at least 100 grams of " + foodToOffer.get(Integer.parseInt(wantedFood)-1).getName()
+                + ", returning back to main menu.");
+                return;
+            }
             System.out.println("How many grams of " + foodToOffer.get(Integer.parseInt(wantedFood)-1).getName() + " do you want? " +
                     "(Min: 100, Max: " + getMaxAmountOfGrams(wantedFood, buyer) + ")");
             while(!(safeIntInput(100,getMaxAmountOfGrams(wantedFood,buyer),wantedAmount = userInput.next(),false) == 1));
@@ -222,7 +227,7 @@ public class Store extends utilityFunctions implements Serializable {
      * @param index An int, the index of the chosen animal
      */
     public void choseAnimal(Player buyer, int index){
-        if(nameScanner == null){ this.nameScanner = new Scanner(System.in); }
+        if(nameScanner == null){ nameScanner = new Scanner(System.in); }
         if (animalsToOffer.get(index).getValue() <= buyer.getAmountOfMoney()) {
             System.out.println("What would you like to name your new " + animalsToOffer.get(index).getClassName() + "?");
             String wantedName = nameScanner.nextLine(); //The wanted name
@@ -261,7 +266,7 @@ public class Store extends utilityFunctions implements Serializable {
      * @param buyer A player object who is the Buyer wanting to buy a Animal from the Shop
      */
     public void buyAnimal(Player buyer){
-        if(userInput == null){ this.userInput = new Scanner(System.in); }
+        if(userInput == null){ userInput = new Scanner(System.in); }
         if(buyer.getAmountOfMoney() < pricesOfAnimals.get(0)){
             System.out.println(buyer.getName() + " cannot afford any animal in the store at the moment. " +
                     "The lowest price of an animal in the shop is: " + pricesOfAnimals.get(0) + " coins.");

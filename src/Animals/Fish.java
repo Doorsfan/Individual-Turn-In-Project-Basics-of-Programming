@@ -1,7 +1,6 @@
 package Animals;
 
 import processedFood.fishFood;
-
 import java.io.Serializable;
 
 public class Fish extends Animal implements Serializable {

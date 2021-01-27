@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
-
 /**
  * The main abstract class that all Animals inherit from - Implements a interface to allow for easy Serialization,
  * and inherits utilityFunctions to allow for enforcing of certain inputs/cleaning of certain inputs.
@@ -28,6 +27,15 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     private String causeOfDeath = "";
     private boolean decayedThisRound = false, alive = true, sick = false;
     private transient Scanner diseaseScanner = new Scanner(System.in);
+    private Player owner;
+
+    public void setOwner(Player owner){
+        this.owner = owner;
+    }
+
+    public Player getOwner(){
+        return this.owner;
+    }
 
     /**
      * A method that aids in Construction of children of the Animal class - Accepts 3 Food Items
@@ -140,7 +148,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
             setCauseOfDeath("Aging"); //Will be used for later purposes such as Death messages
         }
     }
-
 
     /**
      * Gets the value that the animal sells for currently - depends on age and health value

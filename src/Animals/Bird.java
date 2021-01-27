@@ -1,7 +1,6 @@
 package Animals;
 
 import Plants.Seeds;
-
 import java.io.Serializable;
 
 public class Bird extends Animal implements Serializable {

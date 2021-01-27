@@ -11,7 +11,7 @@ import java.util.Scanner;
  * A class that hosts useful methods in parsing Menu choices and Enforcing input elements
  */
 public class utilityFunctions implements Serializable{
-    private transient Scanner nameScanner = new Scanner(System.in);
+    private  transient Scanner nameScanner = new Scanner(System.in);
 
     /**
      * The method that is responsible for handling Menu printing in regards to an Player selling Animals to another Player
@@ -31,7 +31,7 @@ public class utilityFunctions implements Serializable{
         System.out.println("What animal does " + seller.getName() + " wish to sell to: " + buyer.getName() + " (Funds: "
                 + buyer.getAmountOfMoney() + " coins)" + "?");
         counter = 1;
-        for(Animal sellersAnimals: seller.getOwnedAnimals()){
+        for(Animal sellersAnimals: seller.getHealthyAnimals()){
             System.out.println("[" + counter + "] " + sellersAnimals.getInfo() + " Sells for: " + sellersAnimals.getSellsFor() + " coins");
             counter += 1;
         }
@@ -49,6 +49,15 @@ public class utilityFunctions implements Serializable{
                 " coins, has only " + buyer.getAmountOfMoney() + " coins)\n Returning back to main menu");
     }
 
+    public void wait(int seconds){
+        try{
+            Thread.sleep((seconds * 1000)); //wait one second to allow user to react to events
+        }
+        catch(Exception e){
+            System.out.println(e);
+        }
+    }
+
     /**
      * A utility method that forces a user to write y or n (case-insensitive)
      * @param input A string, the input that the user gave
@@ -58,7 +67,7 @@ public class utilityFunctions implements Serializable{
      * @throws RuntimeException - An exception is thrown if the input is not correct length or is anything but y or n
      *
      */
-    public int forceYOrN(String input) throws RuntimeException{
+    public  int forceYOrN(String input) throws RuntimeException{
         String[] splitInput = input.split("");
         try{
             if(splitInput.length > 1){
@@ -91,7 +100,7 @@ public class utilityFunctions implements Serializable{
      *
      * @throws RuntimeException Throws a RuntimeException if the input is not within the accepted Range of Numbers
      */
-    public int safeIntInput(int lowerBoundary, int upperBoundary, String input, boolean maxIsExitCode) throws RuntimeException{
+    public  int safeIntInput(int lowerBoundary, int upperBoundary, String input, boolean maxIsExitCode) throws RuntimeException{
         int check;
         try{
             check = Integer.valueOf(input);
@@ -122,7 +131,7 @@ public class utilityFunctions implements Serializable{
      * @param seller A player object, the Player selling Animals to the Store
      */
     public void printSellAnimalMenu(Player seller){
-        ArrayList<Animal> animalsToSell = seller.getOwnedAnimals();
+        ArrayList<Animal> animalsToSell = seller.getHealthyAnimals();
         int shopCounter = 1;
         System.out.println("Which animal would " + seller.getName() + " like to sell?");
         for(Animal animal : animalsToSell){
@@ -142,8 +151,8 @@ public class utilityFunctions implements Serializable{
      * @param playerBreeding A player Object, the player breeding the animals
      * @param secondAnimalIndex An int, the index for the chosen Female
      */
-    public void createBabies(int amountOfBabies, ArrayList<Animal> females, Player playerBreeding, int secondAnimalIndex){
-        if(nameScanner == null){ this.nameScanner = new Scanner(System.in); }
+    public  void createBabies(int amountOfBabies, ArrayList<Animal> females, Player playerBreeding, int secondAnimalIndex){
+        if(nameScanner == null){ nameScanner = new Scanner(System.in); }
         Random random = new Random();
         for(int i = 0; i < amountOfBabies; i++){ //Create amountOfBabies babies
             int genderChance = random.ints(1,3).findFirst().getAsInt(); //50% chanse of being female or male
@@ -184,8 +193,8 @@ public class utilityFunctions implements Serializable{
         int counter = 1;
         System.out.println("Which Player does " + buyer.getName() + " wish to buy Animals from?");
         for(Player players: sellers){ //Go through all the Sellers and print Info about them
-            System.out.println("[" + counter + "] " + players.getName() + " - Owns " + players.getOwnedAnimals().size() + " animal(s): ");
-            for(Animal ownedAnimals : players.getOwnedAnimals()){ //Go through their Animals and Print info about them
+            System.out.println("[" + counter + "] " + players.getName() + " - Owns " + players.getHealthyAnimals().size() + " healthy animal(s): ");
+            for(Animal ownedAnimals : players.getHealthyAnimals()){ //Go through their Animals and Print info about them
                 System.out.println("\t" + ownedAnimals.getInfo() + " Costs: " + ownedAnimals.getSellsFor() + " coins");
             }
             counter += 1;
@@ -204,7 +213,7 @@ public class utilityFunctions implements Serializable{
 
         for(Player players : playersPlaying){ //Go through the playersPlaying
             if( !players.equals(buyer) ) {  //If they're not the buyer themselves
-                if(players.getOwnedAnimals().size() > 0) { sellers.add(players); } //Add them to the list
+                if(players.getHealthyAnimals().size() > 0) { sellers.add(players); } //Add them to the list
             }
         }
         return sellers;
@@ -223,7 +232,7 @@ public class utilityFunctions implements Serializable{
                 + buyer.getAmountOfMoney() + " coins)" + "?");
 
         counter = 1;
-        for(Animal sellersAnimals: seller.getOwnedAnimals()){
+        for(Animal sellersAnimals: seller.getHealthyAnimals()){
             System.out.println("[" + counter + "] " + sellersAnimals.getInfo() + " Costs: " + sellersAnimals.getSellsFor() + " coins");
             counter += 1;
         }
@@ -241,76 +250,7 @@ public class utilityFunctions implements Serializable{
         System.out.println("Returning back to main menu.");
     }
 
-    /**
-     * A method that handles printing up the Animals and their Info in the Feeding menu
-     * @param playerFeeding A player Object, the Player who is feeding
-     */
-    public void printAnimalsInFeedMenu(Player playerFeeding){
-        int counter = 1;
-        System.out.println("Which animal do you wish to feed?");
-        for(Animal ownedAnimal: playerFeeding.getOwnedAnimals()){
-            System.out.println("[" + counter + "] " + ownedAnimal.getName() +
-                    " the " + ownedAnimal.getClass().getSimpleName() + " (" + ownedAnimal.getGender()
-                    + ") Health: " +
-                    ownedAnimal.getHealth());
-            System.out.print("\tIt eats: [ ");
-            for(Food foodEaten: ownedAnimal.getWhatItEats()){
-                System.out.print(foodEaten.getClass().getSimpleName() + " ");
-            }
-            System.out.print("]\n");
-            System.out.print("\tPortion size: " + ownedAnimal.getPortionSize() + " grams\n");
-            counter += 1;
-        }
-        System.out.println("[" + counter + "] Back to Main Menu");
-    }
 
-    /**
-     * Checks if the Animal being fed eats anything that the player has
-     * @param toBeFed An Animal object, the Animal being fed
-     * @param playerFeeding A player object, the player feeding the Animal
-     * @return A boolean - If the Animal being fed likes anything that the player has in Stock
-     */
-    public boolean checkIfItEatsFood(Animal toBeFed, Player playerFeeding){
-        boolean foundFood = false;
-        for(Food whatTheAnimalEats: toBeFed.getWhatItEats()){
-            for(Food whatThePlayerHas: playerFeeding.getOwnedFood()){
-                if(whatThePlayerHas.getName().equals(whatTheAnimalEats.getName())){
-                    foundFood = true;
-                }
-            }
-        }
-        return foundFood;
-    }
-
-    /**
-     * A method that handles printing menus in terms of Feeding an Animal with Food - after having selected the Animal,
-     * and returns a filtered list based on what the Animal likes and what the player has in terms of Food
-     *
-     * @param toBeFed An animal object, the Animal to be fed
-     * @param playerFeeding A player object, the Player who is feeding an Animal
-     * @return An Arraylist of Food objects, which is the filtered List of food (what the Animal likes to eat)
-     */
-    public ArrayList<Food> printFoodOptions(Animal toBeFed, Player playerFeeding){
-        int counter = 1;
-        System.out.println("With what do you wish to feed " + toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() +
-                "(" + toBeFed.getGender() + ", " + " Health: " + toBeFed.getHealth() + ")?");
-        ArrayList<Food> acceptedFood = toBeFed.getWhatItEats();
-        ArrayList<Food> filteredFood = new ArrayList<>();
-        for(Food ownedItems: playerFeeding.getOwnedFood()){
-            for(Food acceptedFoodItem: acceptedFood){
-                if(ownedItems.getName().equals(acceptedFoodItem.getName())){
-                    filteredFood.add(ownedItems);
-                }
-            }
-        }
-        for(Food pieceOfFood : filteredFood){
-            System.out.println("[" + counter + "] " + pieceOfFood.getClass().getSimpleName() +
-                    " ( " + pieceOfFood.getGrams() + " grams left in stock )");
-            counter += 1;
-        }
-        System.out.println("[" + (counter) + "] Back to Main");
-        return filteredFood;
-    }
 
     /**
      * The method that is responsible for clearing out animals based on that they are dead
@@ -337,7 +277,8 @@ public class utilityFunctions implements Serializable{
      * @param playersPlaying An ArrayList of Player objects, all of whom are Players still playing
      */
     public void printAnimals(boolean loadedGame, int currentRound, int currentPlayer, ArrayList<Player> playersPlaying) {
-        System.out.println("\nRound " + currentRound + ", " + playersPlaying.get(currentPlayer).getName() + "'s turn.");
+        System.out.println("\nRound " + currentRound + ", " + playersPlaying.get(currentPlayer).getName() + "'s turn.\n[Remaining players:" +
+                " " + playersPlaying + "]");
         playersPlaying.get(currentPlayer).announceDeaths(currentRound);
         if (loadedGame) {
             for (String printedDeath : playersPlaying.get(currentPlayer).getSavedDeathList()) {
@@ -389,7 +330,7 @@ public class utilityFunctions implements Serializable{
      * The method responsible for printing out a list of Males for use when Breeding Animals
      * @param males An ArrayList of Animals, all of whom are Males
      */
-    public void printMales(ArrayList<Animal> males){
+    public  void printMales(ArrayList<Animal> males){
         System.out.println("Please choose a male: ");
         int counter = 1;
         for(Animal male : males){
@@ -403,70 +344,12 @@ public class utilityFunctions implements Serializable{
       * The method responsible for printing out a list of Females for use when Breeding Animals
       * @param females An ArrayList of Animals, all of whom are females
      */
-    public void printFemales(ArrayList<Animal> females){
+    public  void printFemales(ArrayList<Animal> females){
         System.out.println("Please choose a female: ");
         int counter = 1;
         for(Animal female : females){
             System.out.println("[" + counter + "] " + female.getInfo());
             counter += 1;
         } System.out.println("[" + counter + "] Back to Main Menu");
-    }
-
-    /**
-     * The method that is responsible for handling that there is enough food left to feed an Animal and
-     * calls the Animals eat method - if there actually is enough of it left in Stock to feed the Animal
-     *
-     * Returns true if the Animal was fed with the food - False otherwise
-     *
-     * @param toBeFed An Animal object, the Animal being fed
-     * @param foodToFeedWith A Food object, the Food the Animal is being fed with
-     * @return A boolean, if the Animal was fed in terms of the Food was found in sufficient amount or not
-     */
-    public boolean checkingFoodFound(Animal toBeFed, Food foodToFeedWith){
-        boolean foundFood = false;
-        for(Food foodItEats : toBeFed.getWhatItEats()){
-            if(foodItEats.getName().equals(foodToFeedWith.getName())){
-                if(toBeFed.getPortionSize() > foodToFeedWith.getGrams()){
-                    System.out.println("There is not enough grams of " + foodToFeedWith.getName() + " left to feed " +
-                            toBeFed.getName() + " the " + toBeFed.getClassName() + "(" + toBeFed.getGender() + ") Health: " +
-                            toBeFed.getHealth() + " - (" + foodToFeedWith.getGrams() +
-                            " grams left, needs " + toBeFed.getPortionSize() + " grams per meal)");
-                }
-                else{
-                    foundFood = true;
-                    int resultCode = toBeFed.eat(toBeFed.getPortionSize(),foodToFeedWith);
-                    if(resultCode == 1){ //The animal liked the food
-                        System.out.println(toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() +")" +
-                                " happily eats the " + foodToFeedWith.getName() + "!");
-                    }
-                    else if(resultCode == -3){ //Mystery meat that did not seem appealing..
-                        System.out.println(toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() + ")" +
-                                " seems to think there's something funny with the " + foodToFeedWith.getClass().getSimpleName() +"..");
-                    }
-                    return foundFood;
-                }
-            }
-        }
-        return foundFood;
-    }
-
-    /**
-     * The method responsible clearing our food - if the Food has run out of Stock, i.e it's 0 Grams left,
-     * this method cleans that food out from the Stock
-     * @param playerFeeding A player object, the respective Players inventory to clean out
-     */
-    public void clearOutFood(Player playerFeeding){ //On each turn, we check if a food has run out of Stock, thus needing to be removed
-        int indexToRemove = 0;
-        boolean shouldRemoveFood = false;
-        for(Food playersFood : playerFeeding.getOwnedFood()){
-            if(playersFood.getGrams() == 0){
-                shouldRemoveFood = true; //With a running index, we keep track of if a Food item should be removed
-                break;
-            }
-            indexToRemove += 1;
-        }
-        if(shouldRemoveFood){
-            playerFeeding.getOwnedFood().remove(indexToRemove); //Remove the food that had run out of Stock
-        }
     }
 }

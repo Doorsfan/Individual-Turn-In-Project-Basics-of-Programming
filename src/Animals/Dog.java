@@ -3,7 +3,6 @@ package Animals;
 import Meats.cowMeat;
 import processedFood.dogFood;
 import processedFood.mysteryMeat;
-
 import java.io.Serializable;
 
 public class Dog extends Animal implements Serializable {
