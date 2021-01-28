@@ -34,6 +34,11 @@ public class mysteryMeat extends processedFood implements Serializable {
     private int contentInMeat = random.ints(1, 4).findFirst().getAsInt();
     private int meatRandomizer = random.ints(1, 4).findFirst().getAsInt();
     private int plantRandomizer = random.ints(1, 4).findFirst().getAsInt();
+
+    /**
+     * The constructor of the mysteryMeat - Upon creation of a mysteryMeat, it's content is randomized - because
+     * it is mystery meat
+     */
     public mysteryMeat(){
         this.value = 100;
         if(contentInMeat == 1){ //Only contains meat

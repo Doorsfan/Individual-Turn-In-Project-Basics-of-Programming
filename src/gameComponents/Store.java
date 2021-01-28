@@ -20,6 +20,10 @@ public class Store extends utilityFunctions implements Serializable {
     ArrayList<Food> foodToOffer = new ArrayList<>(); //Food to offer
     ArrayList<Integer> pricesOfFood = new ArrayList<>(), pricesOfAnimals = new ArrayList<>(); //Prices of Food and Animals
     ArrayList<Animal> animalsToOffer = new ArrayList<>(); //Animals to Offer
+
+    /**
+     * The Stores constructor - we initialize the store with all the products in place and all prices in place, sorted
+     */
     public Store(){
         //Fill the shop with Food for when we start it up
         foodToOffer.add(new cowMeat());
@@ -55,9 +59,7 @@ public class Store extends utilityFunctions implements Serializable {
 
     /**
      * Let's the player specify an Animal they wish to Sell to the Shop. The sell value is defined by
-     * factors such as it's Health and Age.
-     *
-     *
+     * factors such as it's Health and Age. Animal must be healthy to be allowed to be sold.
      * @param seller A player object who is the Seller selling Animals to the Store
      */
     public void sellAnimal(Player seller){

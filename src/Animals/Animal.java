@@ -29,14 +29,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     private transient Scanner diseaseScanner = new Scanner(System.in);
     private Player owner;
 
-    public void setOwner(Player owner){
-        this.owner = owner;
-    }
-
-    public Player getOwner(){
-        return this.owner;
-    }
-
     /**
      * A method that aids in Construction of children of the Animal class - Accepts 3 Food Items
      *

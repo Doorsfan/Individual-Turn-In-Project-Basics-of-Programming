@@ -135,8 +135,7 @@ public class utilityFunctions implements Serializable{
         int shopCounter = 1;
         System.out.println("Which animal would " + seller.getName() + " like to sell?");
         for(Animal animal : animalsToSell){
-            System.out.println("[" + shopCounter + "] " + animal.getName() + " the " + animal.getGender() + " " + animal.getClass().getSimpleName() +
-                    " - Health: " + animal.getHealth() + " - Sells for: " + animal.getSellsFor());
+            System.out.println("[" + shopCounter + "] " + animal.getInfo() + " (Sells for: " + animal.getSellsFor() + " coins)");
             shopCounter += 1;
         }
         System.out.println("[" + (animalsToSell.size() + 1) + "] Exit shop");

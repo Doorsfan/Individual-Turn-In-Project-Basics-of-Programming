@@ -163,6 +163,9 @@ public class Game extends utilityFunctions implements Serializable{
         return -1;
     }
 
+    /**
+     * A method that is responsible for printing the Rules of the Game
+     */
     public void printRules(){
         System.out.println("\t\t\t\t====Welcome to the Pet Game!====\n\t\t\t----Here are the rules for the Pet Game----\n\t\n" +
                 "\t1: The game is played between 5-30 Rounds, with 1-4 Players. (Chosen at the start)\n" +

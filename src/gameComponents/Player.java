@@ -159,6 +159,12 @@ public class Player extends utilityFunctions implements Serializable {
             }
         }
     }
+
+    /**
+     * Method that is responsible for building the list of Hungry Animals (their health is less than 100)
+     * These animals may not be sick either
+     * @return An ArrayList of the type Animal, all of whom are Animals that are at less than 100 Health
+     */
     public ArrayList<Animal> getHungryAnimals(){
         ArrayList<Animal> hungryAnimals = new ArrayList<>();
         for(Animal myAnimals : this.getOwnedAnimals()){
@@ -171,9 +177,10 @@ public class Player extends utilityFunctions implements Serializable {
 
     /**
      * A method that handles printing up the Animals and their Info in the Feeding menu
+     * Only prints Animals that are actually hungry - i.e, not at 100 Health
      * @param playerFeeding A player Object, the Player who is feeding
      */
-    public  void printAnimalsInFeedMenu(Player playerFeeding){
+    public void printAnimalsInFeedMenu(Player playerFeeding){
         int counter = 1;
         System.out.println("Which animal do you wish to feed?");
         for(Animal ownedAnimal: playerFeeding.getHungryAnimals()){
@@ -241,8 +248,16 @@ public class Player extends utilityFunctions implements Serializable {
     }
 
     /**
-     * TO DO
-     * @return
+     * Presents all of the Hungry Animals of the player - if none are found or the player does not have any food,
+     * they are thrown back to the game menu and their turn is consumed.
+     *
+     * If a player attempts to feed an Animal that does not like any of the food in stock, the player is thrown back
+     * to the Game Menu
+     * @return An int, a status code:
+     *      -2: Has no Animals to Feed
+     *          Has no hungry animals to feed
+     *          Has no food left to feed with
+     *      -1: Player doesn't own any food that the specified Animal would like
      */
     public int feedAnimal(){
         if(foodInput == null){ this.foodInput = new Scanner(System.in); }
@@ -255,7 +270,7 @@ public class Player extends utilityFunctions implements Serializable {
             return -2; }
 
         while(!finishedFeeding){
-            if(this.getHungryAnimals().size() == 0){ System.out.println(this.getName() +
+            if(this.getHungryAnimals().size() == 0){ System.out.println(this.getName() + //Only allow feeding if any animal is hungry
                     " has no more hungry animals to feed. Exiting to game menu.");
                 return -2; }
             boolean foundFood = false;
@@ -263,8 +278,6 @@ public class Player extends utilityFunctions implements Serializable {
                 System.out.println(this.getName() + " has no food left to feed with. Returning to main menu.\n");
                 return -2; }
             printAnimalsInFeedMenu(this); //Print the Animals feeding menu
-            //The index of the Animal to feed - returnCode is 2 if the Index is the Exit index
-            // [1]
             while(!((returnCode = (safeIntInput(1, this.getHungryAnimals().size()+1,
                     wantedAnimalToFeed = foodInput.next(), true))) == 1)){ if(returnCode == 2) return 1; }
             Animal toBeFed = this.getHungryAnimals().get((Integer.valueOf(wantedAnimalToFeed)-1)); //The animal being fed
@@ -426,6 +439,10 @@ public class Player extends utilityFunctions implements Serializable {
         this.ownedFood.add(toAdd);
     }
 
+    /**
+     * The toString of the Player class which has been overrided to allow for some more general info about the player
+     * @return A string, the information about the player
+     */
     @Override
     public String toString(){
         return "Name: " + this.getName() + " - Funds: " + this.getAmountOfMoney() + " - Animals: " + this.getOwnedAnimals().size();
