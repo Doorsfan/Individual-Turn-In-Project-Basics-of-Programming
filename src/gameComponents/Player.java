@@ -115,21 +115,12 @@ public class Player extends utilityFunctions implements Serializable {
      *              save it in a list and then remove from the list when we have composed all of the relevant indexes
      * @return An int, a status code
      */
-    public int purgeSavedDeathList(int round){
-        ArrayList<String> toRemove = new ArrayList<String>();
-        for(int i = 0; i < this.savedDeathList.size(); i++){ //Loop through to find which elements to remove
-            if(savedDeathList.get(i).contains(String.valueOf("round of " + round))){
-                toRemove.add(savedDeathList.get(i));
+    public void purgeSavedDeathList(int round){
+        for(int i = this.savedDeathList.size()-1; i > -1; i--){
+            if(this.savedDeathList.get(i).contains("round of " + round)){
+                this.savedDeathList.remove(i);
             }
         }
-        for(int i = savedDeathList.size()-1; i > -1; i--){
-            for(String shouldBeRemoved: toRemove){ //Then actually remove them
-                if(savedDeathList.get(i).equals(shouldBeRemoved)){
-                    savedDeathList.remove(shouldBeRemoved);
-                }
-            }
-        }
-        return -1;
     }
 
     /**

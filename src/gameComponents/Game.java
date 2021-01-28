@@ -117,7 +117,7 @@ public class Game extends utilityFunctions implements Serializable{
                 if(!myGame.getShowedMenu()){ //When loading, re-create Menus printed as well - including Deaths from saved Turn
                     myGame.removeAnimals(loadedGame.getPlayersPlaying(), loadedGame.getCurrentPlayer());
                     myGame.printAnimals(true, loadedGame.getCurrentRound(), loadedGame.getCurrentPlayer()
-                            , loadedGame.getPlayersPlaying());
+                            , loadedGame.getPlayersPlaying(), (rounds+currentRound-1));
                     myGame.setShowedMenu(true);
                 }
                 objectIn.close(); //Close the stream when Done
@@ -208,6 +208,7 @@ public class Game extends utilityFunctions implements Serializable{
         setCurrentRound(1);
         setCurrentPlayer(0);
         this.setShowedMenu(false);
+        System.out.println("\n===================================\n");
         System.out.println("How many rounds would you like to play? (5-30)");
         while(!(safeIntInput(5, 30, wantedRoundsInput = userInputScanner.next(), false) == 1)){
             //Breaks when the input is within a valid range and is a Number
@@ -223,6 +224,7 @@ public class Game extends utilityFunctions implements Serializable{
             String name = nameScanner.nextLine();
             playersPlaying.add(new Player(name, 1000)); //Add them to the list of players playing
         }
+        System.out.println("\n===================================\n");
     }
 
     /**
@@ -661,9 +663,8 @@ public class Game extends utilityFunctions implements Serializable{
 
     /**
      * Checks if a Player fulfills the criteria of being eliminated and eliminates them if true
-     * @return A boolean, true if they were eliminated - False if not
      */
-    public boolean checkIfPlayerIsEliminated(){
+    public void checkIfPlayerIsEliminated(){
         if (playersPlaying.get(currentPlayer).getAmountOfMoney() < 10 &&
                 playersPlaying.get(currentPlayer).getOwnedAnimals().size() == 0) { //If the player cannot afford anything and has no Animals
             System.out.println(playersPlaying.get(currentPlayer).getName() + " was eliminated at Round: " + currentRound + " due to not having" +
@@ -672,9 +673,7 @@ public class Game extends utilityFunctions implements Serializable{
             if(currentPlayer == playersPlaying.size()){
                 currentPlayer -= 1;
             }
-            return true; //Player was Eliminated
         }
-        return false; //player was not eliminated
     }
 
     /**
@@ -694,9 +693,8 @@ public class Game extends utilityFunctions implements Serializable{
 
     /**
      * Handles advancements in rounds as the game progresses
-     * @param playerGotEliminated A boolean, if a player Got eliminated this turn or not
      */
-    public void advanceRound(boolean playerGotEliminated){
+    public void advanceRound(){
         if (playersPlaying.get(currentPlayer).getTurnIsOver()) { //Its the last player
             currentPlayer += 1;
             if(currentPlayer > playersPlaying.size()-1){
@@ -754,7 +752,7 @@ public class Game extends utilityFunctions implements Serializable{
         for(int i = moneyOfPlayers.size()-1; i > -1; i--){ //For each amount of Money to be looked at
             for(Player player: playersPlaying){ //For each player, look if they correspond to the amount of money
                 if(player.getAmountOfMoney() == moneyOfPlayers.get(i) && !player.getAddedToHighScore()){ //If it's a match, add them to the high score
-                    highScore.add("[" + spot + "] - " + player.getName() + " : " + player.getAmountOfMoney() + " coins.");
+                    highScore.add(player.getName() + " : " + player.getAmountOfMoney() + " coins.");
                     if(spot == 1){ //The last element in the sorted list is the winner, so on the first looping through, that's the winner
                         //Add the winner to the winners list
                         winner.add("The winner is: " + player.getName() + " with a whopping amount of " + player.getAmountOfMoney() + " coins!");
@@ -772,8 +770,6 @@ public class Game extends utilityFunctions implements Serializable{
      */
     public void runGame() {
         if(ourStore == null){ ourStore = new Store(); }
-        System.out.println("Welcome to the Raising your Animal Game.");
-        boolean playerGotEliminated = false;
         if(gameMenuScanner == null){ this.gameMenuScanner = new Scanner(System.in); }
         while (rounds > 0) {
             if (playersPlaying.get(currentPlayer).getAmountOfMoney() < 10 &&
@@ -781,15 +777,15 @@ public class Game extends utilityFunctions implements Serializable{
                 playersPlaying.get(currentPlayer).setTurnIsOver(true);
             }
             if(!playersPlaying.get(currentPlayer).getTurnIsOver()){
+                System.out.println("\n===================================\n");
                 if (!showedMenu) { //If the menu has not been shown
-                    playerGotEliminated = false;
                     removeAnimals(playersPlaying, currentPlayer);
-                    printAnimals(false, currentRound, currentPlayer, playersPlaying); //Showcase the info menu
+                    printAnimals(false, currentRound, currentPlayer, playersPlaying, (rounds+currentRound-1)); //Showcase the info menu
                 }
 
                 System.out.println("\n" + playersPlaying.get(currentPlayer).getName()
                         + "'s Funds: " + playersPlaying.get(currentPlayer).getAmountOfMoney() + " coins "
-                        + "\nChoose:\n[1] Buy an Animal from Store\n" +
+                        + "\nChoose an action:\n[1] Buy an Animal from Store\n" +
                         "[2] Sell an Animal to Store\n" +
                         "[3] Feed your animals\n" +
                         "[4] Breed your animals\n" +
@@ -807,20 +803,29 @@ public class Game extends utilityFunctions implements Serializable{
                 showedMenu = false; //Reset variables
                 ageDecayAndDiseaseAtEndofTurn(); //Age, Decay and roll for Disease on Animals
                 handleDeathsOfAnimals(); //Handle death announcements of Animals
-                playerGotEliminated = checkIfPlayerIsEliminated(); //See if a player was eliminated
+                checkIfPlayerIsEliminated(); //See if a player was eliminated
                 if (playersPlaying.size() == 0) { //Check if there are any players left
                     System.out.println("Game is over. No players remaining.");
                     break;
                 }
-                advanceRound(playerGotEliminated); //Advance a round, accounting for if a player got eliminated or not
+                advanceRound(); //Advance a round, accounting for if a player got eliminated or not
                 purgeDeadAnimals(); //Purge the dead animals
+                System.out.println("\n===================================\n");
             }
         }
         ArrayList<String> highScore = buildHighScore(); //Build the high score list
 
-        System.out.println("At the end of the game, here are the results: ");
-        for(String highScoreSpots : highScore){ System.out.println(highScoreSpots); }
+        System.out.println("\n\t\t=======================\nAt the end of the game, here are the results:\n" +
+                "\t\t=======================");
+        int spots = 1;
+        for(String highScoreSpots : highScore){
+            System.out.println("\t\t[" + spots + "] " + highScoreSpots);
+            spots += 1;
+        }
+        System.out.println("\t\t=======================");
         if(winner.size() > 0) { System.out.println(winner.get(0)); } //There was a winner
         else{ System.out.println("There were no players who made it to the end of the game."); } //No player made it to the end
+        System.out.println("\t\t=======================");
+        System.exit(1);
     }
 }
