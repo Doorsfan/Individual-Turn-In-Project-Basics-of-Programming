@@ -67,12 +67,12 @@ public class Store extends utilityFunctions implements Serializable {
         int returnCode;
         boolean finishedSelling = false;
         while(!finishedSelling){
-            if(animalsToSell.size() == 0){ System.out.println(seller.getName() + " has no healthy animals left to sell currently."); return; }
+            if(seller.getHealthyAnimals().size() == 0){ System.out.println(seller.getName() + " has no healthy animals left to sell currently."); return; }
             printSellAnimalMenu(seller); //Print the Sales menu of animals based on the Seller
             //Keep asking for a input until it is a valid index - highest accepted Index is exit index, returns back to main menu
-            while(!((returnCode = (safeIntInput(1, animalsToSell.size()+1, wantedAnimal = userInput.next(),
+            while(!((returnCode = (safeIntInput(1, seller.getHealthyAnimals().size()+1, wantedAnimal = userInput.next(),
                     true))) == 1)){ if(returnCode == 2) return; }
-            Animal animalBeingSold = animalsToSell.get(Integer.parseInt(wantedAnimal)-1);
+            Animal animalBeingSold = seller.getHealthyAnimals().get(Integer.parseInt(wantedAnimal)-1);
             seller.getPaid(animalBeingSold.getSellsFor());
             System.out.println(seller.getName() + " sold " + animalBeingSold.getInfo()
                     + " for " + animalBeingSold.getSellsFor() + " coins. " + seller.getName() + " now has: "

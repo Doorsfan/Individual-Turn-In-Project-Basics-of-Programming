@@ -159,6 +159,15 @@ public class Player extends utilityFunctions implements Serializable {
             }
         }
     }
+    public ArrayList<Animal> getHungryAnimals(){
+        ArrayList<Animal> hungryAnimals = new ArrayList<>();
+        for(Animal myAnimals : this.getOwnedAnimals()){
+            if(myAnimals.getHealth() < 100 && myAnimals.getHealth() > 0 && !myAnimals.isSick()){
+                hungryAnimals.add(myAnimals);
+            }
+        }
+        return hungryAnimals;
+    }
 
     /**
      * A method that handles printing up the Animals and their Info in the Feeding menu
@@ -167,7 +176,7 @@ public class Player extends utilityFunctions implements Serializable {
     public  void printAnimalsInFeedMenu(Player playerFeeding){
         int counter = 1;
         System.out.println("Which animal do you wish to feed?");
-        for(Animal ownedAnimal: playerFeeding.getOwnedAnimals()){
+        for(Animal ownedAnimal: playerFeeding.getHungryAnimals()){
             System.out.println("[" + counter + "] " + ownedAnimal.getName() +
                     " the " + ownedAnimal.getClass().getSimpleName() + " (" + ownedAnimal.getGender()
                     + ") Health: " +
@@ -246,6 +255,9 @@ public class Player extends utilityFunctions implements Serializable {
             return -2; }
 
         while(!finishedFeeding){
+            if(this.getHungryAnimals().size() == 0){ System.out.println(this.getName() +
+                    " has no more hungry animals to feed. Exiting to game menu.");
+                return -2; }
             boolean foundFood = false;
             if(this.getOwnedFood().size() == 0){ //Ran out of Food to feed with
                 System.out.println(this.getName() + " has no food left to feed with. Returning to main menu.\n");
@@ -253,9 +265,9 @@ public class Player extends utilityFunctions implements Serializable {
             printAnimalsInFeedMenu(this); //Print the Animals feeding menu
             //The index of the Animal to feed - returnCode is 2 if the Index is the Exit index
             // [1]
-            while(!((returnCode = (safeIntInput(1, this.getOwnedAnimals().size()+1,
+            while(!((returnCode = (safeIntInput(1, this.getHungryAnimals().size()+1,
                     wantedAnimalToFeed = foodInput.next(), true))) == 1)){ if(returnCode == 2) return 1; }
-            Animal toBeFed = this.getOwnedAnimals().get((Integer.valueOf(wantedAnimalToFeed)-1)); //The animal being fed
+            Animal toBeFed = this.getHungryAnimals().get((Integer.valueOf(wantedAnimalToFeed)-1)); //The animal being fed
 
             if(!checkIfItEatsFood(toBeFed, this)){ //If the player does not own any food the Animal would want, returns to main menu
                 System.out.println(this.getName() + " does not have any food that a " + toBeFed.getClassName() + " would like.");

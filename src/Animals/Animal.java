@@ -419,15 +419,15 @@ public abstract class Animal extends utilityFunctions implements Serializable {
                     }
                 }
                 fedWith.reduceFromStock(gramsFedWith); //Reduce the amount of fed food from owners Stock of Food
-                this.health += ((gramsFedWith/getPortionSize()) * 10); //Is always 1 * 10, but could allow for different amounts of grams
-                //fed with - Not supported, at the moment, though
-                if(this.health <= 100){
-                    System.out.println(this.getName() + "'s health increased by 10.");
-                }
-                else{
-                    System.out.println(this.getName() + "'s health increased by " + (10 - (this.health - 100)) + ".");
+                int beforeHealing = this.health;
+                this.health *= 1.10;
+                int afterHealing = this.health;
+                int gained = afterHealing - beforeHealing;
+                if(this.health > 100){
+                    gained -= (this.health - 100);
                     this.health = 100;
                 }
+                System.out.println(this.getInfo() + " gained " + gained + " health!");
                 return 1; //Went through fine, the Animal ate the food
             }
         } return -2; //The animal did not like the type of food being  served

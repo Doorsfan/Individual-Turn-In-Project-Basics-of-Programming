@@ -141,8 +141,8 @@ public class Game extends utilityFunctions implements Serializable{
         int returnCode = 0;
         if(loadingMenuScanner == null){ this.loadingMenuScanner = new Scanner(System.in); }
         String userInput = "";
-        System.out.println("==== Welcome to the Pet Game! ====\n[1] New game\n[2] Load game\n[3] Exit");
-        while(!((returnCode = (safeIntInput(1, 3, userInput = loadingMenuScanner.next(),
+        System.out.println("==== Welcome to the Pet Game! ====\n[1] New game\n[2] Load game\n[3] Game Rules\n[4] Exit");
+        while(!((returnCode = (safeIntInput(1, 4, userInput = loadingMenuScanner.next(),
                 false))) == 1)){} //Chose to exit on 3
         if(userInput.equals("1")){ askForInput(); runGame(); } //If the user chose to create a new game, ask for input and run the  game
         if(userInput.equals("2")){ //Try to load the game
@@ -155,8 +155,42 @@ public class Game extends utilityFunctions implements Serializable{
                 return -1;
             }
         }
-        if (userInput.equals("3")) { System.out.println("User chose to exit game. Shutting down."); System.exit(1); }
+        if(userInput.equals("3")){
+            printRules();
+            showMainMenu();
+        }
+        if (userInput.equals("4")) { System.out.println("User chose to exit game. Shutting down."); System.exit(1); }
         return -1;
+    }
+
+    public void printRules(){
+        System.out.println("\t\t\t\t====Welcome to the Pet Game!====\n\t\t\t----Here are the rules for the Pet Game----\n\t\n" +
+                "\t1: The game is played between 5-30 Rounds, with 1-4 Players. (Chosen at the start)\n" +
+                "\t2: Each player starts with 1000 coins and no Animals.\n" +
+                "\t3: Every round a Player gets to do ONE of the following things:\n\n" +
+                "\t\t-> Buy an Animal from the Store (if they have enough money to do so)\n" +
+                "\t\t-> Sell an Animal to the Store (If they have any)\n" +
+                "\t\t-> Feed their Animals (if they have any and they have food that the Animal likes)\n" +
+                "\t\t-> Try to breed one male and one female of their animals (if compatible)\n" +
+                "\t\t-> Buy some food from the Store (if they can afford it - minimum 100g of a food item)\n" +
+                "\t\t-> Sell one of their Animals to another player who is still in the game (if they can afford it)(Not sick ones)\n" +
+                "\t\t-> Buy an Animal from another player (Not sick ones)(If they can afford it and there are others to buy from)\n" +
+                "\t\t-> Skip their turn\n" +
+                "\t\t-> Save the Game and Exit to Main Menu (Asks Y/N in case of Overwriting)\n\n" +
+                "\tEvery round, all animals decay (losing 10-30% of max Health every round), age (if they get too old, they die)\n" +
+                "\tand have a 20% chance of getting sick. (20% per Animal per Round) - The sell value of an Animal declines with age\n" +
+                "\tand reduced Health and a Sick animal cannot be sold, fed or spared from death - other than paying the Vet bill\n" +
+                "\t,which gives them a 50% chance of being cured.\n\n" +
+                "\tWhen a player no longer has enough money to buy anything from the store and no Animals - they are eliminated.\n\n" +
+                "\tAt the end of the game - all remaining players sell off their living and healthy animals for their sell value,\n" +
+                "\tand gain said money - Afterwards, rankings are presented - There are no shared spots for equal amount of Coins,\n" +
+                "\tit simply takes the first player it finds as the winner, in that case. If no players make it to the end, there is\n" +
+                "\t no winner.\n\n" +
+                "\tWhen an animal dies - it's death is announced to the player at the next Round, along with cause of death  - At the\n" +
+                "\t start of every round a player is given information about remaining players, their own Animals, Decay since last turn \n" +
+                "\tand their funds.\n\n" +
+                "\tIn the Main Menu, the player can choose to start a new game, load a previous game (if any save is available) or\n" +
+                "\tto see the Game Rules printed out.\n\n");
     }
     /**
      * The method responsible for handling amount of rounds and players to be played with - delegates tasks of
@@ -500,6 +534,10 @@ public class Game extends utilityFunctions implements Serializable{
                     System.out.println(e);
                 }
                 break;
+            case "9":
+                System.out.println(playersPlaying.get(currentPlayer).getName() + " chose to skip their turn.");
+                playersPlaying.get(currentPlayer).setTurnIsOver(true);
+                break;
             default:
                 System.out.println("That input was not one of the valid options. Please try again.");
         }
@@ -667,6 +705,7 @@ public class Game extends utilityFunctions implements Serializable{
                         animals.setDecayedThisRound(false);
                     }
                     players.setTurnIsOver(false);
+                    players.purgeSavedDeathList(currentRound-2);
                 }
             }
         }
@@ -754,7 +793,8 @@ public class Game extends utilityFunctions implements Serializable{
                         "[5] Buy Food\n"
                         + "[6] Sell Animal to Other Player" +
                         "\n[7] Buy Animal from Other Player\n" +
-                        "[8] Save game and Exit");
+                        "[8] Save game and Exit\n" +
+                        "[9] Skip turn");
                 String gameMenuInput = gameMenuScanner.next(); //User choice in the menu
                 makePlayerChoice(gameMenuInput, ourStore); //handle the player choice input
                 showedMenu = true; //menu was shown and input was processed
