@@ -325,8 +325,12 @@ public class Game extends utilityFunctions implements Serializable{
             buyer.pay(animalBeingSold.getSellsFor()); //buyer pays
             seller.getPaid(animalBeingSold.getSellsFor()); //Seller gets paid
 
-            //An animal that is sold "downwards" in the turn order, should age and decay to account for aging/decaying during a round
-            //as Decay and Aging occurs at the end of a Turn (once per Round), however - this would be skipped if sold downwards
+            buyer.addToOwnedAnimals(animalBeingSold); //Buyer gets the Animal
+            seller.getOwnedAnimals().remove(animalBeingSold); //Seller removes his Animal
+
+            //An animal that is sold "downwards" in the turn order, should age, decay and disease
+            // to account for aging/decaying/disease during a round
+            //as Decay,Aging and Disease occurs at the end of a Turn (once per Round), however - this would be skipped if sold downwards
             if(sellersIndex > buyersIndex){ //Age, Decay and Disease the Animal if it would have circumvented this
                 if(animalBeingSold.isAlive()){
                     animalBeingSold.decay();
@@ -338,9 +342,17 @@ public class Game extends utilityFunctions implements Serializable{
                     animalBeingSold.chanceForDisease(buyer);
                 }
                 animalBeingSold.setDecayedThisRound(true);
+                //To place the deathAnnouncement on the correct player (the buyer), we need to have a modifier of
+                //the SELLER_INDEX - BUYER_INDEX (This would be the same as saying CURRENT_PLAYER - BUYER_INDEX) -
+                //to place the death announcement for the correct player who is (CURRENT_PLAYER - BUYER_INDEX) turns
+                //behind in the turn order
+                handleDeathsOfAnimals((sellersIndex - buyersIndex));
+                for(int i = buyer.getOwnedAnimals().size()-1; i > -1; i--){
+                    if(!buyer.getOwnedAnimals().get(i).isAlive()){
+                        buyer.getOwnedAnimals().remove(i); //if the Animal died during the process, remove it
+                    }
+                }
             }
-            buyer.addToOwnedAnimals(animalBeingSold); //Buyer gets the Animal
-            seller.getOwnedAnimals().remove(animalBeingSold); //Seller removes his Animal
 
             //Reset the variables at the end of the While loop, so they're clean for the next run
             buyersIndex = 0;
@@ -676,32 +688,33 @@ public class Game extends utilityFunctions implements Serializable{
     /**
      * The method that handles death announcements and Death list of Players
      */
-    public void handleDeathsOfAnimals(){
-        for (int i = 0; i < playersPlaying.get(currentPlayer).getOwnedAnimals().size(); i++) {
-            if (!playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).isAlive()) {
+    public void handleDeathsOfAnimals(int modifier){
+        for (int i = 0; i < playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().size(); i++) {
+            if (!playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).isAlive()) {
                 //Died of starvation or Old Age or Disease
-                playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).setPerishedAtRound(currentRound);
+                playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).setPerishedAtRound(currentRound);
                 //Add a death Announcement
-                playersPlaying.get(currentPlayer).addDeathAnnouncement(currentRound,
-                        playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getName()
-                                + " the " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getClassName()
-                                + " (" + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getGender() + ")"
+                playersPlaying.get(currentPlayer-modifier).addDeathAnnouncement(currentRound,
+                        playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getName()
+                                + " the " + playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getClassName()
+                                + " (" + playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getGender() + ")"
                                 + " perished at the game round of "
-                                + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getPerishedAtRound()
-                                + ", died of " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getCauseOfDeath()
-                                + ", became : " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getAge()
-                                + " years old. Rest in peace, " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getName());
+                                + playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getPerishedAtRound()
+                                + ", died of " + playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getCauseOfDeath()
+                                + ", became : " + playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getAge()
+                                + " years old. Rest in peace, " + playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getName());
                 //Add to the players death List - used in Loading games to archive old deaths and re-construct death messages
-                playersPlaying.get(currentPlayer).addToPlayerDeathList(playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getName()
-                        + " the " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getClassName()
-                        + " (" + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getGender() + ")"
+                playersPlaying.get(currentPlayer-modifier).addToPlayerDeathList(playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getName()
+                        + " the " + playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getClassName()
+                        + " (" + playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getGender() + ")"
                         + " perished at the game round of "
                         + currentRound
-                        + ", died of " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getCauseOfDeath()
-                        + ", became : " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getAge()
-                        + " years old. Rest in peace, " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getName());
+                        + ", died of " + playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getCauseOfDeath()
+                        + ", became : " + playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getAge()
+                        + " years old. Rest in peace, " + playersPlaying.get(currentPlayer-modifier).getOwnedAnimals().get(i).getName());
                 //Add Animal to should be removed list - utilized when Animal dies, it is then purged
-                playersPlaying.get(currentPlayer).getShouldBeRemoved().add(playersPlaying.get(currentPlayer).getOwnedAnimals().get(i));
+                playersPlaying.get(currentPlayer-modifier).getShouldBeRemoved().add(playersPlaying.get(currentPlayer-modifier)
+                        .getOwnedAnimals().get(i));
             }
         }
     }
@@ -830,7 +843,7 @@ public class Game extends utilityFunctions implements Serializable{
                 //Reset variables for next round
                 showedMenu = false; //Reset variables
                 decayAgeAndDiseaseAtEndofTurn(); //Age, Decay and roll for Disease on Animals
-                handleDeathsOfAnimals(); //Handle death announcements of Animals
+                handleDeathsOfAnimals(0); //Handle death announcements of Animals
                 for(int i = playersPlaying.get(currentPlayer).getOwnedAnimals().size()-1; i > -1; i--){
                     if(!playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).isAlive()){
                         System.out.println("REMOVING " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getColoredInfo()
