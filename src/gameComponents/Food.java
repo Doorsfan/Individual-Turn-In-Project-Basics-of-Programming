@@ -8,7 +8,7 @@ import java.io.Serializable;
  */
 public abstract class Food implements Serializable {
     protected int value, grams = 1000;
-
+    // =========== GETTERS ===================
     /**
      * Get value int.
      *
@@ -28,6 +28,14 @@ public abstract class Food implements Serializable {
     }
 
     /**
+     * Gets the name of the Class of the Food
+     *
+     * @return the name
+     */
+    public String getName() { return this.getClass().getSimpleName(); }
+
+    // ============== SETTERS ===================
+    /**
      * Set grams.
      *
      * @param amount the amount
@@ -36,13 +44,7 @@ public abstract class Food implements Serializable {
         this.grams = amount;
     }
 
-    /**
-     * Gets the name of the Class of the Food
-     *
-     * @return the name
-     */
-    public String getName() { return this.getClass().getSimpleName(); }
-
+    // ============= GAME LOGIC METHOD ==================
     /**
      * Reduce from stock by the amount specified
      *

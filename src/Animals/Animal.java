@@ -27,64 +27,10 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     private String causeOfDeath = "";
     private boolean decayedThisRound = false, alive = true, sick = false;
     private transient Scanner diseaseScanner = new Scanner(System.in);
+    private  transient Scanner nameScanner = new Scanner(System.in);
 
-    /**
-     * A method that aids in Construction of children of the Animal class - Accepts 3 Food Items
-     *
-     * @param firstItem  A food Object used in helping with constructing the Constructor for Animals
-     * @param secondItem A food Object used in helping with constructing the Constructor for Animals
-     * @param thirdItem  A food Object used in helping with constructing the Constructor for Animals
-     * @return An ArrayList of Food object type, used for the Constructor of Animals
-     */
-    protected ArrayList<Food> whatItEats(Food firstItem, Food secondItem, Food thirdItem){
-        //Just a simple form of Getter that will help us when Constructing Animal based Classes
-        ArrayList<Food> toReturn = new ArrayList<>();
-        toReturn.add(firstItem);
-        toReturn.add(secondItem);
-        toReturn.add(thirdItem);
-        return toReturn;
-    }
 
-    /**
-     * A method that aids in Construction of children of the Animal class - Accepts 2 Food Items
-     *
-     * @param firstItem  A food Object used in helping with constructing the Constructor for Animals
-     * @param secondItem A food Object used in helping with constructing the Constructor for Animals
-     * @return An ArrayList of Food object type, used for the Constructor of Animals
-     */
-    protected ArrayList<Food> whatItEats(Food firstItem, Food secondItem){
-        //Just a simple form of Getter that will help us when Constructing Animal based Classes
-        ArrayList<Food> toReturn = new ArrayList<>();
-        toReturn.add(firstItem);
-        toReturn.add(secondItem);
-        return toReturn;
-    }
-
-    /**
-     * A method that aids in Construction of children of the Animal class - Accepts 1 Food Item
-     *
-     * @param firstItem A food Object used in helping with constructing the Constructor for Animals
-     * @return An ArrayList of Food object type, used for the Constructor of Animals
-     */
-    protected ArrayList<Food> whatItEats(Food firstItem){
-        //Just a simple form of Getter that will help us when Constructing Animal based Classes
-        ArrayList<Food> toReturn = new ArrayList<>();
-        toReturn.add(firstItem);
-        return toReturn;
-    }
-
-    /**
-     * Getter for decayedThisRound
-     * @return A boolean saying if this is true or not
-     */
-    public boolean hasDecayedThisRound() { return this.decayedThisRound; }
-
-    /**
-     * Setter for decayedThisRound
-     * @param decayedThisRound A boolean saying if the animal decayed this round
-     */
-    public void setDecayedThisRound(boolean decayedThisRound) { this.decayedThisRound = decayedThisRound; }
-
+    // ============= GETTERS =====================
     /**
      * Gets minimum offspring.
      * @return the minimum offspring
@@ -106,31 +52,11 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     }
 
     /**
-     * Set cause of death.
-     * @param diedFrom the cause of death for the Animal
-     */
-    public void setCauseOfDeath(String diedFrom){
-        this.causeOfDeath = diedFrom;
-    }
-
-    /**
      * Get cause of death string.
      * @return the string
      */
     public String getCauseOfDeath(){
         return this.causeOfDeath;
-    }
-
-    /**
-     * Ages the Animal, if it goes above it's max age, it dies and the cause of death is aging
-     */
-    public void age(){
-        //Basic Aging method that is called every Round
-        this.age += 1;
-        if(this.age > this.maxAge){ //If the animal gets too old, it dies
-            setAlive(false);
-            setCauseOfDeath("Aging"); //Will be used for later purposes such as Death messages
-        }
     }
 
     /**
@@ -156,14 +82,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     }
 
     /**
-     * Sets if the animal is sick
-     * @param isSick A boolean that denotes if this Animal is sick
-     */
-    public void setSick(boolean isSick){
-        this.sick = isSick;
-    }
-
-    /**
      * Gets if this animal is sick or not
      * @return A boolean to denote if this animal is sick
      */
@@ -177,71 +95,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
      */
     public int getVetCost(){
         return this.vetCost;
-    }
-
-    /**
-     * The method to simulate getting sick - 20% chance per call that the respective Animal gets sick,
-     * if this happens - a player is prompted to pay a Vet bill to possibly cure the Animal - if not done,
-     * the Animal will remain sick until the end of the Round and die afterwards.
-     *
-     * If the player pays for the Vet bill, there is a 50% chance that the treatment will work, and the
-     * animal is no longer sick. If this fails, however, the Animal perishes.
-     * @param owner the owner
-     */
-    public void chanceForDisease(Player owner){
-        String answer;
-        if(this.diseaseScanner == null){ this.diseaseScanner = new Scanner(System.in); }
-
-        Random random = new Random();
-        int diseaseChance = random.ints(1, 101).findFirst().getAsInt();
-
-        if(diseaseChance <= 20){ //20% chance of being diseased, 20 out of 100
-            this.setSick(true);
-            //Print some info about who has been struck by a Disease
-            System.out.println("\u001b[31m" + this.getVanillaInfo() + " has been struck by a terrible disease!\u001b[0m");
-            if(owner.getAmountOfMoney() < this.getVetCost()){
-                System.out.println("\u001b[31m" + owner.getName() +
-                        " cannot afford to treat " + this.getVanillaInfo() + " (Costs: " + this.getVetCost() +
-                        " coins, have: " + owner.getAmountOfMoney() + " coins left.)\n\u001b[0m");
-                setAlive(false);
-                setCauseOfDeath("Disease");
-                return; //Could not afford it
-            }
-            System.out.println("\u001b[33mDoes " + owner.getName() + " wish to pay the Vet bill for " + this.getVanillaInfo() + "?"
-                    + " (Costs: " + this.getVetCost() + " coins.)\u001b[0m");
-            while(!(forceYOrN(answer = diseaseScanner.next()) == 1)){
-                //Break when the input is Y,y,N or n
-            }
-            if(owner.getAmountOfMoney() >= this.getVetCost() && answer.toLowerCase().equals("y")){
-                //Random number in range of 1-2, 3 is exclusive - Returns a Stream of Ints, retrieves the first element and returns
-                //it as a Int
-                int getsCured = random.ints(1, 3).findFirst().getAsInt();
-                owner.pay(this.getVetCost());
-                System.out.println("\u001b[32m" + owner.getName() + " paid the Vet bill for " +
-                        this.getVanillaInfo() + " for " + this.getVetCost() + " coins.\u001b[0m");
-                System.out.println(owner.getName() + " has " + owner.getAmountOfMoney() + " coins left after paying the Vet bill.");
-
-                if(getsCured == 1){ //50% chance of being cured, 1 or 2
-                    System.out.println("\u001b[32m" + this.getVanillaInfo() + " was cured!\n\u001b[0m");
-                    this.setSick(false);
-
-                    return; //Paid for treatment and it worked
-                }
-                else{
-                    System.out.println("\u001b[31mThe treatment for " + this.getVanillaInfo() + " did not work.\n\u001b[0m");
-                    setAlive(false);
-                    setCauseOfDeath("Disease");
-                    return; //Paid for the treatment, but did not work
-                }
-            }
-            else{
-                System.out.println("\u001b[31m" + owner.getName() + " chose not to pay the Vet bill for " + this.getVanillaInfo()
-                        + " for " + this.getVetCost() + " coins.\n\u001b[0m");
-                setAlive(false);
-                setCauseOfDeath("Disease");
-                return; //Can afford it, but answered no
-            }
-        }
     }
 
     /**
@@ -336,37 +189,11 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     }
 
     /**
-     * Simulates the health loss of animals for each turn - Yields a random number between 10 and 30 (inclusive),
-     * saves the amount of health this Animal lost - deducts from the current Health - and if the Health is below 0,
-     * this animal dies - cause of death being Starvation.
-     */
-    public void decay(){
-        wasAtHealth = health;
-        Random random = new Random();
-        // Random number between 10 and 30 (inclusive)
-        int decayFactor = random.ints(10, 31).findFirst().getAsInt();
-        this.health -= decayFactor;
-        lostHealth = decayFactor;
-        if(this.health <= 0){
-            setAlive(false);
-            setCauseOfDeath("Starvation"); //Died of starvation
-        }
-    }
-
-    /**
      * Is alive boolean.
      * @return the boolean
      */
     public boolean isAlive(){
         return this.alive;
-    }
-
-    /**
-     * Set alive.
-     * @param status the status
-     */
-    public void setAlive(boolean status){
-        this.alive = status;
     }
 
     /**
@@ -378,19 +205,94 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     }
 
     /**
-     * Set name.
-     * @param name the name
-     */
-    public void setName(String name){
-        this.name= name;
-    }
-
-    /**
      * Get lost health int.
      * @return the int
      */
     public int getLostHealth(){
         return this.lostHealth;
+    }
+
+    /**
+     * Get perished at round int.
+     *
+     * @return An int, the round the animal died at
+     */
+    public int getPerishedAtRound(){
+        return this.perishedAtRound;
+    }
+
+    /**
+     * Getter for the base value of the Animal
+     *
+     * @return An int, the base value of the Animal
+     */
+    public int getValue(){
+        return this.value;
+    }
+
+    /**
+     * Getter for the Health of the Animal
+     *
+     * @return An int, the current health of the Animal
+     */
+    public int getHealth(){
+        return this.health;
+    }
+
+    /**
+     * Getter for decayedThisRound
+     * @return A boolean saying if this is true or not
+     */
+    public boolean getDecayedThisRound() { return this.decayedThisRound; }
+
+    /**
+     * A method that builds a death message for a Animal
+     * @return A string, it's death message
+     */
+    public String getDeathMessage(){
+        return (this.getName() + " the " + this.getClassName() + " (" + this.getGender() + ")"
+                + " perished at the game round of " + this.getPerishedAtRound() + ", died of " + this.getCauseOfDeath()
+                + ", became : " + this.getAge() + " years old. Rest in peace, " + this.getName());
+    }
+
+    // ============= SETTERS =====================
+
+    /**
+     * Setter for decayedThisRound
+     * @param decayedThisRound A boolean saying if the animal decayed this round
+     */
+    public void setDecayedThisRound(boolean decayedThisRound) { this.decayedThisRound = decayedThisRound; }
+
+    /**
+     * Set cause of death.
+     * @param diedFrom the cause of death for the Animal
+     */
+    public void setCauseOfDeath(String diedFrom){
+        this.causeOfDeath = diedFrom;
+    }
+
+    /**
+     * Sets if the animal is sick
+     * @param isSick A boolean that denotes if this Animal is sick
+     */
+    public void setSick(boolean isSick){
+        this.sick = isSick;
+    }
+
+    /**
+     * Set alive.
+     * @param status the status
+     */
+    public void setAlive(boolean status){
+        this.alive = status;
+    }
+
+    /**
+     * Set name.
+     * @param name the name
+     */
+    public void setName(String name){
+        this.name= name;
     }
 
     /**
@@ -400,6 +302,141 @@ public abstract class Animal extends utilityFunctions implements Serializable {
      */
     public void setPerishedAtRound(int diedAtRound){
         this.perishedAtRound = diedAtRound;
+    }
+
+    // =============== UTILITY METHODS ===================
+
+    /**
+     * A method that aids in Construction of children of the Animal class - Accepts 3 Food Items
+     *
+     * @param firstItem  A food Object used in helping with constructing the Constructor for Animals
+     * @param secondItem A food Object used in helping with constructing the Constructor for Animals
+     * @param thirdItem  A food Object used in helping with constructing the Constructor for Animals
+     * @return An ArrayList of Food object type, used for the Constructor of Animals
+     */
+    protected ArrayList<Food> whatItEats(Food firstItem, Food secondItem, Food thirdItem){
+        //Just a simple form of Getter that will help us when Constructing Animal based Classes
+        ArrayList<Food> toReturn = new ArrayList<>();
+        toReturn.add(firstItem);
+        toReturn.add(secondItem);
+        toReturn.add(thirdItem);
+        return toReturn;
+    }
+
+    /**
+     * A method that aids in Construction of children of the Animal class - Accepts 2 Food Items
+     *
+     * @param firstItem  A food Object used in helping with constructing the Constructor for Animals
+     * @param secondItem A food Object used in helping with constructing the Constructor for Animals
+     * @return An ArrayList of Food object type, used for the Constructor of Animals
+     */
+    protected ArrayList<Food> whatItEats(Food firstItem, Food secondItem){
+        //Just a simple form of Getter that will help us when Constructing Animal based Classes
+        ArrayList<Food> toReturn = new ArrayList<>();
+        toReturn.add(firstItem);
+        toReturn.add(secondItem);
+        return toReturn;
+    }
+
+    /**
+     * A method that aids in Construction of children of the Animal class - Accepts 1 Food Item
+     *
+     * @param firstItem A food Object used in helping with constructing the Constructor for Animals
+     * @return An ArrayList of Food object type, used for the Constructor of Animals
+     */
+    protected ArrayList<Food> whatItEats(Food firstItem){
+        //Just a simple form of Getter that will help us when Constructing Animal based Classes
+        ArrayList<Food> toReturn = new ArrayList<>();
+        toReturn.add(firstItem);
+        return toReturn;
+    }
+
+    // ============ GAME LOGIC METHODS ==================
+
+    /**
+     * Ages the Animal, if it goes above it's max age, it dies and the cause of death is aging
+     */
+    public void age(){
+        //Basic Aging method that is called every Round
+        this.age += 1;
+        if(this.age > this.maxAge){ //If the animal gets too old, it dies
+            setAlive(false);
+            setCauseOfDeath("Aging"); //Will be used for later purposes such as Death messages
+        }
+    }
+
+    /**
+     * The method to simulate getting sick - 20% chance per call that the respective Animal gets sick,
+     * if this happens - a player is prompted to pay a Vet bill to possibly cure the Animal - if not done,
+     * the Animal will remain sick until the end of the Round and die afterwards.
+     *
+     * If the player pays for the Vet bill, there is a 50% chance that the treatment will work, and the
+     * animal is no longer sick. If this fails, however, the Animal perishes.
+     * @param owner the owner
+     */
+    public void chanceForDisease(Player owner){
+        String answer;
+        if(this.diseaseScanner == null){ this.diseaseScanner = new Scanner(System.in); }
+        Random random = new Random();
+        if(random.ints(1, 6).findFirst().getAsInt() == 1){ //20% chance of being diseased, 1 out of 5
+            this.setSick(true);
+            //Print some info about who has been struck by a Disease
+            System.out.println("\u001b[31m" + this.getVanillaInfo() + " has been struck by a terrible disease!\u001b[0m");
+            if(owner.getAmountOfMoney() < this.getVetCost()){
+                System.out.println("\u001b[31m" + owner.getName() +
+                        " cannot afford to treat " + this.getVanillaInfo() + " (Costs: " + this.getVetCost() +
+                        " coins, have: " + owner.getAmountOfMoney() + " coins left.)\n\u001b[0m");
+                setAlive(false);
+                setCauseOfDeath("Disease");
+                return; //Could not afford it
+            }
+            System.out.println("\u001b[33mDoes " + owner.getName() + " wish to pay the Vet bill for " + this.getVanillaInfo() + "?"
+                    + " (Costs: " + this.getVetCost() + " coins.)\u001b[0m");
+            //Break when the input is Y,y,N or n
+            while(!(forceYOrN(answer = diseaseScanner.next()) == 1)){ }
+            if(owner.getAmountOfMoney() >= this.getVetCost() && answer.toLowerCase().equals("y")){
+                owner.pay(this.getVetCost());
+                System.out.println("\u001b[32m" + owner.getName() + " paid the Vet bill for " +
+                        this.getVanillaInfo() + " for " + this.getVetCost() + " coins.\u001b[0m");
+                System.out.println(owner.getName() + " has " + owner.getAmountOfMoney() + " coins left after paying the Vet bill.");
+                if(random.ints(1, 3).findFirst().getAsInt() == 1){ //50% chance of being cured, 1 or 2
+                    System.out.println("\u001b[32m" + this.getVanillaInfo() + " was cured!\n\u001b[0m");
+                    this.setSick(false); //Paid for treatment and it worked
+                }
+                else{
+                    System.out.println("\u001b[31mThe treatment for " + this.getVanillaInfo() + " did not work.\n\u001b[0m");
+                    setAlive(false); //Paid for the treatment and it did not work
+                    setCauseOfDeath("Disease");
+                }
+                return;
+            }
+            else{
+                System.out.println("\u001b[31m" + owner.getName() + " chose not to pay the Vet bill for " + this.getVanillaInfo()
+                        + " for " + this.getVetCost() + " coins.\n\u001b[0m");
+                setAlive(false);
+                setCauseOfDeath("Disease");
+                return; //Can afford it, but answered no
+            }
+        }
+    }
+
+    /**
+     * Simulates the health loss of animals for each turn - Yields a random number between 10 and 30 (inclusive),
+     * saves the amount of health this Animal lost - deducts from the current Health - and if the Health is below 0,
+     * this animal dies - cause of death being Starvation.
+     */
+    public void decay(){
+        wasAtHealth = health;
+        Random random = new Random();
+        // Random number between 10 and 30 (inclusive)
+        //DEBUG
+        int decayFactor = random.ints(10, 31).findFirst().getAsInt();
+        this.health -= decayFactor;
+        lostHealth = decayFactor;
+        if(this.health <= 0){
+            setAlive(false);
+            setCauseOfDeath("Starvation"); //Died of starvation
+        }
     }
 
     /**
@@ -429,9 +466,9 @@ public abstract class Animal extends utilityFunctions implements Serializable {
                 int beforeHealing = this.health;
                 this.health *= 1.10;
                 int afterHealing = this.health;
-                int gained = afterHealing - beforeHealing;
+                int gained = afterHealing - beforeHealing; //Example: started at 99, went up to 108, 108 - 99 = gained is 9
                 if(this.health > 100){
-                    gained -= (this.health - 100);
+                    gained -= (this.health - 100); //Example: 108 - 100 = 8, gained is 9, 9 - 8 = 1, actual gain was 1
                     this.health = 100;
                 }
                 //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
@@ -442,29 +479,36 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     }
 
     /**
-     * Get perished at round int.
+     * A method that is responsible for creating babies - 50% chance of a male or female per baby, and each
+     * type of animal has a different amount of Babies they produce
      *
-     * @return An int, the round the animal died at
+     * @param amountOfBabies An int, the amount of children to create
+     * @param females An Arraylist of Animals, all of them being Female
+     * @param playerBreeding A player Object, the player breeding the animals
+     * @param secondAnimalIndex An int, the index for the chosen Female
      */
-    public int getPerishedAtRound(){
-        return this.perishedAtRound;
-    }
+    public void createBabies(int amountOfBabies, ArrayList<Animal> females, Player playerBreeding, int secondAnimalIndex){
+        if(nameScanner == null){ nameScanner = new Scanner(System.in); }
+        Random random = new Random();
+        for(int i = 0; i < amountOfBabies; i++){ //Create amountOfBabies babies
+            int genderChance = random.ints(1,3).findFirst().getAsInt(); //50% chance of being female or male
+            String gender; //The gender
+            gender = (genderChance == 1 ? "Male" : "Female"); //If it's 1, it's a Male, otherwise, it's a Female
+            System.out.println("It's a " + gender); //Announce what it is
+            //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
+            System.out.println("\u001b[33mWhat would you like to name your new baby "
+                    + females.get(secondAnimalIndex-1).getClassName() + " " +
+                    "(" + gender + ")?\u001b[0m"); //Print the Class name (same as its parents) and the gender
 
-    /**
-     * Getter for the base value of the Animal
-     *
-     * @return An int, the base value of the Animal
-     */
-    public int getValue(){
-        return this.value;
-    }
-
-    /**
-     * Getter for the Health of the Animal
-     *
-     * @return An int, the current health of the Animal
-     */
-    public int getHealth(){
-        return this.health;
+            String name = nameScanner.nextLine(); //ask for a name
+            //Based on what the parent is, the baby is the same in terms of Species
+            switch (females.get(secondAnimalIndex - 1).getClassName()) {
+                case "Bird" -> playerBreeding.addToOwnedAnimals(new Bird(name, gender));
+                case "Cat" -> playerBreeding.addToOwnedAnimals(new Cat(name, gender));
+                case "Dog" -> playerBreeding.addToOwnedAnimals(new Dog(name, gender));
+                case "Elephant" -> playerBreeding.addToOwnedAnimals(new Elephant(name, gender));
+                case "Fish" -> playerBreeding.addToOwnedAnimals(new Fish(name, gender));
+            }
+        }
     }
 }

@@ -13,14 +13,15 @@ import java.util.Scanner;
  * The class that acts as a Store to Sell animals to, Buy animals from or Buy Food from
  */
 public class Store extends utilityFunctions implements Serializable {
-    //Scanners declared as Transient to not include them in Serialization
-    private transient Scanner nameScanner = new Scanner(System.in);
-    private transient Scanner userInput = new Scanner(System.in);
     int shopCounter = 0; //Just a simple counter ot showcase Index of items in Store
     ArrayList<Food> foodToOffer = new ArrayList<>(); //Food to offer
     ArrayList<Integer> pricesOfFood = new ArrayList<>(), pricesOfAnimals = new ArrayList<>(); //Prices of Food and Animals
     ArrayList<Animal> animalsToOffer = new ArrayList<>(); //Animals to Offer
+    //Scanners declared as Transient to not include them in Serialization
+    private transient Scanner nameScanner = new Scanner(System.in);
+    private transient Scanner userInput = new Scanner(System.in);
 
+    // ========== CONSTRUCTOR ==================
     /**
      * The Stores constructor - we initialize the store with all the products in place and all prices in place, sorted
      */
@@ -57,37 +58,7 @@ public class Store extends utilityFunctions implements Serializable {
         Collections.sort(pricesOfAnimals); //Sort it, ascending order
     }
 
-    /**
-     * Let's the player specify an Animal they wish to Sell to the Shop. The sell value is defined by
-     * factors such as it's Health and Age. Animal must be healthy to be allowed to be sold.
-     * @param seller A player object who is the Seller selling Animals to the Store
-     */
-    public void sellAnimal(Player seller){
-        if(userInput == null){ userInput = new Scanner(System.in); }
-        ArrayList<Animal> animalsToSell = seller.getHealthyAnimals(); //The owned Animals that are available to be sold
-        String wantedAnimal; //index of the wanted animal to be sold
-        int returnCode;
-        boolean finishedSelling = false;
-        while(!finishedSelling){
-            if(seller.getHealthyAnimals().size() == 0){
-                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
-                System.out.println("\u001b[31m" + seller.getName() + " has no healthy animals left to sell currently." +
-                        " Returning to Game Menu\u001b[0m");
-                return;
-            }
-            printSellAnimalMenu(seller); //Print the Sales menu of animals based on the Seller
-            //Keep asking for a input until it is a valid index - highest accepted Index is exit index, returns back to main menu
-            while(!((returnCode = (safeIntInput(1, seller.getHealthyAnimals().size()+1, wantedAnimal = userInput.next(),
-                    true))) == 1)){ if(returnCode == 2) return; }
-            Animal animalBeingSold = seller.getHealthyAnimals().get(Integer.parseInt(wantedAnimal)-1);
-            seller.getPaid(animalBeingSold.getSellsFor());
-            //RESET \u001b[0m - GREEN - \u001b[32m
-            System.out.println("\u001b[32m" + seller.getName() + " sold " + animalBeingSold.getVanillaInfo()
-                    + " for " + animalBeingSold.getSellsFor() + " coins. " + seller.getName() + " now has: "
-                    + seller.getAmountOfMoney() + " coins.\u001b[0m");
-            seller.getOwnedAnimals().remove(animalBeingSold);
-        }
-    }
+    // =========== PRINT METHODS =================
 
     /**
      * A method that prints menu options in the Shop when buying Food
@@ -104,6 +75,24 @@ public class Store extends utilityFunctions implements Serializable {
     }
 
     /**
+     * A method that handles printing of Menus in Buying the Animals shop
+     * @param buyer A player object, that is the buyer
+     */
+    public void printAnimalsInBuyAnimals(Player buyer){
+        System.out.println("Your current funds are: " + buyer.getAmountOfMoney());
+        for(Animal animalInStore: animalsToOffer){ //prints information about each Animal
+            System.out.println("[" + (shopCounter+1) + "]. " + animalInStore.getClassName() +
+                    "(" + animalInStore.getGender() + ") - Costs: " + animalInStore.getValue() + " coins.");
+            shopCounter += 1;
+        }
+        System.out.println("[" + (shopCounter+1) + "]. Exit shop.");
+        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
+        System.out.println("\u001b[33mWhich animal would you like to buy?\u001b[0m");
+    }
+
+    // =========== GAME LOGIC METHODS =================
+
+    /**
      * A method that handles the upper boundary that a player can afford in terms of a specific specified type of Food
      * @param wantedFood A string, the index of the wanted food in the Food menu
      * @param buyer A player object, the player acting as the Buyer
@@ -117,42 +106,6 @@ public class Store extends utilityFunctions implements Serializable {
         int gramsAsInt = (int) howManyGramsICanAfford; //Convert downwards to closest Gram
         gramsAsInt = gramsAsInt - (gramsAsInt % 100); //Force purchase to closest dividable by 100 in upper limit
         return gramsAsInt;
-    }
-
-    /**
-     * Checks if the Player already has the Food item in their own Inventory - if so, adds to that amount, if not
-     * adds as a new Item to the inventory of the Player
-     *
-     * @param index An int, the chosen index of the Food item in the Menu
-     * @param buyer A player object, the Buyer of the Food
-     * @param wantedAmount A string, the amount of food the player wants in Grams
-     */
-    public void addToInventory(int index, Player buyer, String wantedAmount){
-        boolean foundFood = false;
-
-        Food foodToAdd = foodToOffer.get(index); //The food to add to inventory
-        String foodOfNameToAdd = foodToAdd.getName();
-        switch (foodOfNameToAdd) {
-            case "cowMeat" -> foodToAdd = new cowMeat();
-            case "horseMeat" -> foodToAdd = new horseMeat();
-            case "Apple" -> foodToAdd = new Apple();
-            case "Peanut" -> foodToAdd = new Peanut();
-            case "Seeds" -> foodToAdd = new Seeds();
-            case "catFood" -> foodToAdd = new catFood();
-            case "dogFood" -> foodToAdd = new dogFood();
-            case "fishFood" -> foodToAdd = new fishFood();
-            case "mysteryMeat" -> foodToAdd = new mysteryMeat();
-        }
-        for(Food ownedFood : buyer.getOwnedFood()){ //Check buyers food stocks
-            if(ownedFood.getName().contains(foodToAdd.getName())){ //if there is a match in owned food and the one being purchased
-                foundFood = true; //Track that it was found
-                ownedFood.setGrams((ownedFood.getGrams() + Integer.parseInt(wantedAmount))); //Increase the gram of the owned food stock
-            }
-        }
-        if(!foundFood){ //Player does not own the purchased food in any amount yet
-            foodToAdd.setGrams(Integer.parseInt(wantedAmount)); //Set the amount of grams of the food being bought
-            buyer.addToOwnedFood(foodToAdd);  //Add it to the players stock
-        }
     }
 
     /**
@@ -198,22 +151,6 @@ public class Store extends utilityFunctions implements Serializable {
         //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[31m" + buyer.getName() + " cannot afford any food in the store at the moment. The lowest price of 100 grams of " +
                 "an food item in the shop is: " + pricesOfFood.get(0)/10 + " coins.\n\u001b[0m"); //Ran out of money in the Store
-    }
-
-    /**
-     * A method that handles printing of Menus in Buying the Animals shop
-     * @param buyer A player object, that is the buyer
-     */
-    public void printAnimalsInBuyAnimals(Player buyer){
-        System.out.println("Your current funds are: " + buyer.getAmountOfMoney());
-        for(Animal animalInStore: animalsToOffer){ //prints information about each Animal
-            System.out.println("[" + (shopCounter+1) + "]. " + animalInStore.getClassName() +
-                    "(" + animalInStore.getGender() + ") - Costs: " + animalInStore.getValue() + " coins.");
-            shopCounter += 1;
-        }
-        System.out.println("[" + (shopCounter+1) + "]. Exit shop.");
-        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
-        System.out.println("\u001b[33mWhich animal would you like to buy?\u001b[0m");
     }
 
     /**
@@ -284,5 +221,73 @@ public class Store extends utilityFunctions implements Serializable {
             choseAnimal(buyer, index);
         }
         return;
+    }
+
+    /**
+     * Let's the player specify an Animal they wish to Sell to the Shop. The sell value is defined by
+     * factors such as it's Health and Age. Animal must be healthy to be allowed to be sold.
+     * @param seller A player object who is the Seller selling Animals to the Store
+     */
+    public void sellAnimal(Player seller){
+        if(userInput == null){ userInput = new Scanner(System.in); }
+        ArrayList<Animal> animalsToSell = seller.getHealthyAnimals(); //The owned Animals that are available to be sold
+        String wantedAnimal; //index of the wanted animal to be sold
+        int returnCode;
+        boolean finishedSelling = false;
+        while(!finishedSelling){
+            if(seller.getHealthyAnimals().size() == 0){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
+                System.out.println("\u001b[31m" + seller.getName() + " has no healthy animals left to sell currently." +
+                        " Returning to Game Menu\u001b[0m");
+                return;
+            }
+            printSellAnimalMenu(seller); //Print the Sales menu of animals based on the Seller
+            //Keep asking for a input until it is a valid index - highest accepted Index is exit index, returns back to main menu
+            while(!((returnCode = (safeIntInput(1, seller.getHealthyAnimals().size()+1, wantedAnimal = userInput.next(),
+                    true))) == 1)){ if(returnCode == 2) return; }
+            Animal animalBeingSold = seller.getHealthyAnimals().get(Integer.parseInt(wantedAnimal)-1);
+            seller.getPaid(animalBeingSold.getSellsFor());
+            //RESET \u001b[0m - GREEN - \u001b[32m
+            System.out.println("\u001b[32m" + seller.getName() + " sold " + animalBeingSold.getVanillaInfo()
+                    + " for " + animalBeingSold.getSellsFor() + " coins. " + seller.getName() + " now has: "
+                    + seller.getAmountOfMoney() + " coins.\u001b[0m");
+            seller.getOwnedAnimals().remove(animalBeingSold);
+        }
+    }
+
+    /**
+     * Checks if the Player already has the Food item in their own Inventory - if so, adds to that amount, if not
+     * adds as a new Item to the inventory of the Player
+     *
+     * @param index An int, the chosen index of the Food item in the Menu
+     * @param buyer A player object, the Buyer of the Food
+     * @param wantedAmount A string, the amount of food the player wants in Grams
+     */
+    public void addToInventory(int index, Player buyer, String wantedAmount){
+        boolean foundFood = false;
+
+        Food foodToAdd = foodToOffer.get(index); //The food to add to inventory
+        String foodOfNameToAdd = foodToAdd.getName();
+        switch (foodOfNameToAdd) {
+            case "cowMeat" -> foodToAdd = new cowMeat();
+            case "horseMeat" -> foodToAdd = new horseMeat();
+            case "Apple" -> foodToAdd = new Apple();
+            case "Peanut" -> foodToAdd = new Peanut();
+            case "Seeds" -> foodToAdd = new Seeds();
+            case "catFood" -> foodToAdd = new catFood();
+            case "dogFood" -> foodToAdd = new dogFood();
+            case "fishFood" -> foodToAdd = new fishFood();
+            case "mysteryMeat" -> foodToAdd = new mysteryMeat();
+        }
+        for(Food ownedFood : buyer.getOwnedFood()){ //Check buyers food stocks
+            if(ownedFood.getName().contains(foodToAdd.getName())){ //if there is a match in owned food and the one being purchased
+                foundFood = true; //Track that it was found
+                ownedFood.setGrams((ownedFood.getGrams() + Integer.parseInt(wantedAmount))); //Increase the gram of the owned food stock
+            }
+        }
+        if(!foundFood){ //Player does not own the purchased food in any amount yet
+            foodToAdd.setGrams(Integer.parseInt(wantedAmount)); //Set the amount of grams of the food being bought
+            buyer.addToOwnedFood(foodToAdd);  //Add it to the players stock
+        }
     }
 }
