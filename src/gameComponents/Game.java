@@ -75,6 +75,8 @@ public class Game extends utilityFunctions implements Serializable{
                     for(Player playerInGame : loadedGame.getPlayersPlaying()){
                         System.out.println("\t\t\t" + playerInGame);
                     }
+                    System.out.println("\tCurrent player: " +
+                            loadedGame.getPlayersPlaying().get(loadedGame.getCurrentPlayer()).toString().substring(6));
                     System.out.println("\tLast played: " + dtf.format(loadedGame.getTimeOfSaving()));
                 }
                 catch(Exception e){ //IGNORE
@@ -613,7 +615,7 @@ public class Game extends utilityFunctions implements Serializable{
     public void saveGame(Game myGame) throws FileNotFoundException{
         String overwrite = "", newName = "", fullSavePath = "savedGames\\", saveGameName;
         File savedGamesFolder = new File("savedGames");
-        savedGamesFolder.mkdir();
+        savedGamesFolder.mkdir(); //If the savedGamesFolder does not exist, create it - to avoid a NullpointerException
         File[] gameFiles = new File("savedGames").listFiles();
         if(saveGameScanner == null){ saveGameScanner = new Scanner(System.in); }
         if(gameFiles.length > 0){
@@ -847,11 +849,9 @@ public class Game extends utilityFunctions implements Serializable{
                 //Reset variables for next round
                 showedMenu = false; //Reset variables
                 decayAgeAndDiseaseAtEndofTurn(); //Age, Decay and roll for Disease on Animals
-                handleDeathsOfAnimals(0); //Handle death announcements of Animals
+                handleDeathsOfAnimals(0); //Handle death announcements of Animals with no modifier
                 for(int i = playersPlaying.get(currentPlayer).getOwnedAnimals().size()-1; i > -1; i--){
                     if(!playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).isAlive()){
-                        System.out.println("REMOVING " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getColoredInfo()
-                        + " FROM " + playersPlaying.get(currentPlayer));
                         playersPlaying.get(currentPlayer).getOwnedAnimals().remove(i);
                     }
                 }

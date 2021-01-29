@@ -207,7 +207,7 @@ public abstract class Animal extends utilityFunctions implements Serializable {
                 setCauseOfDeath("Disease");
                 return; //Could not afford it
             }
-            System.out.println("\u001b[33mDoes" + owner.getName() + " wish to pay the Vet bill for " + this.getVanillaInfo() + "?"
+            System.out.println("\u001b[33mDoes " + owner.getName() + " wish to pay the Vet bill for " + this.getVanillaInfo() + "?"
                     + " (Costs: " + this.getVetCost() + " coins.)\u001b[0m");
             while(!(forceYOrN(answer = diseaseScanner.next()) == 1)){
                 //Break when the input is Y,y,N or n
