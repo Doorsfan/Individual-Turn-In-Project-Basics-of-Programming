@@ -50,6 +50,8 @@ public class Game extends utilityFunctions implements Serializable{
     public void loadGame(Game myGame) throws FileNotFoundException{
         int counter = 1, returnCode = 0;
         String userInput = "", filePath;
+        File savedGamesFolder = new File("savedGames"); //This is only to make sure that there is a savedGames folder if none exist
+        savedGamesFolder.mkdir(); //Returns true if it made a dir, false if not - does not create a new dir if one exists
         File[] gameFiles = new File("savedGames").listFiles();
         if(loadGameScanner == null){ loadGameScanner = new Scanner(System.in); }
         if(gameFiles.length == 0){
@@ -610,6 +612,8 @@ public class Game extends utilityFunctions implements Serializable{
      */
     public void saveGame(Game myGame) throws FileNotFoundException{
         String overwrite = "", newName = "", fullSavePath = "savedGames\\", saveGameName;
+        File savedGamesFolder = new File("savedGames");
+        savedGamesFolder.mkdir();
         File[] gameFiles = new File("savedGames").listFiles();
         if(saveGameScanner == null){ saveGameScanner = new Scanner(System.in); }
         if(gameFiles.length > 0){
