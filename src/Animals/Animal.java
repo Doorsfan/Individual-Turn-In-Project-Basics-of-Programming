@@ -222,7 +222,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
                 System.out.println(owner.getName() + " has " + owner.getAmountOfMoney() + " coins left after paying the Vet bill.");
 
                 if(getsCured == 1){ //50% chance of being cured, 1 or 2
-                    //RESET \u001b[0m - GREEN - \u001b[32m
                     System.out.println("\u001b[32m" + this.getVanillaInfo() + " was cured!\n\u001b[0m");
                     this.setSick(false);
 
@@ -253,22 +252,28 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     public String getColoredInfo(){
         String colorOfHealth, colorOfAge;
         if(this.getHealth() >= 50){
-            colorOfHealth = "\u001b[32m"; //Green
+            //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
+            colorOfHealth = "\u001b[32m";
         }
         else if(this.getHealth() >= 30 && this.getHealth() <= 49){
-            colorOfHealth = "\u001b[33m"; //Yellow
+            //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
+            colorOfHealth = "\u001b[33m";
         }
         else{
-            colorOfHealth = "\u001b[31m"; //Red
+            //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
+            colorOfHealth = "\u001b[31m";
         }
         double percentOfYearsSpent = (double)this.getAge()/(double)this.getMaxAge();
         if(percentOfYearsSpent >= 0.75){
-            colorOfAge = "\u001b[31m"; //Red age
+            //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
+            colorOfAge = "\u001b[31m";
         }
         else if(percentOfYearsSpent >= 0.33 && percentOfYearsSpent <= 74){
-            colorOfAge = "\u001b[33m"; //Yellow age
+            //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
+            colorOfAge = "\u001b[33m";
         }
         else{
+            //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
             colorOfAge = "\u001b[32m"; //Green age
         }
         return (this.getName() + " the " + this.getClassName() + " (" + this.getGender() +
@@ -429,6 +434,7 @@ public abstract class Animal extends utilityFunctions implements Serializable {
                     gained -= (this.health - 100);
                     this.health = 100;
                 }
+                //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[32m" + this.getVanillaInfo() + " gained " + gained + " health!\u001b[0m");
                 return 1; //Went through fine, the Animal ate the food
             }

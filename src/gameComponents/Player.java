@@ -131,7 +131,7 @@ public class Player extends utilityFunctions implements Serializable {
         if(diedAtRoundList.size() > 0){
             for(int i = diedAtRoundList.size()-1; i > -1; i--){
                 if(diedAtRoundList.get(i) == currentRound-1){ //Check deaths for corresponding to last round
-                    //HERE
+                    //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                     System.out.println("\u001b[31m" + deathMessageList.get(i) + "\u001b[0m"); //Print it out
                     removeRound.add(diedAtRoundList.get(i));
                     removeMessage.add(deathMessageList.get(i));
@@ -172,6 +172,7 @@ public class Player extends utilityFunctions implements Serializable {
         for(Food ownedFood : playerFeeding.getOwnedFood()){
             System.out.println(ownedFood.getGrams() + " grams of " + ownedFood.getName());
         }
+        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[33mWhich animal do you wish to feed?\u001b[0m");
         for(Animal ownedAnimal: playerFeeding.getHungryAnimals()){
             System.out.println("[" + counter + "] " + ownedAnimal.getName() +
@@ -217,6 +218,7 @@ public class Player extends utilityFunctions implements Serializable {
      */
     public  ArrayList<Food> printFoodOptions(Animal toBeFed, Player playerFeeding){
         int counter = 1;
+        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[33mWith what do you wish to feed " + toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() +
                 "(" + toBeFed.getGender() + ", " + " Health: " + toBeFed.getHealth() + ")?\u001b[0m");
         ArrayList<Food> acceptedFood = toBeFed.getWhatItEats();
@@ -257,16 +259,19 @@ public class Player extends utilityFunctions implements Serializable {
         String wantedAnimalToFeed, wantedFood;
 
         if(this.getOwnedAnimals().size() == 0){ //Has no Animals to feed, thrown back to main menu
+            //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31m" + this.getName() + " has no Animals to feed. Returning to Game menu.\u001b[0m");
             return -2; }
 
         while(!finishedFeeding){
             boolean hasFood = true;
             if(this.getHungryAnimals().size() == 0){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31m" + this.getName() + " has no more hungry animals to feed. " +
                         "Returning to Game menu.\u001b[0m");
                 return -2; }
             if(this.getOwnedFood().size() == 0){ //Ran out of Food to feed with
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31m" + this.getName() + " has no food left to feed with. Returning to Game menu.\n\u001b[0m");
                 return -2; }
             printAnimalsInFeedMenu(this); //Print the Animals feeding menu
@@ -275,6 +280,7 @@ public class Player extends utilityFunctions implements Serializable {
             Animal toBeFed = this.getHungryAnimals().get((Integer.parseInt(wantedAnimalToFeed)-1)); //The animal being fed
 
             if(!checkIfItEatsFood(toBeFed, this)){ //If the player does not own any food the Animal would want, the animal wont eat it
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31m" + this.getName() + " does not have any food that a "
                         + toBeFed.getClassName() + " would like.\u001b[0m");
                 hasFood = false;
@@ -307,6 +313,7 @@ public class Player extends utilityFunctions implements Serializable {
         for(Food foodItEats : toBeFed.getWhatItEats()){
             if(foodItEats.getName().equals(foodToFeedWith.getName())){
                 if(toBeFed.getPortionSize() > foodToFeedWith.getGrams()){
+                    //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                     System.out.println("\u001b[31mThere is not enough grams of " + foodToFeedWith.getName() + " left to feed " +
                             toBeFed.getName() + " the " + toBeFed.getClassName() + "(" + toBeFed.getGender() + ") Health: " +
                             toBeFed.getHealth() + " - (" + foodToFeedWith.getGrams() +
@@ -316,12 +323,13 @@ public class Player extends utilityFunctions implements Serializable {
                     foundFood = true;
                     int resultCode = toBeFed.eat(toBeFed.getPortionSize(),foodToFeedWith);
                     if(resultCode == 1){ //The animal liked the food
+                        //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
                         System.out.println("\u001b[32m" +
                                 toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() +")" +
                                 " happily eats the " + foodToFeedWith.getName() + "!\u001b[0m");
                     }
                     else if(resultCode == -3){ //Mystery meat that did not seem appealing..
-                        //HERE
+                        //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                         System.out.println("\u001b[31m" +
                                 toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() + ")" +
                                 " seems to think there's something funny with the " + foodToFeedWith.getClass().getSimpleName() +".." +
@@ -350,6 +358,7 @@ public class Player extends utilityFunctions implements Serializable {
             indexToRemove += 1;
         }
         if(shouldRemoveFood){
+            //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31m" + playerFeeding.getName() + " has run out of " +
                     playerFeeding.getOwnedFood().get(indexToRemove).getName() + "!\u001b[0m");
             playerFeeding.getOwnedFood().remove(indexToRemove); //Remove the food that had run out of Stock

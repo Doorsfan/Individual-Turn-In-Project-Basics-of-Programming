@@ -70,6 +70,7 @@ public class Store extends utilityFunctions implements Serializable {
         boolean finishedSelling = false;
         while(!finishedSelling){
             if(seller.getHealthyAnimals().size() == 0){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31m" + seller.getName() + " has no healthy animals left to sell currently." +
                         " Returning to Game Menu\u001b[0m");
                 return;
@@ -169,6 +170,7 @@ public class Store extends utilityFunctions implements Serializable {
             while(!((returnCode = (safeIntInput(1, foodToOffer.size()+1, wantedFood = userInput.next(),
                     true))) == 1)){ if(returnCode == 2) return; } //Index of Wanted food
             if(getMaxAmountOfGrams(wantedFood, buyer) < 100){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31mCannot afford at least 100 grams of " + foodToOffer.get(Integer.parseInt(wantedFood)-1).getName()
                         + ", Returning to Game menu.\n\u001b[0m");
 
@@ -184,14 +186,16 @@ public class Store extends utilityFunctions implements Serializable {
             if (toPay <= buyer.getAmountOfMoney()) { //Can afford the food
                 addToInventory(index, buyer, wantedAmount); //Add to players Inventory (checks if already has, increases that amount instead then)
                 buyer.pay((int) toPay);
-                //GREEN COLOR \u001b[32m - RESET \u001b[0m
+                //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\n\u001b[32m" + buyer.getName() + " bought " + wantedAmount + " grams of " + foodToOffer.get(index).getName() + " for " +
                         (int) toPay + " coins. " + buyer.getName() + " now has " + buyer.getAmountOfMoney() + " coins left.\n\u001b[0m");
             } else { //Can't afford the food
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31m" + buyer.getName() + " cannot afford the " + wantedAmount + " grams of " +
                         foodToOffer.get(index).getName() + ". It costs " + (int) toPay + " and " + buyer.getName() + " only has " +
                         buyer.getAmountOfMoney() + " coins left!\u001b[0m"); }
         }
+        //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[31m" + buyer.getName() + " cannot afford any food in the store at the moment. The lowest price of 100 grams of " +
                 "an food item in the shop is: " + pricesOfFood.get(0)/10 + " coins.\n\u001b[0m"); //Ran out of money in the Store
     }
@@ -208,7 +212,7 @@ public class Store extends utilityFunctions implements Serializable {
             shopCounter += 1;
         }
         System.out.println("[" + (shopCounter+1) + "]. Exit shop.");
-        //HERE
+        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[33mWhich animal would you like to buy?\u001b[0m");
     }
 
@@ -221,6 +225,7 @@ public class Store extends utilityFunctions implements Serializable {
     public void choseAnimal(Player buyer, int index){
         if(nameScanner == null){ nameScanner = new Scanner(System.in); }
         if (animalsToOffer.get(index).getValue() <= buyer.getAmountOfMoney()) {
+            //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[33mWhat would you like to name your new "
                     + animalsToOffer.get(index).getClassName() + " (" + animalsToOffer.get(index).getGender() + ")?\u001b[0m");
             String wantedName = nameScanner.nextLine(); //The wanted name
@@ -234,13 +239,13 @@ public class Store extends utilityFunctions implements Serializable {
                 case "Fish" -> buyer.addToOwnedAnimals(new Fish(wantedName, wantedGender));
             }
             buyer.pay(animalsToOffer.get(index).getValue()); //Pay the full value of the Animal
-            //RESET \u001b[0m - GREEN - \u001b[32m
+            //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[32m" + buyer.getName() + " bought a " + animalsToOffer.get(index).getGender() +
                     " " + animalsToOffer.get(index).getClassName() + " for " +
                     animalsToOffer.get(index).getValue() + " coins and named it: " + wantedName + ".\u001b[0m");
             System.out.println(buyer.getName() + " now has " + buyer.getAmountOfMoney() + " coins left.\n");
         } else {
-            //HERE
+            //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31m" + buyer.getName() + " cannot afford the " + animalsToOffer.get(index).getClassName() + ". It costs " +
                     animalsToOffer.get(index).getValue() + " and " + buyer.getName() + " only has " +
                     buyer.getAmountOfMoney() + " coins left!\u001b[0m");
@@ -256,11 +261,13 @@ public class Store extends utilityFunctions implements Serializable {
         boolean buyingAnimal = true;
         while(buyingAnimal) {
             if(buyer.getAmountOfMoney() < pricesOfAnimals.get(0)){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31m" + buyer.getName() + " cannot afford any animal in the store at the moment.\n" +
                         "The lowest price of an animal in the shop is: " + pricesOfAnimals.get(0) + " coins." +
                         "\nReturning to Game Menu.\n\u001b[0m");
                 return;
             }
+            //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[32mWelcome " + buyer.getName() +
                     " to The Emporium of Animals! We sell Animals/Food for animals!\u001b[0m");
             printAnimalsInBuyAnimals(buyer); //Print info about the animals up for sale

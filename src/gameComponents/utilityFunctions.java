@@ -28,6 +28,7 @@ public class utilityFunctions implements Serializable{
             }
             counter += 1;
         }
+        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[33mWhat animal does " + seller.getName() + " wish to sell to: " + buyer.getName() + " (Funds: "
                 + buyer.getAmountOfMoney() + " coins)" + "?\u001b[0m");
         counter = 1;
@@ -45,6 +46,7 @@ public class utilityFunctions implements Serializable{
      * @param animalBeingSold An animal object, the Animal being sold
      */
     public void printCantAffordAnimal(Player buyer, Animal animalBeingSold){
+        //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[31m" + buyer.getName() + " cannot afford " + animalBeingSold.getVanillaInfo() + "! (Needed: " + animalBeingSold.getSellsFor() +
                 " coins, has only " + buyer.getAmountOfMoney() + " coins)\n Returning back to main menu\u001b[0m");
     }
@@ -62,12 +64,14 @@ public class utilityFunctions implements Serializable{
         String[] splitInput = input.split("");
         try{
             if(splitInput.length > 1){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 throw new RuntimeException("\u001b[31mInput must be 1 character long (y or n) (Case insensitive)\u001b[0m");
             }
             else if(input.toLowerCase().equals("y") || input.toLowerCase().equals("n")){
                 return 1;
             }
             else{
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 throw new RuntimeException("\u001b[31mInput was : " + input + ", only allowed to be y or n\u001b[0m");
             }
         }
@@ -96,17 +100,20 @@ public class utilityFunctions implements Serializable{
         try{
             check = Integer.parseInt(input);
             if(check < lowerBoundary || check > upperBoundary){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 throw new RuntimeException("\u001b[31mOut of accepted boundary - [LOWER: " + lowerBoundary + " UPPER: " + upperBoundary +
                         " GIVEN: " + check + "] - " + "Please write a number between: " + lowerBoundary +
                         " and " + upperBoundary + ".\u001b[0m");
             }
             if(check == upperBoundary && maxIsExitCode){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31mUser chose to exit. Returning back to main menu.\u001b[0m");
                 return 2;
             }
         }
         catch(Exception e){
             if(e.getMessage().contains("For input")){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31mPlease do not put in letters instead of Numbers.\u001b[0m");
             }
             else{
@@ -125,6 +132,7 @@ public class utilityFunctions implements Serializable{
     public void printSellAnimalMenu(Player seller){
         ArrayList<Animal> animalsToSell = seller.getHealthyAnimals();
         int shopCounter = 1;
+        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[33mWhich animal would " + seller.getName() + " like to sell?\u001b[0m");
         for(Animal animal : animalsToSell){
             System.out.println("[" + shopCounter + "] " + animal.getColoredInfo() + " (Sells for: " + animal.getSellsFor() + " coins)");
@@ -150,7 +158,9 @@ public class utilityFunctions implements Serializable{
             String gender; //The gender
             gender = (genderChance == 1 ? "Male" : "Female"); //If it's 1, it's a Male, otherwise, it's a Female
             System.out.println("It's a " + gender); //Announce what it is
-            System.out.println("\u001b[33mWhat would you like to name your new baby " + females.get(secondAnimalIndex-1).getClassName() + " " +
+            //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
+            System.out.println("\u001b[33mWhat would you like to name your new baby "
+                    + females.get(secondAnimalIndex-1).getClassName() + " " +
                     "(" + gender + ")?\u001b[0m"); //Print the Class name (same as its parents) and the gender
 
             String name = nameScanner.nextLine(); //ask for a name
@@ -173,10 +183,12 @@ public class utilityFunctions implements Serializable{
      */
     public void printSalesMenu(Player buyer, ArrayList<Player> sellers){
         int counter = 1;
+        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[33mWhich Player does " + buyer.getName() + " wish to buy Animals from? ("
                 + buyer.getName() + "'s funds: " + buyer.getAmountOfMoney() + " coins)\u001b[0m");
         for(Player players: sellers){ //Go through all the Sellers and print Info about them
-            System.out.println("[" + counter + "] " + players.getName() + " - Owns " + players.getHealthyAnimals().size() + " healthy animal(s): ");
+            System.out.println("[" + counter + "] " + players.getName() + " - Owns "
+                    + players.getHealthyAnimals().size() + " healthy animal(s): ");
             for(Animal ownedAnimals : players.getHealthyAnimals()){ //Go through their Animals and Print info about them
                 System.out.println("\t" + ownedAnimals.getColoredInfo() + " Costs: " + ownedAnimals.getSellsFor() + " coins");
             }
@@ -187,6 +199,7 @@ public class utilityFunctions implements Serializable{
 
     /**
      * A helper method in building a list of Sellers, who are not the buyer themselves
+     * Will only get players who have living and not sick Animals
      * @param buyer A player object, the buyer itself
      * @param sellers Array List of Player objects, used to add to and then return when built
      * @param playersPlaying Array List of Player objects that all are plays still playing in the game
@@ -209,6 +222,7 @@ public class utilityFunctions implements Serializable{
      */
     public void printBuyFromOtherPlayerMenu(Player buyer, Player seller){
         int counter = 1;
+        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[33mWhich animal does " + buyer.getName() + " wish to buy from: " + seller.getName()
                 + " (" + buyer.getName() +"'s funds: "
                 + buyer.getAmountOfMoney() + " coins)" + "?\u001b[0m");
@@ -225,8 +239,10 @@ public class utilityFunctions implements Serializable{
      * @param animalBeingBought An Animal object, the Animal trying to be bought
      */
     public void printFailedTransaction(Player buyer, Animal animalBeingBought){
+        //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[31m" + buyer.getName() + " cannot afford " + animalBeingBought.getVanillaInfo() + "! " +
                 "(Needed: " + animalBeingBought.getSellsFor() + " coins, has only " + buyer.getAmountOfMoney() + " coins)\u001b[0m");
+        //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[31mReturning to Game menu.\u001b[0m");
     }
 
@@ -241,11 +257,13 @@ public class utilityFunctions implements Serializable{
      */
     public void printAnimals(boolean loadedGame, int currentRound, int currentPlayer, ArrayList<Player> playersPlaying, int maxRounds) {
         int counter = 0;
+        //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
         System.out.println("\nRound " + currentRound + "/" + maxRounds + ", \u001B[1m\u001b[31m"
                 + playersPlaying.get(currentPlayer).getName() + "\u001b[0m's turn.");
         System.out.println("\t~~===    STILL PLAYING    ===~~\t");
         for(Player playerStillPlaying: playersPlaying){
             if(counter == currentPlayer){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.print("== \u001b[31m" + playerStillPlaying.getName() + "\u001b[0m - " + " Funds: " +
                         playerStillPlaying.getAmountOfMoney() + " coins ==\n");
             }
@@ -259,37 +277,46 @@ public class utilityFunctions implements Serializable{
         playersPlaying.get(currentPlayer).announceDeaths(currentRound);
         if (loadedGame) {
             for (String printedDeath : playersPlaying.get(currentPlayer).getSavedDeathList()) {
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31m" + printedDeath + "\u001b[0m");
             }
         }
+        //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
         System.out.print("\n\u001b[31m" + playersPlaying.get(currentPlayer).getName() + "\u001b[0m's Owned Animals: \n");
 
         for (Animal ownedAnimal : playersPlaying.get(currentPlayer).getOwnedAnimals()) {
             System.out.print(ownedAnimal.getName() + " the " + ownedAnimal.getClass().getSimpleName() +
                     "(" + ownedAnimal.getGender() + "), who is at: ");
             if(ownedAnimal.getHealth() >= 50){
+                //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[32m"); //Green health
             }
             else if(ownedAnimal.getHealth() >= 30 && ownedAnimal.getHealth() <= 49){
-                System.out.print("\u001b[33m"); //Yellow Health
+                //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
+                System.out.print("\u001b[33m"); //Yellow health
             }
             else{
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[31m"); //Red health
             }
-            System.out.print(ownedAnimal.getHealth() + "\u001b[0m health (Lost " + ownedAnimal.getLostHealth() + " health last round, was at: " +
-                    ownedAnimal.getWasAtHealth() + " health.) (Age: ");
+            System.out.print(ownedAnimal.getHealth() + "\u001b[0m health (Lost " + ownedAnimal.getLostHealth()
+                    + " health last round, was at: " + ownedAnimal.getWasAtHealth() + " health.) (Age: ");
             double percentOfYearsSpent = (double)ownedAnimal.getAge()/(double)ownedAnimal.getMaxAge();
             if(percentOfYearsSpent >= 0.75){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[31m"); //Red age
             }
             else if(percentOfYearsSpent >= 0.33 && percentOfYearsSpent <= 74){
+                //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[33m"); //Yellow age
             }
             else{
+                //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[32m"); //Green age
             }
             System.out.print(ownedAnimal.getAge() + "\u001b[0m of " + ownedAnimal.getMaxAge() + ")\n");
         }
+        //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
         System.out.print("\u001b[31m" + playersPlaying.get(currentPlayer).getName() + "\u001b[0m's Owned Food: \n");
         for (Food ownedFood : playersPlaying.get(currentPlayer).getOwnedFood()) {
             System.out.print(ownedFood.getGrams() + " Grams of " + ownedFood.getClass().getSimpleName() + "\n");
@@ -308,7 +335,7 @@ public class utilityFunctions implements Serializable{
      */
     public int listOfBuyersInSellToOtherPlayer(Player seller, ArrayList<Player> buyers, ArrayList<Player> playersPlaying){
         int counter = 1, sellersIndex = 1;
-
+        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[33mWhich Player does " + seller.getName() + " wish to sell Animals to? ("
                 + seller.getName() +"'s funds: " + seller.getAmountOfMoney() + " coins)\u001b[0m");
         for(Player players : playersPlaying){
@@ -330,6 +357,7 @@ public class utilityFunctions implements Serializable{
      * @param males An ArrayList of Animals, all of whom are Males
      */
     public  void printMales(ArrayList<Animal> males){
+        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[33mPlease choose a male:\u001b[0m");
         int counter = 1;
         for(Animal male : males){
@@ -344,6 +372,7 @@ public class utilityFunctions implements Serializable{
       * @param females An ArrayList of Animals, all of whom are females
      */
     public  void printFemales(ArrayList<Animal> females){
+        //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
         System.out.println("\u001b[33mPlease choose a female:\u001b[0m");
         int counter = 1;
         for(Animal female : females){

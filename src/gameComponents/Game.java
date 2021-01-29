@@ -53,6 +53,7 @@ public class Game extends utilityFunctions implements Serializable{
         File[] gameFiles = new File("savedGames").listFiles();
         if(loadGameScanner == null){ loadGameScanner = new Scanner(System.in); }
         if(gameFiles.length == 0){
+            //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31mThere are no save games currently. Returning to main menu.\u001b[0m");
             myGame.showMainMenu();
             return;
@@ -82,6 +83,7 @@ public class Game extends utilityFunctions implements Serializable{
             while(!((returnCode = (safeIntInput(1, gameFiles.length+1, userInput = loadGameScanner.next(),
                     false))) == 1)){ } //Chose to exit on 3
             if(Integer.parseInt(userInput) == gameFiles.length+1){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31mExiting from loading game menu.\u001b[0m");
                 myGame.showMainMenu();
                 return;
@@ -154,6 +156,7 @@ public class Game extends utilityFunctions implements Serializable{
             showMainMenu();
         }
         if (userInput.equals("4")) {
+            //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31mUser chose to exit game. Shutting down.\u001b[0m");
             System.exit(1);
         }
@@ -248,11 +251,13 @@ public class Game extends utilityFunctions implements Serializable{
         boolean doneBuying = false;
         while(!doneBuying) {
             if( playersPlaying.size() < 2 ){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31mNo other players in game. Returning to Game menu.\u001b[0m");
                 return -1;
             } //Too few players
             sellers = buildSellersList(buyer, sellers, playersPlaying);
             if ( sellers.size() == 0 ){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31mNo other players had healthy animals to sell. Returning to Game menu.\u001b[0m");
                 return -1;
             } //No other player with Animals to buy from is available
@@ -272,6 +277,7 @@ public class Game extends utilityFunctions implements Serializable{
                 printFailedTransaction(buyer, animalBeingBought); //Print the failed Transaction section
                 return -2;
             } //Not enough money
+            //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[32m" + buyer.getName() + " bought " + animalBeingBought.getVanillaInfo() +
                     " for " + animalBeingBought.getSellsFor() + " coins from " + seller.getName() + ".\u001b[0m");
             buyer.pay(animalBeingBought.getSellsFor()); //buyer pays
@@ -294,6 +300,7 @@ public class Game extends utilityFunctions implements Serializable{
         while(!doneSelling){
             boolean result = playersPlaying.size() < 2 || seller.getHealthyAnimals().size() == 0; //1 player or no Animals
             if(result){
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31mToo few players left or no healthy animals left to sell. Returning to Game menu.\u001b[0m");
                 return -1;
             }
@@ -311,7 +318,7 @@ public class Game extends utilityFunctions implements Serializable{
             Animal animalBeingSold = seller.getHealthyAnimals().get(Integer.parseInt(animalToSellIndex)-1);
 
             if(animalBeingSold.getSellsFor() > buyer.getAmountOfMoney()){ printCantAffordAnimal(buyer, animalBeingSold); return -1; }
-
+            //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[32m" + buyer.getName() + " bought " + animalBeingSold.getVanillaInfo() + " for "
                     + animalBeingSold.getSellsFor() + " coins from " + seller.getName() + ".\u001b[0m");
 
@@ -458,20 +465,15 @@ public class Game extends utilityFunctions implements Serializable{
      * Method that handles aging,decaying and disease at the end of the turn
      */
     public void decayAgeAndDiseaseAtEndofTurn(){
-        System.out.println("PERFORMING DECAY ON: " + playersPlaying.get(currentPlayer).getName() +"'S ANIMALS.");
         for (Animal eachPlayerAnimal : playersPlaying.get(currentPlayer).getOwnedAnimals()) {
-            System.out.println("BEGINNING PROCESS FOR: " + eachPlayerAnimal.getColoredInfo());
             if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) { //If the Animal is alive and hasn't decayed, decay
                 eachPlayerAnimal.decay();
-                System.out.println(eachPlayerAnimal.getColoredInfo() + "DECAYED IN END OF ROUND: " + currentRound);
             }
             if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) { //If the Animal is alive and hasn't decayed, age
                 eachPlayerAnimal.age();
-                System.out.println(eachPlayerAnimal.getColoredInfo() + "AGED IN END OF ROUND: " + currentRound);
             }
             if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) { //If the Animal is alive and hasn't decayed, roll for Disease
                 eachPlayerAnimal.chanceForDisease(playersPlaying.get(currentPlayer));
-                System.out.println(eachPlayerAnimal.getColoredInfo() + "DISEASED IN END OF ROUND: " + currentRound);
             }
             eachPlayerAnimal.setDecayedThisRound(true); //The animal has had it's decay/age/disease for the Turn
         }
@@ -489,6 +491,7 @@ public class Game extends utilityFunctions implements Serializable{
         String firstAnimalWanted,secondAnimalWanted; //wanted Animals indexes
         int returnCode = 0; //status code from handling input, used to check for exit
         if(ownedAnimals.size() <= 1){
+            //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31m" + playerBreeding.getName() +
                     " needs to have at least 2 Animals to breed. Returning to Game menu.\u001b[0m");
             return;
@@ -498,6 +501,7 @@ public class Game extends utilityFunctions implements Serializable{
             else{ females.add(inspectedAnimal); } //Females get added to female list
         }
         if(males.size() == 0 || females.size() == 0){
+            //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31mDid not find enough males or females to breed with, Returning to Game menu.\u001b[0m");
             return;
         }
@@ -518,16 +522,21 @@ public class Game extends utilityFunctions implements Serializable{
                 int madeOffspring = random.ints(1,3).findFirst().getAsInt(); //NR of Offspring
                 if(madeOffspring > 1)
                 {
+                    //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                     System.out.println("\u001b[31m" + theFemale.getVanillaInfo() + " and " + theMale.getVanillaInfo() +
                             " did not manage to make any babies.\n\u001b[0m");
                 }
                 else{
-                    //RESET \u001b[0m - GREEN - \u001b[32m
+                    //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
                     int amountOfBabies = random.ints(theFemale.getMinimumOffspring(),theFemale.getMaximumOffspring()).findFirst().getAsInt();
                     System.out.println("\u001b[32m" + theMale.getVanillaInfo() + " and " + theFemale.getVanillaInfo() + " made "
                             + amountOfBabies + " babies!\u001b[0m");
                     createBabies(amountOfBabies, females, playerBreeding, Integer.parseInt(secondAnimalWanted)); } } //Create the babies
-            else{ System.out.println("\u001b[31mCannot breed two different Animals of different breeds. Returning to Game Menu\u001b[0m"); } }
+            else{
+                //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
+                System.out.println("\u001b[31mCannot breed two different Animals of different breeds. Returning to Game Menu\u001b[0m");
+            }
+        }
     }
 
     /**
@@ -703,6 +712,7 @@ public class Game extends utilityFunctions implements Serializable{
     public void checkIfPlayerIsEliminated(){
         if (playersPlaying.get(currentPlayer).getAmountOfMoney() < 10 &&
                 playersPlaying.get(currentPlayer).getOwnedAnimals().size() == 0) { //If the player cannot afford anything and has no Animals
+            //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31m" + playersPlaying.get(currentPlayer).getName() + " was eliminated at Round: " + currentRound + " due to not having" +
                     " enough money to buy anything and no animals left." + "\u001b[0m");
             playersPlaying.remove(currentPlayer); //Remove the player
