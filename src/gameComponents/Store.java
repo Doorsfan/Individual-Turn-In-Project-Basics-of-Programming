@@ -69,16 +69,21 @@ public class Store extends utilityFunctions implements Serializable {
         int returnCode;
         boolean finishedSelling = false;
         while(!finishedSelling){
-            if(seller.getHealthyAnimals().size() == 0){ System.out.println(seller.getName() + " has no healthy animals left to sell currently."); return; }
+            if(seller.getHealthyAnimals().size() == 0){
+                System.out.println("\u001b[31m" + seller.getName() + " has no healthy animals left to sell currently." +
+                        " Returning to Game Menu\u001b[0m");
+                return;
+            }
             printSellAnimalMenu(seller); //Print the Sales menu of animals based on the Seller
             //Keep asking for a input until it is a valid index - highest accepted Index is exit index, returns back to main menu
             while(!((returnCode = (safeIntInput(1, seller.getHealthyAnimals().size()+1, wantedAnimal = userInput.next(),
                     true))) == 1)){ if(returnCode == 2) return; }
             Animal animalBeingSold = seller.getHealthyAnimals().get(Integer.parseInt(wantedAnimal)-1);
             seller.getPaid(animalBeingSold.getSellsFor());
-            System.out.println(seller.getName() + " sold " + animalBeingSold.getInfo()
+            //RESET \u001b[0m - GREEN - \u001b[32m
+            System.out.println("\u001b[32m" + seller.getName() + " sold " + animalBeingSold.getVanillaInfo()
                     + " for " + animalBeingSold.getSellsFor() + " coins. " + seller.getName() + " now has: "
-                    + seller.getAmountOfMoney() + " coins.");
+                    + seller.getAmountOfMoney() + " coins.\u001b[0m");
             seller.getOwnedAnimals().remove(animalBeingSold);
         }
     }
@@ -126,34 +131,16 @@ public class Store extends utilityFunctions implements Serializable {
 
         Food foodToAdd = foodToOffer.get(index); //The food to add to inventory
         String foodOfNameToAdd = foodToAdd.getName();
-        switch(foodOfNameToAdd){
-            case "cowMeat":
-                foodToAdd = new cowMeat();
-                break;
-            case "horseMeat":
-                foodToAdd = new horseMeat();
-                break;
-            case "Apple":
-                foodToAdd = new Apple();
-                break;
-            case "Peanut":
-                foodToAdd = new Peanut();
-                break;
-            case "Seeds":
-                foodToAdd = new Seeds();
-                break;
-            case "catFood":
-                foodToAdd = new catFood();
-                break;
-            case "dogFood":
-                foodToAdd = new dogFood();
-                break;
-            case "fishFood":
-                foodToAdd = new fishFood();
-                break;
-            case "mysteryMeat":
-                foodToAdd = new mysteryMeat();
-                break;
+        switch (foodOfNameToAdd) {
+            case "cowMeat" -> foodToAdd = new cowMeat();
+            case "horseMeat" -> foodToAdd = new horseMeat();
+            case "Apple" -> foodToAdd = new Apple();
+            case "Peanut" -> foodToAdd = new Peanut();
+            case "Seeds" -> foodToAdd = new Seeds();
+            case "catFood" -> foodToAdd = new catFood();
+            case "dogFood" -> foodToAdd = new dogFood();
+            case "fishFood" -> foodToAdd = new fishFood();
+            case "mysteryMeat" -> foodToAdd = new mysteryMeat();
         }
         for(Food ownedFood : buyer.getOwnedFood()){ //Check buyers food stocks
             if(ownedFood.getName().contains(foodToAdd.getName())){ //if there is a match in owned food and the one being purchased
@@ -173,7 +160,7 @@ public class Store extends utilityFunctions implements Serializable {
      * @param buyer A player object, the player buying Food
      */
     public void buyFood(Player buyer){
-        String wantedFood = "", wantedAmount = "";
+        String wantedFood, wantedAmount;
         int returnCode;
         if(userInput == null){ userInput = new Scanner(System.in); }
         while(buyer.getAmountOfMoney() >= pricesOfFood.get(0)/10) {
@@ -182,8 +169,9 @@ public class Store extends utilityFunctions implements Serializable {
             while(!((returnCode = (safeIntInput(1, foodToOffer.size()+1, wantedFood = userInput.next(),
                     true))) == 1)){ if(returnCode == 2) return; } //Index of Wanted food
             if(getMaxAmountOfGrams(wantedFood, buyer) < 100){
-                System.out.println("Cannot afford at least 100 grams of " + foodToOffer.get(Integer.parseInt(wantedFood)-1).getName()
-                + ", returning back to main menu.");
+                System.out.println("\u001b[31mCannot afford at least 100 grams of " + foodToOffer.get(Integer.parseInt(wantedFood)-1).getName()
+                        + ", Returning to Game menu.\n\u001b[0m");
+
                 return;
             }
             System.out.println("How many grams of " + foodToOffer.get(Integer.parseInt(wantedFood)-1).getName() + " do you want? " +
@@ -196,15 +184,16 @@ public class Store extends utilityFunctions implements Serializable {
             if (toPay <= buyer.getAmountOfMoney()) { //Can afford the food
                 addToInventory(index, buyer, wantedAmount); //Add to players Inventory (checks if already has, increases that amount instead then)
                 buyer.pay((int) toPay);
-                System.out.println(buyer.getName() + " bought " + wantedAmount + " grams of " + foodToOffer.get(index).getName() + " for " +
-                        (int) toPay + " coins. " + buyer.getName() + " now has " + buyer.getAmountOfMoney() + " coins left.");
+                //GREEN COLOR \u001b[32m - RESET \u001b[0m
+                System.out.println("\n\u001b[32m" + buyer.getName() + " bought " + wantedAmount + " grams of " + foodToOffer.get(index).getName() + " for " +
+                        (int) toPay + " coins. " + buyer.getName() + " now has " + buyer.getAmountOfMoney() + " coins left.\n\u001b[0m");
             } else { //Can't afford the food
-                System.out.println(buyer.getName() + " cannot afford the " + wantedAmount + " grams of " +
+                System.out.println("\u001b[31m" + buyer.getName() + " cannot afford the " + wantedAmount + " grams of " +
                         foodToOffer.get(index).getName() + ". It costs " + (int) toPay + " and " + buyer.getName() + " only has " +
-                        buyer.getAmountOfMoney() + " coins left!"); }
+                        buyer.getAmountOfMoney() + " coins left!\u001b[0m"); }
         }
-        System.out.println(buyer.getName() + " cannot afford any food in the store at the moment. The lowest price of 100 grams of " +
-                "an food item in the shop is: " + pricesOfFood.get(0)/10 + " coins.\n"); //Ran out of money in the Store
+        System.out.println("\u001b[31m" + buyer.getName() + " cannot afford any food in the store at the moment. The lowest price of 100 grams of " +
+                "an food item in the shop is: " + pricesOfFood.get(0)/10 + " coins.\n\u001b[0m"); //Ran out of money in the Store
     }
 
     /**
@@ -219,7 +208,8 @@ public class Store extends utilityFunctions implements Serializable {
             shopCounter += 1;
         }
         System.out.println("[" + (shopCounter+1) + "]. Exit shop.");
-        System.out.println("Which animal would you like to buy?");
+        //HERE
+        System.out.println("\u001b[33mWhich animal would you like to buy?\u001b[0m");
     }
 
     /**
@@ -231,35 +221,29 @@ public class Store extends utilityFunctions implements Serializable {
     public void choseAnimal(Player buyer, int index){
         if(nameScanner == null){ nameScanner = new Scanner(System.in); }
         if (animalsToOffer.get(index).getValue() <= buyer.getAmountOfMoney()) {
-            System.out.println("What would you like to name your new " + animalsToOffer.get(index).getClassName() + "?");
+            System.out.println("\u001b[33mWhat would you like to name your new "
+                    + animalsToOffer.get(index).getClassName() + " (" + animalsToOffer.get(index).getGender() + ")?\u001b[0m");
             String wantedName = nameScanner.nextLine(); //The wanted name
             String wantedGender = animalsToOffer.get(index).getGender(); //The wanted Gender is based on the index chosen
-            switch(animalsToOffer.get(index).getClassName()){ //based on the index, we get a ClassName and add that respective Animal
-                case "Bird":
-                    buyer.addToOwnedAnimals(new Bird(wantedName, wantedGender));
-                    break;
-                case "Cat":
-                    buyer.addToOwnedAnimals(new Cat(wantedName, wantedGender));
-                    break;
-                case "Dog":
-                    buyer.addToOwnedAnimals(new Dog(wantedName, wantedGender));
-                    break;
-                case "Elephant":
-                    buyer.addToOwnedAnimals(new Elephant(wantedName, wantedGender));
-                    break;
-                case "Fish":
-                    buyer.addToOwnedAnimals(new Fish(wantedName, wantedGender));
-                    break;
+            //based on the index, we get a ClassName and add that respective Animal
+            switch (animalsToOffer.get(index).getClassName()) {
+                case "Bird" -> buyer.addToOwnedAnimals(new Bird(wantedName, wantedGender));
+                case "Cat" -> buyer.addToOwnedAnimals(new Cat(wantedName, wantedGender));
+                case "Dog" -> buyer.addToOwnedAnimals(new Dog(wantedName, wantedGender));
+                case "Elephant" -> buyer.addToOwnedAnimals(new Elephant(wantedName, wantedGender));
+                case "Fish" -> buyer.addToOwnedAnimals(new Fish(wantedName, wantedGender));
             }
             buyer.pay(animalsToOffer.get(index).getValue()); //Pay the full value of the Animal
-            System.out.println(buyer.getName() + " bought a " + animalsToOffer.get(index).getGender() +
+            //RESET \u001b[0m - GREEN - \u001b[32m
+            System.out.println("\u001b[32m" + buyer.getName() + " bought a " + animalsToOffer.get(index).getGender() +
                     " " + animalsToOffer.get(index).getClassName() + " for " +
-                    animalsToOffer.get(index).getValue() + " coins. " + buyer.getName() + " now has " +
-                    buyer.getAmountOfMoney() + " coins left.");
+                    animalsToOffer.get(index).getValue() + " coins and named it: " + wantedName + ".\u001b[0m");
+            System.out.println(buyer.getName() + " now has " + buyer.getAmountOfMoney() + " coins left.\n");
         } else {
-            System.out.println(buyer.getName() + " cannot afford the " + animalsToOffer.get(index).getClassName() + ". It costs " +
+            //HERE
+            System.out.println("\u001b[31m" + buyer.getName() + " cannot afford the " + animalsToOffer.get(index).getClassName() + ". It costs " +
                     animalsToOffer.get(index).getValue() + " and " + buyer.getName() + " only has " +
-                    buyer.getAmountOfMoney() + " coins left!");
+                    buyer.getAmountOfMoney() + " coins left!\u001b[0m");
         }
     }
 
@@ -269,13 +253,16 @@ public class Store extends utilityFunctions implements Serializable {
      */
     public void buyAnimal(Player buyer){
         if(userInput == null){ userInput = new Scanner(System.in); }
-        if(buyer.getAmountOfMoney() < pricesOfAnimals.get(0)){
-            System.out.println(buyer.getName() + " cannot afford any animal in the store at the moment. " +
-                    "The lowest price of an animal in the shop is: " + pricesOfAnimals.get(0) + " coins.");
-            return;
-        }
-        System.out.println("Welcome " + buyer.getName() + " to The Emporium of Animals! We sell Animals/Food for animals!");
-        while(buyer.getAmountOfMoney() >= pricesOfAnimals.get(0)) {
+        boolean buyingAnimal = true;
+        while(buyingAnimal) {
+            if(buyer.getAmountOfMoney() < pricesOfAnimals.get(0)){
+                System.out.println("\u001b[31m" + buyer.getName() + " cannot afford any animal in the store at the moment.\n" +
+                        "The lowest price of an animal in the shop is: " + pricesOfAnimals.get(0) + " coins." +
+                        "\nReturning to Game Menu.\n\u001b[0m");
+                return;
+            }
+            System.out.println("\u001b[32mWelcome " + buyer.getName() +
+                    " to The Emporium of Animals! We sell Animals/Food for animals!\u001b[0m");
             printAnimalsInBuyAnimals(buyer); //Print info about the animals up for sale
             shopCounter = 0;
             String wantedAnimal = "";

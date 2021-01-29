@@ -28,11 +28,11 @@ public class utilityFunctions implements Serializable{
             }
             counter += 1;
         }
-        System.out.println("What animal does " + seller.getName() + " wish to sell to: " + buyer.getName() + " (Funds: "
-                + buyer.getAmountOfMoney() + " coins)" + "?");
+        System.out.println("\u001b[33mWhat animal does " + seller.getName() + " wish to sell to: " + buyer.getName() + " (Funds: "
+                + buyer.getAmountOfMoney() + " coins)" + "?\u001b[0m");
         counter = 1;
         for(Animal sellersAnimals: seller.getHealthyAnimals()){
-            System.out.println("[" + counter + "] " + sellersAnimals.getInfo() + " Sells for: " + sellersAnimals.getSellsFor() + " coins");
+            System.out.println("[" + counter + "] " + sellersAnimals.getColoredInfo() + " Sells for: " + sellersAnimals.getSellsFor() + " coins");
             counter += 1;
         }
         System.out.println("[" + counter + "]" + " Back to main menu");
@@ -45,17 +45,8 @@ public class utilityFunctions implements Serializable{
      * @param animalBeingSold An animal object, the Animal being sold
      */
     public void printCantAffordAnimal(Player buyer, Animal animalBeingSold){
-        System.out.println(buyer.getName() + " cannot afford " + animalBeingSold.getInfo() + "! (Needed: " + animalBeingSold.getSellsFor() +
-                " coins, has only " + buyer.getAmountOfMoney() + " coins)\n Returning back to main menu");
-    }
-
-    public void wait(int seconds){
-        try{
-            Thread.sleep((seconds * 1000)); //wait one second to allow user to react to events
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }
+        System.out.println("\u001b[31m" + buyer.getName() + " cannot afford " + animalBeingSold.getVanillaInfo() + "! (Needed: " + animalBeingSold.getSellsFor() +
+                " coins, has only " + buyer.getAmountOfMoney() + " coins)\n Returning back to main menu\u001b[0m");
     }
 
     /**
@@ -71,13 +62,13 @@ public class utilityFunctions implements Serializable{
         String[] splitInput = input.split("");
         try{
             if(splitInput.length > 1){
-                throw new RuntimeException("Input must be 1 character long (y or n) (Case insensitive)");
+                throw new RuntimeException("\u001b[31mInput must be 1 character long (y or n) (Case insensitive)\u001b[0m");
             }
             else if(input.toLowerCase().equals("y") || input.toLowerCase().equals("n")){
                 return 1;
             }
             else{
-                throw new RuntimeException("Input was : " + input + ", only allowed to be y or n");
+                throw new RuntimeException("\u001b[31mInput was : " + input + ", only allowed to be y or n\u001b[0m");
             }
         }
         catch(Exception e){
@@ -103,19 +94,20 @@ public class utilityFunctions implements Serializable{
     public  int safeIntInput(int lowerBoundary, int upperBoundary, String input, boolean maxIsExitCode) throws RuntimeException{
         int check;
         try{
-            check = Integer.valueOf(input);
+            check = Integer.parseInt(input);
             if(check < lowerBoundary || check > upperBoundary){
-                throw new RuntimeException("Out of accepted boundary - [LOWER: " + lowerBoundary + " UPPER: " + upperBoundary +
-                        " GIVEN: " + check + "] - " + "Please write a number between: " + lowerBoundary + " and " + upperBoundary + ".");
+                throw new RuntimeException("\u001b[31mOut of accepted boundary - [LOWER: " + lowerBoundary + " UPPER: " + upperBoundary +
+                        " GIVEN: " + check + "] - " + "Please write a number between: " + lowerBoundary +
+                        " and " + upperBoundary + ".\u001b[0m");
             }
             if(check == upperBoundary && maxIsExitCode){
-                System.out.println("User chose to exit. Returning back to main menu.");
+                System.out.println("\u001b[31mUser chose to exit. Returning back to main menu.\u001b[0m");
                 return 2;
             }
         }
         catch(Exception e){
             if(e.getMessage().contains("For input")){
-                System.out.println("Please do not put in letters instead of Numbers.");
+                System.out.println("\u001b[31mPlease do not put in letters instead of Numbers.\u001b[0m");
             }
             else{
                 System.out.println(e.getMessage());
@@ -133,16 +125,16 @@ public class utilityFunctions implements Serializable{
     public void printSellAnimalMenu(Player seller){
         ArrayList<Animal> animalsToSell = seller.getHealthyAnimals();
         int shopCounter = 1;
-        System.out.println("Which animal would " + seller.getName() + " like to sell?");
+        System.out.println("\u001b[33mWhich animal would " + seller.getName() + " like to sell?\u001b[0m");
         for(Animal animal : animalsToSell){
-            System.out.println("[" + shopCounter + "] " + animal.getInfo() + " (Sells for: " + animal.getSellsFor() + " coins)");
+            System.out.println("[" + shopCounter + "] " + animal.getColoredInfo() + " (Sells for: " + animal.getSellsFor() + " coins)");
             shopCounter += 1;
         }
         System.out.println("[" + (animalsToSell.size() + 1) + "] Exit shop");
     }
 
     /**
-     * A method that is responsible for creating babies - 50% chanse of a male or female per baby, and each
+     * A method that is responsible for creating babies - 50% chance of a male or female per baby, and each
      * type of animal has a different amount of Babies they produce
      *
      * @param amountOfBabies An int, the amount of children to create
@@ -154,30 +146,21 @@ public class utilityFunctions implements Serializable{
         if(nameScanner == null){ nameScanner = new Scanner(System.in); }
         Random random = new Random();
         for(int i = 0; i < amountOfBabies; i++){ //Create amountOfBabies babies
-            int genderChance = random.ints(1,3).findFirst().getAsInt(); //50% chanse of being female or male
+            int genderChance = random.ints(1,3).findFirst().getAsInt(); //50% chance of being female or male
             String gender; //The gender
             gender = (genderChance == 1 ? "Male" : "Female"); //If it's 1, it's a Male, otherwise, it's a Female
             System.out.println("It's a " + gender); //Announce what it is
-            System.out.println("What would you like to name your new baby " + females.get(secondAnimalIndex-1).getClassName() + " " +
-                    "(" + gender + ")?"); //Print the Class name (same as its parents) and the gender
+            System.out.println("\u001b[33mWhat would you like to name your new baby " + females.get(secondAnimalIndex-1).getClassName() + " " +
+                    "(" + gender + ")?\u001b[0m"); //Print the Class name (same as its parents) and the gender
 
             String name = nameScanner.nextLine(); //ask for a name
-            switch(females.get(secondAnimalIndex-1).getClassName()){ //Based on what the parent is, the baby is the same in terms of Species
-                case "Bird":
-                    playerBreeding.addToOwnedAnimals(new Bird(name,gender));
-                    break;
-                case "Cat":
-                    playerBreeding.addToOwnedAnimals(new Cat(name,gender));
-                    break;
-                case "Dog":
-                    playerBreeding.addToOwnedAnimals(new Dog(name,gender));
-                    break;
-                case "Elephant":
-                    playerBreeding.addToOwnedAnimals(new Elephant(name,gender));
-                    break;
-                case "Fish":
-                    playerBreeding.addToOwnedAnimals(new Fish(name,gender));
-                    break;
+            //Based on what the parent is, the baby is the same in terms of Species
+            switch (females.get(secondAnimalIndex - 1).getClassName()) {
+                case "Bird" -> playerBreeding.addToOwnedAnimals(new Bird(name, gender));
+                case "Cat" -> playerBreeding.addToOwnedAnimals(new Cat(name, gender));
+                case "Dog" -> playerBreeding.addToOwnedAnimals(new Dog(name, gender));
+                case "Elephant" -> playerBreeding.addToOwnedAnimals(new Elephant(name, gender));
+                case "Fish" -> playerBreeding.addToOwnedAnimals(new Fish(name, gender));
             }
         }
     }
@@ -190,11 +173,12 @@ public class utilityFunctions implements Serializable{
      */
     public void printSalesMenu(Player buyer, ArrayList<Player> sellers){
         int counter = 1;
-        System.out.println("Which Player does " + buyer.getName() + " wish to buy Animals from?");
+        System.out.println("\u001b[33mWhich Player does " + buyer.getName() + " wish to buy Animals from? ("
+                + buyer.getName() + "'s funds: " + buyer.getAmountOfMoney() + " coins)\u001b[0m");
         for(Player players: sellers){ //Go through all the Sellers and print Info about them
             System.out.println("[" + counter + "] " + players.getName() + " - Owns " + players.getHealthyAnimals().size() + " healthy animal(s): ");
             for(Animal ownedAnimals : players.getHealthyAnimals()){ //Go through their Animals and Print info about them
-                System.out.println("\t" + ownedAnimals.getInfo() + " Costs: " + ownedAnimals.getSellsFor() + " coins");
+                System.out.println("\t" + ownedAnimals.getColoredInfo() + " Costs: " + ownedAnimals.getSellsFor() + " coins");
             }
             counter += 1;
         }
@@ -209,10 +193,9 @@ public class utilityFunctions implements Serializable{
      * @return An Array List of Player Objects, that are of all the Possible sellers
      */
     public ArrayList<Player> buildSellersList(Player buyer, ArrayList<Player> sellers, ArrayList<Player> playersPlaying){
-
         for(Player players : playersPlaying){ //Go through the playersPlaying
             if( !players.equals(buyer) ) {  //If they're not the buyer themselves
-                if(players.getHealthyAnimals().size() > 0) { sellers.add(players); } //Add them to the list
+                if(players.getHealthyAnimals().size() > 0) { sellers.add(players); } //Add them to the list if they have Healthy animals
             }
         }
         return sellers;
@@ -226,44 +209,25 @@ public class utilityFunctions implements Serializable{
      */
     public void printBuyFromOtherPlayerMenu(Player buyer, Player seller){
         int counter = 1;
-
-        System.out.println("Which animal does " + buyer.getName() + " wish to buy from: " + seller.getName() + " (" + buyer.getName() +"'s funds: "
-                + buyer.getAmountOfMoney() + " coins)" + "?");
-
-        counter = 1;
+        System.out.println("\u001b[33mWhich animal does " + buyer.getName() + " wish to buy from: " + seller.getName()
+                + " (" + buyer.getName() +"'s funds: "
+                + buyer.getAmountOfMoney() + " coins)" + "?\u001b[0m");
         for(Animal sellersAnimals: seller.getHealthyAnimals()){
-            System.out.println("[" + counter + "] " + sellersAnimals.getInfo() + " Costs: " + sellersAnimals.getSellsFor() + " coins");
+            System.out.println("[" + counter + "] " + sellersAnimals.getColoredInfo() + " Costs: " + sellersAnimals.getSellsFor() + " coins");
             counter += 1;
         }
         System.out.println("[" + counter + "]" + " Back to main menu");
     }
 
     /**
-     * A method responsible for printing out information about having insufficient funds to buy an ANimal from another Player
+     * A method responsible for printing out information about having insufficient funds to buy an Animal from another Player
      * @param buyer A player object, the buyer
      * @param animalBeingBought An Animal object, the Animal trying to be bought
      */
     public void printFailedTransaction(Player buyer, Animal animalBeingBought){
-        System.out.println(buyer.getName() + " cannot afford " + animalBeingBought.getInfo() + "! (Needed: " + animalBeingBought.getSellsFor() +
-                " coins, has only " + buyer.getAmountOfMoney() + " coins)");
-        System.out.println("Returning back to main menu.");
-    }
-
-
-
-    /**
-     * The method that is responsible for clearing out animals based on that they are dead
-     * @param playersPlaying An Arraylist of Player, all of which are players still in the game
-     * @param currentPlayer An int, the current player
-     */
-    public void removeAnimals(ArrayList<Player> playersPlaying, int currentPlayer){
-        if (playersPlaying.get(currentPlayer).getShouldBeRemoved().size() > 0) {
-            for (int i = playersPlaying.get(currentPlayer).getShouldBeRemoved().size() - 1; i > -1; i--) {
-                Animal toRemove = playersPlaying.get(currentPlayer).getShouldBeRemoved().get(i);
-                playersPlaying.get(currentPlayer).getOwnedAnimals().remove(toRemove);
-                playersPlaying.get(currentPlayer).getShouldBeRemoved().remove(i);
-            }
-        }
+        System.out.println("\u001b[31m" + buyer.getName() + " cannot afford " + animalBeingBought.getVanillaInfo() + "! " +
+                "(Needed: " + animalBeingBought.getSellsFor() + " coins, has only " + buyer.getAmountOfMoney() + " coins)\u001b[0m");
+        System.out.println("\u001b[31mReturning to Game menu.\u001b[0m");
     }
 
     /**
@@ -276,23 +240,57 @@ public class utilityFunctions implements Serializable{
      * @param playersPlaying An ArrayList of Player objects, all of whom are Players still playing
      */
     public void printAnimals(boolean loadedGame, int currentRound, int currentPlayer, ArrayList<Player> playersPlaying, int maxRounds) {
-        System.out.println("\nRound " + currentRound + "/" + maxRounds + ", " + playersPlaying.get(currentPlayer).getName() + "'s turn.\n[Remaining players:" +
-                " " + playersPlaying + "]");
+        int counter = 0;
+        System.out.println("\nRound " + currentRound + "/" + maxRounds + ", \u001B[1m\u001b[31m"
+                + playersPlaying.get(currentPlayer).getName() + "\u001b[0m's turn.");
+        System.out.println("\t~~===    STILL PLAYING    ===~~\t");
+        for(Player playerStillPlaying: playersPlaying){
+            if(counter == currentPlayer){
+                System.out.print("== \u001b[31m" + playerStillPlaying.getName() + "\u001b[0m - " + " Funds: " +
+                        playerStillPlaying.getAmountOfMoney() + " coins ==\n");
+            }
+            else{
+                System.out.print("== " + playerStillPlaying.getName() + " - " + " Funds: " +
+                        playerStillPlaying.getAmountOfMoney() + " coins ==\n");
+            }
+            counter += 1;
+        }
+        counter = 0;
         playersPlaying.get(currentPlayer).announceDeaths(currentRound);
         if (loadedGame) {
             for (String printedDeath : playersPlaying.get(currentPlayer).getSavedDeathList()) {
-                System.out.println(printedDeath);
+                System.out.println("\u001b[31m" + printedDeath + "\u001b[0m");
             }
         }
-        System.out.print(playersPlaying.get(currentPlayer).getName() + "'s Owned Animals: \n");
+        System.out.print("\n\u001b[31m" + playersPlaying.get(currentPlayer).getName() + "\u001b[0m's Owned Animals: \n");
 
         for (Animal ownedAnimal : playersPlaying.get(currentPlayer).getOwnedAnimals()) {
             System.out.print(ownedAnimal.getName() + " the " + ownedAnimal.getClass().getSimpleName() +
-                    "(" + ownedAnimal.getGender() + "), who is at: "
-                    + ownedAnimal.getHealth() + " health (Lost " + ownedAnimal.getLostHealth() + " health last round, was at: " +
-                    ownedAnimal.getWasAtHealth() + " health.) (Age: " + ownedAnimal.getAge() + " of " + ownedAnimal.getMaxAge() + ")\n");
+                    "(" + ownedAnimal.getGender() + "), who is at: ");
+            if(ownedAnimal.getHealth() >= 50){
+                System.out.print("\u001b[32m"); //Green health
+            }
+            else if(ownedAnimal.getHealth() >= 30 && ownedAnimal.getHealth() <= 49){
+                System.out.print("\u001b[33m"); //Yellow Health
+            }
+            else{
+                System.out.print("\u001b[31m"); //Red health
+            }
+            System.out.print(ownedAnimal.getHealth() + "\u001b[0m health (Lost " + ownedAnimal.getLostHealth() + " health last round, was at: " +
+                    ownedAnimal.getWasAtHealth() + " health.) (Age: ");
+            double percentOfYearsSpent = (double)ownedAnimal.getAge()/(double)ownedAnimal.getMaxAge();
+            if(percentOfYearsSpent >= 0.75){
+                System.out.print("\u001b[31m"); //Red age
+            }
+            else if(percentOfYearsSpent >= 0.33 && percentOfYearsSpent <= 74){
+                System.out.print("\u001b[33m"); //Yellow age
+            }
+            else{
+                System.out.print("\u001b[32m"); //Green age
+            }
+            System.out.print(ownedAnimal.getAge() + "\u001b[0m of " + ownedAnimal.getMaxAge() + ")\n");
         }
-        System.out.print(playersPlaying.get(currentPlayer).getName() + "'s Owned Food: \n");
+        System.out.print("\u001b[31m" + playersPlaying.get(currentPlayer).getName() + "\u001b[0m's Owned Food: \n");
         for (Food ownedFood : playersPlaying.get(currentPlayer).getOwnedFood()) {
             System.out.print(ownedFood.getGrams() + " Grams of " + ownedFood.getClass().getSimpleName() + "\n");
         }
@@ -310,7 +308,9 @@ public class utilityFunctions implements Serializable{
      */
     public int listOfBuyersInSellToOtherPlayer(Player seller, ArrayList<Player> buyers, ArrayList<Player> playersPlaying){
         int counter = 1, sellersIndex = 1;
-        System.out.println("Which Player does " + seller.getName() + " wish to sell Animals to?");
+
+        System.out.println("\u001b[33mWhich Player does " + seller.getName() + " wish to sell Animals to? ("
+                + seller.getName() +"'s funds: " + seller.getAmountOfMoney() + " coins)\u001b[0m");
         for(Player players : playersPlaying){
             if(!players.equals(seller)){
                 System.out.println("[" + counter + "] " + players.getName() + " - Funds: " + players.getAmountOfMoney() + " coins.");
@@ -330,10 +330,10 @@ public class utilityFunctions implements Serializable{
      * @param males An ArrayList of Animals, all of whom are Males
      */
     public  void printMales(ArrayList<Animal> males){
-        System.out.println("Please choose a male: ");
+        System.out.println("\u001b[33mPlease choose a male:\u001b[0m");
         int counter = 1;
         for(Animal male : males){
-            System.out.println("[" + counter + "] " + male.getInfo());
+            System.out.println("[" + counter + "] " + male.getColoredInfo());
             counter += 1;
         }
         System.out.println("[" + counter + "] Back to Main Menu");
@@ -344,10 +344,10 @@ public class utilityFunctions implements Serializable{
       * @param females An ArrayList of Animals, all of whom are females
      */
     public  void printFemales(ArrayList<Animal> females){
-        System.out.println("Please choose a female: ");
+        System.out.println("\u001b[33mPlease choose a female:\u001b[0m");
         int counter = 1;
         for(Animal female : females){
-            System.out.println("[" + counter + "] " + female.getInfo());
+            System.out.println("[" + counter + "] " + female.getColoredInfo());
             counter += 1;
         } System.out.println("[" + counter + "] Back to Main Menu");
     }

@@ -16,7 +16,7 @@ import java.util.Random;
  * fun and variety to the game - as well as justifying the concept of having both Plant and Meat as Abstract
  * categorical classes.
  *
- * There is a 100% chanse at Store creation, that the Mystery meat will contain either Meat, Plants or Both.
+ * There is a 100% chance at Store creation, that the Mystery meat will contain either Meat, Plants or Both.
  * This meat can be horseMeat, cowMeat or ratMeat.
  * The plants range from Peanuts, Seeds to Apples.
  *

@@ -17,8 +17,7 @@ public class Game extends utilityFunctions implements Serializable{
     //Initialize our variables that we are going to need
     private int rounds = 0, players = 0, currentRound = 1, currentPlayer = 0;
     private String wantedRoundsInput = "", wantedPlayersInput = "";
-    private boolean showedMenu = false, deductedRounds = false;
-    private Random random = new Random();
+    private boolean showedMenu = false;
     private ArrayList<Player> playersPlaying = new ArrayList<>();
     private Store ourStore = null;
     private ArrayList<String> winner = new ArrayList<>();
@@ -49,13 +48,12 @@ public class Game extends utilityFunctions implements Serializable{
      * @throws FileNotFoundException An Exception that has to be able to be thrown in terms of loading and parsing Files
      */
     public void loadGame(Game myGame) throws FileNotFoundException{
-        boolean holdLoop = true;
         int counter = 1, returnCode = 0;
         String userInput = "", filePath;
         File[] gameFiles = new File("savedGames").listFiles();
         if(loadGameScanner == null){ loadGameScanner = new Scanner(System.in); }
         if(gameFiles.length == 0){
-            System.out.println("There are no save games currently. Returning to main menu.");
+            System.out.println("\u001b[31mThere are no save games currently. Returning to main menu.\u001b[0m");
             myGame.showMainMenu();
             return;
         }
@@ -68,26 +66,27 @@ public class Game extends utilityFunctions implements Serializable{
                     Object obj = objectIn.readObject(); //Read the object in from the Save file
                     Game loadedGame = (Game) obj; //Convert it to a game object and save it
                     objectIn.close(); //Close the stream when Done
-                    System.out.println("[" + counter + "] " + saves.getName().substring(0, saves.getName().length()-4) + " (Round: "
+                    System.out.println("[" + counter + "] " + saves.getName().substring(0, saves.getName().length()-4) + " [ = Round: "
                         + loadedGame.getCurrentRound() + "/" + (loadedGame.getRounds() + (loadedGame.getCurrentRound()-1))
-                            + " Players remaining(" + loadedGame.getPlayersPlaying().size() + "/" + loadedGame.getPlayers() + ")" +
-                            ": " + loadedGame.getPlayersPlaying() + ")");
+                            + " - Players remaining (" + loadedGame.getPlayersPlaying().size() + "/" + loadedGame.getPlayers() + ") = ]");
+                    for(Player playerInGame : loadedGame.getPlayersPlaying()){
+                        System.out.println("\t\t\t" + playerInGame);
+                    }
                     System.out.println("\tLast played: " + dtf.format(loadedGame.getTimeOfSaving()));
                 }
-                catch(Exception e){
-
+                catch(Exception e){ //IGNORE
                 }
                 counter += 1;
             }
             System.out.println("[" + counter + "] Exit");
             while(!((returnCode = (safeIntInput(1, gameFiles.length+1, userInput = loadGameScanner.next(),
                     false))) == 1)){ } //Chose to exit on 3
-            if(Integer.valueOf(userInput) == gameFiles.length+1){
-                System.out.println("Exiting from loading game menu.");
+            if(Integer.parseInt(userInput) == gameFiles.length+1){
+                System.out.println("\u001b[31mExiting from loading game menu.\u001b[0m");
                 myGame.showMainMenu();
                 return;
             }
-            filePath = "savedGames\\" + gameFiles[Integer.valueOf(userInput)-1].getName();
+            filePath = "savedGames\\" + gameFiles[Integer.parseInt(userInput)-1].getName();
             System.out.println("filePath is:" + filePath);
         }
         loadFile(filePath, myGame);
@@ -98,35 +97,30 @@ public class Game extends utilityFunctions implements Serializable{
      * @param filePath A string, the Filepath to load from
      */
     public void loadFile(String filePath, Game myGame){
-        boolean holdLoop = true;
-        while(holdLoop){
-            //Open the FileInputStream on the given Filepath
-            try { //Open the ObjectInputStream on the filePath handle
-                FileInputStream fileIn = new FileInputStream(filePath);
-                ObjectInputStream objectIn = new ObjectInputStream(fileIn);
-                Object obj = objectIn.readObject(); //Read the object in from the Save file
-                Game loadedGame = (Game) obj; //Convert it to a game object and save it
-                myGame.setCurrentPlayer(loadedGame.getCurrentPlayer()); //Retrieve the attributes and set them to the current Game
-                myGame.setCurrentRound(loadedGame.getCurrentRound());
-                myGame.setPlayers(loadedGame.getPlayers());
-                myGame.setRounds(loadedGame.getRounds());
-                myGame.setPlayersPlaying(loadedGame.getPlayersPlaying());
-                myGame.setShowedMenu(loadedGame.getShowedMenu());
-                myGame.setOurStore(loadedGame.getOurStore());
-                System.out.println("Successfully loaded save game from: " + filePath);
-                if(!myGame.getShowedMenu()){ //When loading, re-create Menus printed as well - including Deaths from saved Turn
-                    myGame.removeAnimals(loadedGame.getPlayersPlaying(), loadedGame.getCurrentPlayer());
-                    myGame.printAnimals(true, loadedGame.getCurrentRound(), loadedGame.getCurrentPlayer()
-                            , loadedGame.getPlayersPlaying(), (rounds+currentRound-1));
-                    myGame.setShowedMenu(true);
-                }
-                objectIn.close(); //Close the stream when Done
-                myGame.runGame();
-                break;
-            } catch (Exception ex) {
-                System.out.println(ex);
-                break; //Stream closed
+        //Open the FileInputStream on the given Filepath
+        try { //Open the ObjectInputStream on the filePath handle
+            FileInputStream fileIn = new FileInputStream(filePath);
+            ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+            Object obj = objectIn.readObject(); //Read the object in from the Save file
+            Game loadedGame = (Game) obj; //Convert it to a game object and save it
+            myGame.setCurrentPlayer(loadedGame.getCurrentPlayer()); //Retrieve the attributes and set them to the current Game
+            myGame.setCurrentRound(loadedGame.getCurrentRound());
+            myGame.setPlayers(loadedGame.getPlayers());
+            myGame.setRounds(loadedGame.getRounds());
+            myGame.setPlayersPlaying(loadedGame.getPlayersPlaying());
+            myGame.setShowedMenu(loadedGame.getShowedMenu());
+            myGame.setOurStore(loadedGame.getOurStore());
+            System.out.println("Successfully loaded save game from: " + filePath);
+            if(!myGame.getShowedMenu()){ //When loading, re-create Menus printed as well - including Deaths from saved Turn
+                //myGame.removeAnimals(loadedGame.getPlayersPlaying(), loadedGame.getCurrentPlayer());
+                myGame.printAnimals(true, loadedGame.getCurrentRound(), loadedGame.getCurrentPlayer()
+                        , loadedGame.getPlayersPlaying(), (rounds+currentRound-1));
+                myGame.setShowedMenu(true);
             }
+            objectIn.close(); //Close the stream when Done
+            myGame.runGame();
+        } catch (Exception ex) {
+            System.out.println(ex);
         }
     }
 
@@ -159,7 +153,10 @@ public class Game extends utilityFunctions implements Serializable{
             printRules();
             showMainMenu();
         }
-        if (userInput.equals("4")) { System.out.println("User chose to exit game. Shutting down."); System.exit(1); }
+        if (userInput.equals("4")) {
+            System.out.println("\u001b[31mUser chose to exit game. Shutting down.\u001b[0m");
+            System.exit(1);
+        }
         return -1;
     }
 
@@ -167,33 +164,44 @@ public class Game extends utilityFunctions implements Serializable{
      * A method that is responsible for printing the Rules of the Game
      */
     public void printRules(){
-        System.out.println("\t\t\t\t====Welcome to the Pet Game!====\n\t\t\t----Here are the rules for the Pet Game----\n\t\n" +
-                "\t1: The game is played between 5-30 Rounds, with 1-4 Players. (Chosen at the start)\n" +
-                "\t2: Each player starts with 1000 coins and no Animals.\n" +
-                "\t3: Every round a Player gets to do ONE of the following things:\n\n" +
-                "\t\t-> Buy an Animal from the Store (if they have enough money to do so)\n" +
-                "\t\t-> Sell an Animal to the Store (If they have any)\n" +
-                "\t\t-> Feed their Animals (if they have any and they have food that the Animal likes)\n" +
-                "\t\t-> Try to breed one male and one female of their animals (if compatible)\n" +
-                "\t\t-> Buy some food from the Store (if they can afford it - minimum 100g of a food item)\n" +
-                "\t\t-> Sell one of their Animals to another player who is still in the game (if they can afford it)(Not sick ones)\n" +
-                "\t\t-> Buy an Animal from another player (Not sick ones)(If they can afford it and there are others to buy from)\n" +
-                "\t\t-> Skip their turn\n" +
-                "\t\t-> Save the Game and Exit to Main Menu (Asks Y/N in case of Overwriting)\n\n" +
-                "\tEvery round, all animals decay (losing 10-30% of max Health every round), age (if they get too old, they die)\n" +
-                "\tand have a 20% chance of getting sick. (20% per Animal per Round) - The sell value of an Animal declines with age\n" +
-                "\tand reduced Health and a Sick animal cannot be sold, fed or spared from death - other than paying the Vet bill\n" +
-                "\t,which gives them a 50% chance of being cured.\n\n" +
-                "\tWhen a player no longer has enough money to buy anything from the store and no Animals - they are eliminated.\n\n" +
-                "\tAt the end of the game - all remaining players sell off their living and healthy animals for their sell value,\n" +
-                "\tand gain said money - Afterwards, rankings are presented - There are no shared spots for equal amount of Coins,\n" +
-                "\tit simply takes the first player it finds as the winner, in that case. If no players make it to the end, there is\n" +
-                "\t no winner.\n\n" +
-                "\tWhen an animal dies - it's death is announced to the player at the next Round, along with cause of death  - At the\n" +
-                "\t start of every round a player is given information about remaining players, their own Animals, Decay since last turn \n" +
-                "\tand their funds.\n\n" +
-                "\tIn the Main Menu, the player can choose to start a new game, load a previous game (if any save is available) or\n" +
-                "\tto see the Game Rules printed out.\n\n");
+        System.out.println("""
+                \t\t\t\t====Welcome to the Pet Game!====
+                \t\t\t----Here are the rules for the Pet Game----
+                \t
+                \t1: The game is played between 5-30 Rounds, with 1-4 Players. (Chosen at the start)
+                \t2: Each player starts with 1000 coins and no Animals.
+                \t3: Every round a Player gets to do ONE of the following things:
+
+                \t\t-> Buy an Animal from the Store (if they have enough money to do so)
+                \t\t-> Sell an Animal to the Store (If they have any)
+                \t\t-> Feed their Animals (if they have any and they have food that the Animal likes)
+                \t\t-> Try to breed one male and one female of their animals (if compatible)
+                \t\t-> Buy some food from the Store (if they can afford it - minimum 100g of a food item)
+                \t\t-> Sell one of their Animals to another player who is still in the game (if they can afford it)(Not sick ones)
+                \t\t-> Buy an Animal from another player (Not sick ones)(If they can afford it and there are others to buy from)
+                \t\t-> Skip their turn
+                \t\t-> Save the Game and Exit to Main Menu (Asks Y/N in case of Overwriting)
+
+                \tEvery round, all animals decay (losing 10-30% of max Health every round), age (if they get too old, they die)
+                \tand have a 20% chance of getting sick. (20% per Animal per Round) - The sell value of an Animal declines with age
+                \tand reduced Health and a Sick animal cannot be sold, fed or spared from death - other than paying the Vet bill
+                \t,which gives them a 50% chance of being cured.
+
+                \tWhen a player no longer has enough money to buy anything from the store and no Animals - they are eliminated.
+
+                \tAt the end of the game - all remaining players sell off their living and healthy animals for their sell value,
+                \tand gain said money - Afterwards, rankings are presented - There are no shared spots for equal amount of Coins,
+                \tit simply takes the first player it finds as the winner, in that case. If no players make it to the end, there is
+                \t no winner.
+
+                \tWhen an animal dies - it's death is announced to the player at the next Round, along with cause of death  - At the
+                \t start of every round a player is given information about remaining players, their own Animals, Decay since last turn\s
+                \tand their funds.
+
+                \tIn the Main Menu, the player can choose to start a new game, load a previous game (if any save is available) or
+                \tto see the Game Rules printed out.
+
+                """);
     }
     /**
      * The method responsible for handling amount of rounds and players to be played with - delegates tasks of
@@ -208,7 +216,7 @@ public class Game extends utilityFunctions implements Serializable{
         setCurrentRound(1);
         setCurrentPlayer(0);
         this.setShowedMenu(false);
-        System.out.println("\n===================================\n");
+        System.out.println("\n===================================\n == STARTING A FRESH NEW GAME ==");
         System.out.println("How many rounds would you like to play? (5-30)");
         while(!(safeIntInput(5, 30, wantedRoundsInput = userInputScanner.next(), false) == 1)){
             //Breaks when the input is within a valid range and is a Number
@@ -235,39 +243,42 @@ public class Game extends utilityFunctions implements Serializable{
      */
     public int buyFromOtherPlayer(Player buyer){
         int counter = 1, returnCode = 0;
-        ArrayList<Player> sellers = new ArrayList<Player>(); //List of sellers
+        ArrayList<Player> sellers = new ArrayList<>(); //List of sellers
         String targetPlayerIndex, animalToBuyIndex; //Indexes the player wishes to target (player and Animal)
         boolean doneBuying = false;
         while(!doneBuying) {
             if( playersPlaying.size() < 2 ){
-                System.out.println("No other players in game. Returning to main menu.");
+                System.out.println("\u001b[31mNo other players in game. Returning to Game menu.\u001b[0m");
                 return -1;
             } //Too few players
             sellers = buildSellersList(buyer, sellers, playersPlaying);
-            if ( sellers.size() == 0 ) return -1; //No other player with Animals to buy from is available
+            if ( sellers.size() == 0 ){
+                System.out.println("\u001b[31mNo other players had healthy animals to sell. Returning to Game menu.\u001b[0m");
+                return -1;
+            } //No other player with Animals to buy from is available
             else{ printSalesMenu(buyer, sellers); } //Otherwise, just print the sellers
 
             while(!((returnCode = (safeIntInput(1, sellers.size()+1, targetPlayerIndex = userInputScanner.next(),
                     true))) == 1)){ if(returnCode == 2) return 1; }
             //Which player the Player wants to buy from - forces a valid index, returnCode is 2 if it's the exit index
-            Player seller = sellers.get(Integer.valueOf(targetPlayerIndex)-1); //Save the seller
+            Player seller = sellers.get(Integer.parseInt(targetPlayerIndex)-1); //Save the seller
 
             printBuyFromOtherPlayerMenu(buyer, seller); //print the Menu
 
             while(!((returnCode = (safeIntInput(1, seller.getHealthyAnimals().size()+1, animalToBuyIndex = userInputScanner.next(),
                     true))) == 1)){ if(returnCode == 2) return 1; } //Which animal the player wants to Buy
-            Animal animalBeingBought = seller.getHealthyAnimals().get(Integer.valueOf(animalToBuyIndex)-1); //Animal being Bought
+            Animal animalBeingBought = seller.getHealthyAnimals().get(Integer.parseInt(animalToBuyIndex)-1); //Animal being Bought
             if(animalBeingBought.getSellsFor() > buyer.getAmountOfMoney()) {
                 printFailedTransaction(buyer, animalBeingBought); //Print the failed Transaction section
                 return -2;
             } //Not enough money
-            System.out.println(buyer.getName() + " bought " + animalBeingBought.getInfo() + " for " + animalBeingBought.getSellsFor()
-                    + " coins from " + seller.getName() + ".");
+            System.out.println("\u001b[32m" + buyer.getName() + " bought " + animalBeingBought.getVanillaInfo() +
+                    " for " + animalBeingBought.getSellsFor() + " coins from " + seller.getName() + ".\u001b[0m");
             buyer.pay(animalBeingBought.getSellsFor()); //buyer pays
             seller.getPaid(animalBeingBought.getSellsFor()); //Seller gets paid
             buyer.addToOwnedAnimals(animalBeingBought); //Buyer gets Animal
             seller.getOwnedAnimals().remove(animalBeingBought); //Seller removes Animal
-            sellers = new ArrayList<Player>(); //Sellers list is reset
+            sellers = new ArrayList<>(); //Sellers list is reset
         }
         return 3;
     }
@@ -276,46 +287,55 @@ public class Game extends utilityFunctions implements Serializable{
      * @return An int, the status code of what happened
      */
     public int sellToOtherPlayer(Player seller){
-        int counter = 1; //Shop counter to keep track of indexes
-        int buyersIndex = 0, sellersIndex = 0, returnCode = 0; //Indexes and the returnCode from selling
-        ArrayList<Player> buyers = new ArrayList<Player>(); //List of Buyers
+        int buyersIndex, sellersIndex, returnCode; //Indexes and the returnCode from selling
+        ArrayList<Player> buyers = new ArrayList<>(); //List of Buyers
         String targetPlayerIndex, animalToSellIndex; //Inputs from Users to convert to Integers
         boolean doneSelling = false;
         while(!doneSelling){
             boolean result = playersPlaying.size() < 2 || seller.getHealthyAnimals().size() == 0; //1 player or no Animals
-            if(result){ System.out.println("Too few players left or no healthy animals left to sell. Returning to main menu."); return -1; }
+            if(result){
+                System.out.println("\u001b[31mToo few players left or no healthy animals left to sell. Returning to Game menu.\u001b[0m");
+                return -1;
+            }
 
             sellersIndex = listOfBuyersInSellToOtherPlayer(seller, buyers, playersPlaying); //Index of the Seller
             //Index of the player to sell to, returnCode is 2 if the Index is the Exit index
             while(!((returnCode = (safeIntInput(1, buyers.size()+1, targetPlayerIndex = userInputScanner.next(),
                     true))) == 1)){ if(returnCode == 2) return 1; }
-            Player buyer = buyers.get(Integer.valueOf(targetPlayerIndex)-1); //Get the buyer
+            Player buyer = buyers.get(Integer.parseInt(targetPlayerIndex)-1); //Get the buyer
 
             buyersIndex = sellingAnimalToOtherPlayerMenu(buyer, seller, playersPlaying); //index of the Buyer
             //Index of the Animal to sell, returnCode is 2 if the index is the Exit index
             while(!((returnCode = (safeIntInput(1, seller.getHealthyAnimals().size()+1, animalToSellIndex = userInputScanner.next(),
                     true))) == 1)){ if(returnCode == 2) return 1; }
-            Animal animalBeingSold = seller.getHealthyAnimals().get(Integer.valueOf(animalToSellIndex)-1);
+            Animal animalBeingSold = seller.getHealthyAnimals().get(Integer.parseInt(animalToSellIndex)-1);
 
             if(animalBeingSold.getSellsFor() > buyer.getAmountOfMoney()){ printCantAffordAnimal(buyer, animalBeingSold); return -1; }
 
-            System.out.println(buyer.getName() + " bought " + animalBeingSold.getInfo() + " for "
-                    + animalBeingSold.getSellsFor() + " coins from " + seller.getName() + ".");
+            System.out.println("\u001b[32m" + buyer.getName() + " bought " + animalBeingSold.getVanillaInfo() + " for "
+                    + animalBeingSold.getSellsFor() + " coins from " + seller.getName() + ".\u001b[0m");
 
             buyer.pay(animalBeingSold.getSellsFor()); //buyer pays
             seller.getPaid(animalBeingSold.getSellsFor()); //Seller gets paid
 
             //An animal that is sold "downwards" in the turn order, should age and decay to account for aging/decaying during a round
-            //as Decay and Aging occurs at the end of a Round, however - this would be skipped if sold downwards
-            if(sellersIndex > buyersIndex){ //Age and Decay the Animal if it would have circumvented this
-                animalBeingSold.age();
-                if( animalBeingSold.isAlive() ) { animalBeingSold.decay(currentRound); }
+            //as Decay and Aging occurs at the end of a Turn (once per Round), however - this would be skipped if sold downwards
+            if(sellersIndex > buyersIndex){ //Age, Decay and Disease the Animal if it would have circumvented this
+                if(animalBeingSold.isAlive()){
+                    animalBeingSold.decay();
+                }
+                if(animalBeingSold.isAlive()){
+                    animalBeingSold.age();
+                }
+                if(animalBeingSold.isAlive()){
+                    animalBeingSold.chanceForDisease(buyer);
+                }
+                animalBeingSold.setDecayedThisRound(true);
             }
             buyer.addToOwnedAnimals(animalBeingSold); //Buyer gets the Animal
             seller.getOwnedAnimals().remove(animalBeingSold); //Seller removes his Animal
 
             //Reset the variables at the end of the While loop, so they're clean for the next run
-            counter = 1;
             buyersIndex = 0;
             sellersIndex = 0;
             buyers = new ArrayList<Player>();
@@ -437,16 +457,21 @@ public class Game extends utilityFunctions implements Serializable{
     /**
      * Method that handles aging,decaying and disease at the end of the turn
      */
-    public void ageDecayAndDiseaseAtEndofTurn(){
+    public void decayAgeAndDiseaseAtEndofTurn(){
+        System.out.println("PERFORMING DECAY ON: " + playersPlaying.get(currentPlayer).getName() +"'S ANIMALS.");
         for (Animal eachPlayerAnimal : playersPlaying.get(currentPlayer).getOwnedAnimals()) {
+            System.out.println("BEGINNING PROCESS FOR: " + eachPlayerAnimal.getColoredInfo());
             if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) { //If the Animal is alive and hasn't decayed, decay
-                eachPlayerAnimal.decay(currentRound);
+                eachPlayerAnimal.decay();
+                System.out.println(eachPlayerAnimal.getColoredInfo() + "DECAYED IN END OF ROUND: " + currentRound);
             }
             if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) { //If the Animal is alive and hasn't decayed, age
                 eachPlayerAnimal.age();
+                System.out.println(eachPlayerAnimal.getColoredInfo() + "AGED IN END OF ROUND: " + currentRound);
             }
             if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.hasDecayedThisRound()) { //If the Animal is alive and hasn't decayed, roll for Disease
                 eachPlayerAnimal.chanceForDisease(playersPlaying.get(currentPlayer));
+                System.out.println(eachPlayerAnimal.getColoredInfo() + "DISEASED IN END OF ROUND: " + currentRound);
             }
             eachPlayerAnimal.setDecayedThisRound(true); //The animal has had it's decay/age/disease for the Turn
         }
@@ -463,13 +488,19 @@ public class Game extends utilityFunctions implements Serializable{
         ArrayList<Animal> ownedAnimals = playerBreeding.getOwnedAnimals(), males = new ArrayList<>(), females = new ArrayList<>();
         String firstAnimalWanted,secondAnimalWanted; //wanted Animals indexes
         int returnCode = 0; //status code from handling input, used to check for exit
-        if(ownedAnimals.size() <= 1){ System.out.println(playerBreeding.getName() + //Need at least 2 animals to breed
-                " needs to have at least 2 Animals to breed. Returning to main menu.\n"); return;}
+        if(ownedAnimals.size() <= 1){
+            System.out.println("\u001b[31m" + playerBreeding.getName() +
+                    " needs to have at least 2 Animals to breed. Returning to Game menu.\u001b[0m");
+            return;
+        }
         for(Animal inspectedAnimal : ownedAnimals){ //inspect animals
             if( inspectedAnimal.getGender().equals("Male") ) { males.add(inspectedAnimal); } //Males get added to male List
             else{ females.add(inspectedAnimal); } //Females get added to female list
         }
-        if(males.size() == 0 || females.size() == 0){ System.out.println("Found no males/females to breed with, Returning to main menu.\n"); return;}
+        if(males.size() == 0 || females.size() == 0){
+            System.out.println("\u001b[31mDid not find enough males or females to breed with, Returning to Game menu.\u001b[0m");
+            return;
+        }
         else {
             System.out.println("Which two animals do you wish to breed?");
             printMales(males); //Print the menu of relevant males
@@ -481,19 +512,22 @@ public class Game extends utilityFunctions implements Serializable{
                     true))) == 1)){ if(returnCode == 2) return; }
             //Force index boundary between 1 and females.size()+1,
             // highest index is exit highest index is exit - returnCode is 2 if the input is the Exit index
-            Animal theMale = males.get(Integer.valueOf(firstAnimalWanted) - 1); //The wanted Male
-            Animal theFemale = females.get(Integer.valueOf(secondAnimalWanted) - 1); //The wanted female
+            Animal theMale = males.get(Integer.parseInt(firstAnimalWanted) - 1); //The wanted Male
+            Animal theFemale = females.get(Integer.parseInt(secondAnimalWanted) - 1); //The wanted female
             if(theMale.getClassName().equals(theFemale.getClassName())){ //If they're both of the same race
                 int madeOffspring = random.ints(1,3).findFirst().getAsInt(); //NR of Offspring
                 if(madeOffspring > 1)
                 {
-                    System.out.println(theFemale.getInfo() + " and " + theMale.getInfo() + " did not manage to make any babies..\n");
+                    System.out.println("\u001b[31m" + theFemale.getVanillaInfo() + " and " + theMale.getVanillaInfo() +
+                            " did not manage to make any babies.\n\u001b[0m");
                 }
                 else{
+                    //RESET \u001b[0m - GREEN - \u001b[32m
                     int amountOfBabies = random.ints(theFemale.getMinimumOffspring(),theFemale.getMaximumOffspring()).findFirst().getAsInt();
-                    System.out.println(theMale.getInfo() + " " + theFemale.getInfo() + " made " + amountOfBabies + " babies.");
-                    createBabies(amountOfBabies, females, playerBreeding, Integer.valueOf(secondAnimalWanted)); } } //Create the babies
-            else{ System.out.println("Cannot breed two different Animals of different breeds."); } }
+                    System.out.println("\u001b[32m" + theMale.getVanillaInfo() + " and " + theFemale.getVanillaInfo() + " made "
+                            + amountOfBabies + " babies!\u001b[0m");
+                    createBabies(amountOfBabies, females, playerBreeding, Integer.parseInt(secondAnimalWanted)); } } //Create the babies
+            else{ System.out.println("\u001b[31mCannot breed two different Animals of different breeds. Returning to Game Menu\u001b[0m"); } }
     }
 
     /**
@@ -554,12 +588,14 @@ public class Game extends utilityFunctions implements Serializable{
      * @throws FileNotFoundException An exception that has to be declared in case of IO errors
      */
     public void saveGame(Game myGame) throws FileNotFoundException{
-        String overwrite = "", newName = "", fullSavePath = "savedGames\\", answer = "", saveGameName;;
+        String overwrite = "", newName = "", fullSavePath = "savedGames\\", saveGameName;
         File[] gameFiles = new File("savedGames").listFiles();
         if(saveGameScanner == null){ saveGameScanner = new Scanner(System.in); }
-        System.out.println("Saved games in savedGames folder: ");
-        for(File gameFile: gameFiles){
-            System.out.println(gameFile.getName().substring(0,gameFile.getName().length()-4));
+        if(gameFiles.length > 0){
+            System.out.println("Saved games in savedGames folder: ");
+            for(File gameFile: gameFiles){
+                System.out.println(gameFile.getName().substring(0,gameFile.getName().length()-4));
+            }
         }
         System.out.println("What would you like to name your save file?");
         while(((saveGameName = saveGameScanner.nextLine()).length()) == 0){
@@ -667,26 +703,11 @@ public class Game extends utilityFunctions implements Serializable{
     public void checkIfPlayerIsEliminated(){
         if (playersPlaying.get(currentPlayer).getAmountOfMoney() < 10 &&
                 playersPlaying.get(currentPlayer).getOwnedAnimals().size() == 0) { //If the player cannot afford anything and has no Animals
-            System.out.println(playersPlaying.get(currentPlayer).getName() + " was eliminated at Round: " + currentRound + " due to not having" +
-                    " enough money to buy anything and no animals left.");
+            System.out.println("\u001b[31m" + playersPlaying.get(currentPlayer).getName() + " was eliminated at Round: " + currentRound + " due to not having" +
+                    " enough money to buy anything and no animals left." + "\u001b[0m");
             playersPlaying.remove(currentPlayer); //Remove the player
             if(currentPlayer == playersPlaying.size()){
                 currentPlayer -= 1;
-            }
-        }
-    }
-
-    /**
-     * The method responsible for purging Animals that should be removed
-     */
-    public void purgeDeadAnimals(){
-        if (playersPlaying.size() > 0){ //To avoid a out of bounds bug when there are no players left
-            if (playersPlaying.get(currentPlayer).getShouldBeRemoved().size() > 0) { //If there are any Animals to purge
-                for (int i = playersPlaying.get(currentPlayer).getShouldBeRemoved().size() - 1; i > -1; i--) {
-                    Animal toRemove = playersPlaying.get(currentPlayer).getShouldBeRemoved().get(i); //get the Animal to remove
-                    playersPlaying.get(currentPlayer).getOwnedAnimals().remove(toRemove); //Remove it from ownership
-                    playersPlaying.get(currentPlayer).getShouldBeRemoved().remove(i); //Remove it from the Purging list
-                }
             }
         }
     }
@@ -719,12 +740,12 @@ public class Game extends utilityFunctions implements Serializable{
      */
     public ArrayList<Integer> sellOffAnimalsAtEndOfGame(){
         ArrayList<Integer> moneyOfPlayers = new ArrayList<>(); //The money of the Players
-
+        System.out.println();
         for(Player player : playersPlaying){ //Sell off the Animal of each player at the end of the game
             for(int i = player.getOwnedAnimals().size()-1; i > -1; i--){
                 //Dead Animals and Sick Animals don't count at the end of the game when selling, as both are functionally dead
                 if(player.getOwnedAnimals().get(i).getHealth() > 0 && !player.getOwnedAnimals().get(i).isSick()){
-                    System.out.println(player.getName() + " sold off " + player.getOwnedAnimals().get(i).getInfo()
+                    System.out.println(player.getName() + " sold off " + player.getOwnedAnimals().get(i).getColoredInfo()
                             + " for " + player.getOwnedAnimals().get(i).getSellsFor() + " coins.");
                     player.getPaid(player.getOwnedAnimals().get(i).getSellsFor()); //Sells the Animal
                 }
@@ -779,13 +800,10 @@ public class Game extends utilityFunctions implements Serializable{
             if(!playersPlaying.get(currentPlayer).getTurnIsOver()){
                 System.out.println("\n===================================\n");
                 if (!showedMenu) { //If the menu has not been shown
-                    removeAnimals(playersPlaying, currentPlayer);
                     printAnimals(false, currentRound, currentPlayer, playersPlaying, (rounds+currentRound-1)); //Showcase the info menu
                 }
 
-                System.out.println("\n" + playersPlaying.get(currentPlayer).getName()
-                        + "'s Funds: " + playersPlaying.get(currentPlayer).getAmountOfMoney() + " coins "
-                        + "\nChoose an action:\n[1] Buy an Animal from Store\n" +
+                System.out.println("\nChoose an action:\n[1] Buy an Animal from Store\n" +
                         "[2] Sell an Animal to Store\n" +
                         "[3] Feed your animals\n" +
                         "[4] Breed your animals\n" +
@@ -801,22 +819,29 @@ public class Game extends utilityFunctions implements Serializable{
             if (playersPlaying.get(currentPlayer).getTurnIsOver()) { //If the player turn is over
                 //Reset variables for next round
                 showedMenu = false; //Reset variables
-                ageDecayAndDiseaseAtEndofTurn(); //Age, Decay and roll for Disease on Animals
+                decayAgeAndDiseaseAtEndofTurn(); //Age, Decay and roll for Disease on Animals
                 handleDeathsOfAnimals(); //Handle death announcements of Animals
+                for(int i = playersPlaying.get(currentPlayer).getOwnedAnimals().size()-1; i > -1; i--){
+                    if(!playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).isAlive()){
+                        System.out.println("REMOVING " + playersPlaying.get(currentPlayer).getOwnedAnimals().get(i).getColoredInfo()
+                        + " FROM " + playersPlaying.get(currentPlayer));
+                        playersPlaying.get(currentPlayer).getOwnedAnimals().remove(i);
+                    }
+                }
                 checkIfPlayerIsEliminated(); //See if a player was eliminated
                 if (playersPlaying.size() == 0) { //Check if there are any players left
                     System.out.println("Game is over. No players remaining.");
                     break;
                 }
                 advanceRound(); //Advance a round, accounting for if a player got eliminated or not
-                purgeDeadAnimals(); //Purge the dead animals
-                System.out.println("\n===================================\n");
             }
         }
         ArrayList<String> highScore = buildHighScore(); //Build the high score list
 
-        System.out.println("\n\t\t=======================\nAt the end of the game, here are the results:\n" +
-                "\t\t=======================");
+        System.out.println("""
+                \n\t\t=======================
+                At the end of the game, here are the results:
+                \t\t=======================""");
         int spots = 1;
         for(String highScoreSpots : highScore){
             System.out.println("\t\t[" + spots + "] " + highScoreSpots);

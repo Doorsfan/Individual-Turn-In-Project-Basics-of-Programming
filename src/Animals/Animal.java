@@ -27,7 +27,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     private String causeOfDeath = "";
     private boolean decayedThisRound = false, alive = true, sick = false;
     private transient Scanner diseaseScanner = new Scanner(System.in);
-    private Player owner;
 
     /**
      * A method that aids in Construction of children of the Animal class - Accepts 3 Food Items
@@ -76,36 +75,31 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Getter for decayedThisRound
-     *
-     * @return A boolean saying wether this is true or not
+     * @return A boolean saying if this is true or not
      */
     public boolean hasDecayedThisRound() { return this.decayedThisRound; }
 
     /**
      * Setter for decayedThisRound
-     *
      * @param decayedThisRound A boolean saying if the animal decayed this round
      */
     public void setDecayedThisRound(boolean decayedThisRound) { this.decayedThisRound = decayedThisRound; }
 
     /**
      * Gets minimum offspring.
-     *
      * @return the minimum offspring
      */
     public int getMinimumOffspring() { return this.minimumOffspring; }
 
     /**
      * Gets maximum offspring.
-     *
      * @return the maximum offspring
      */
     public int getMaximumOffspring() { return this.maximumOffspring; }
 
     /**
      * Get portion size int.
-     *
-     * @return the portionsize of the animal
+     * @return the portion size of the animal
      */
     public int getPortionSize(){
         return this.portionSize;
@@ -113,7 +107,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Set cause of death.
-     *
      * @param diedFrom the cause of death for the Animal
      */
     public void setCauseOfDeath(String diedFrom){
@@ -122,7 +115,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Get cause of death string.
-     *
      * @return the string
      */
     public String getCauseOfDeath(){
@@ -143,14 +135,12 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Gets the value that the animal sells for currently - depends on age and health value
-     *
      * @return An int that is the relative value of the Animal
      */
     public int getSellsFor(){
         //First takes the % of Health an animal is at as a Double
         double valueMultiplicator = (double) this.health / 100.0;
-        double toReturn = this.value * valueMultiplicator;
-        double ageFactor = 0;
+        double toReturn = this.value * valueMultiplicator, ageFactor;
         //The closer the Animal is to death, the less it's value is
         if(this.age < maxAge){
             ageFactor = 1.0 - ((double)this.age/maxAge);
@@ -166,17 +156,15 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     }
 
     /**
-     * Sets wether the animal is sick
-     *
-     * @param isSick A boolean that  denotes wether this Animal is sick
+     * Sets if the animal is sick
+     * @param isSick A boolean that denotes if this Animal is sick
      */
     public void setSick(boolean isSick){
         this.sick = isSick;
     }
 
     /**
-     * Gets wether this animal is sick or not
-     *
+     * Gets if this animal is sick or not
      * @return A boolean to denote if this animal is sick
      */
     public boolean isSick(){
@@ -184,8 +172,7 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     }
 
     /**
-     * Gets cost of a veterniary
-     *
+     * Gets cost of a Vet
      * @return An int, the cost of the Vet for this Animal
      */
     public int getVetCost(){
@@ -199,29 +186,29 @@ public abstract class Animal extends utilityFunctions implements Serializable {
      *
      * If the player pays for the Vet bill, there is a 50% chance that the treatment will work, and the
      * animal is no longer sick. If this fails, however, the Animal perishes.
-     *
      * @param owner the owner
-     * @return An int that acts as Status code, wether said Animal got sick or other events. (Such as not paying Vet cost, etc.)
      */
     public void chanceForDisease(Player owner){
         String answer;
         if(this.diseaseScanner == null){ this.diseaseScanner = new Scanner(System.in); }
 
         Random random = new Random();
-        int diseaseChanse = random.ints(1, 101).findFirst().getAsInt();
+        int diseaseChance = random.ints(1, 101).findFirst().getAsInt();
 
-        if(diseaseChanse <= 20){ //20% chance of being diseased, 20 out of 100
+        if(diseaseChance <= 20){ //20% chance of being diseased, 20 out of 100
             this.setSick(true);
             //Print some info about who has been struck by a Disease
-            System.out.println(this.getInfo() + " has been struck by a terrible disease!");
+            System.out.println("\u001b[31m" + this.getVanillaInfo() + " has been struck by a terrible disease!\u001b[0m");
             if(owner.getAmountOfMoney() < this.getVetCost()){
-                System.out.println(owner.getName() + " cannot afford to treat " + this.getInfo() + " (Costs: " + this.getVetCost() +
-                        " coins, have: " + owner.getAmountOfMoney() + " coins left.)\n");
+                System.out.println("\u001b[31m" + owner.getName() +
+                        " cannot afford to treat " + this.getVanillaInfo() + " (Costs: " + this.getVetCost() +
+                        " coins, have: " + owner.getAmountOfMoney() + " coins left.)\n\u001b[0m");
                 setAlive(false);
                 setCauseOfDeath("Disease");
                 return; //Could not afford it
             }
-            System.out.println("Do you wish to pay the Vet bill for " + this.getInfo() + "?" + " (Costs: " + this.getVetCost() + " coins.)");
+            System.out.println("\u001b[33mDoes" + owner.getName() + " wish to pay the Vet bill for " + this.getVanillaInfo() + "?"
+                    + " (Costs: " + this.getVetCost() + " coins.)\u001b[0m");
             while(!(forceYOrN(answer = diseaseScanner.next()) == 1)){
                 //Break when the input is Y,y,N or n
             }
@@ -230,22 +217,27 @@ public abstract class Animal extends utilityFunctions implements Serializable {
                 //it as a Int
                 int getsCured = random.ints(1, 3).findFirst().getAsInt();
                 owner.pay(this.getVetCost());
-                System.out.println(owner.getName() + " paid the Vet bill for " + this.getInfo() + " for " + this.getVetCost() + " coins.\n" +
-                        owner.getName() + " has " + owner.getAmountOfMoney() + " coins left after paying the Vet bill.");
+                System.out.println("\u001b[32m" + owner.getName() + " paid the Vet bill for " +
+                        this.getVanillaInfo() + " for " + this.getVetCost() + " coins.\u001b[0m");
+                System.out.println(owner.getName() + " has " + owner.getAmountOfMoney() + " coins left after paying the Vet bill.");
+
                 if(getsCured == 1){ //50% chance of being cured, 1 or 2
-                    System.out.println(this.getInfo() + " was cured!\n");
+                    //RESET \u001b[0m - GREEN - \u001b[32m
+                    System.out.println("\u001b[32m" + this.getVanillaInfo() + " was cured!\n\u001b[0m");
                     this.setSick(false);
+
                     return; //Paid for treatment and it worked
                 }
                 else{
-                    System.out.println("The treatment for " + this.getInfo() + " did not work.\n");
+                    System.out.println("\u001b[31mThe treatment for " + this.getVanillaInfo() + " did not work.\n\u001b[0m");
                     setAlive(false);
                     setCauseOfDeath("Disease");
                     return; //Paid for the treatment, but did not work
                 }
             }
             else{
-                System.out.println(owner.getName() + " chose not to pay the Vet bill for " + this.getInfo() + " for " + this.getVetCost() + " coins.\n");
+                System.out.println("\u001b[31m" + owner.getName() + " chose not to pay the Vet bill for " + this.getVanillaInfo()
+                        + " for " + this.getVetCost() + " coins.\n\u001b[0m");
                 setAlive(false);
                 setCauseOfDeath("Disease");
                 return; //Can afford it, but answered no
@@ -254,18 +246,48 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     }
 
     /**
-     * A more general getter to get some info about this Animal in general, used in Menus for Shorthand writing
-     *
-     * @return The string with information about the animal
+     * A getter that implements colours into the Terminal printing - to be used when colours codes are NOT implemented
+     * directly in the System.out.print by itself
+     * @return A string that includes Colours in it
      */
-    public String getInfo(){
+    public String getColoredInfo(){
+        String colorOfHealth, colorOfAge;
+        if(this.getHealth() >= 50){
+            colorOfHealth = "\u001b[32m"; //Green
+        }
+        else if(this.getHealth() >= 30 && this.getHealth() <= 49){
+            colorOfHealth = "\u001b[33m"; //Yellow
+        }
+        else{
+            colorOfHealth = "\u001b[31m"; //Red
+        }
+        double percentOfYearsSpent = (double)this.getAge()/(double)this.getMaxAge();
+        if(percentOfYearsSpent >= 0.75){
+            colorOfAge = "\u001b[31m"; //Red age
+        }
+        else if(percentOfYearsSpent >= 0.33 && percentOfYearsSpent <= 74){
+            colorOfAge = "\u001b[33m"; //Yellow age
+        }
+        else{
+            colorOfAge = "\u001b[32m"; //Green age
+        }
         return (this.getName() + " the " + this.getClassName() + " (" + this.getGender() +
-                "), (Health: " + this.getHealth() + ", Age: " + this.getAge() + ") (SicK: " + isSick() + ")");
+                "), (Health: " + colorOfHealth + this.getHealth() + "\u001b[0m, " +
+                "Age: " + colorOfAge + this.getAge() + "\u001b[0m) (SicK: " + isSick() + ")");
+    }
+
+    /**
+     * The normal setup of general Information getting - to be used in conjunction with setting colours manually
+     * in the actual System Out
+     * @return A string with general info that is not colour modified by itself
+     */
+    public String getVanillaInfo(){
+        return (this.getName() + " the " + this.getClassName() + " (" + this.getGender() +
+                "), (Health: " + this.getHealth() + ", " + "Age: " + this.getAge() + ") (SicK: " + isSick() + ")");
     }
 
     /**
      * Get what it eats array list.
-     *
      * @return the array list
      */
     public ArrayList<Food> getWhatItEats(){
@@ -274,7 +296,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Get name string.
-     *
      * @return the string
      */
     public String getName(){
@@ -283,7 +304,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Get age int.
-     *
      * @return the int
      */
     public int getAge(){
@@ -292,21 +312,18 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Gets max age.
-     *
      * @return the max age
      */
     public int getMaxAge() { return this.maxAge; }
 
     /**
      * Shorthand getter for getting the SimpleName of the Class
-     *
      * @return A string with the simpleName of the Class
      */
     public String getClassName(){ return this.getClass().getSimpleName(); }
 
     /**
      * Get gender string.
-     *
      * @return the string
      */
     public String getGender(){
@@ -317,10 +334,8 @@ public abstract class Animal extends utilityFunctions implements Serializable {
      * Simulates the health loss of animals for each turn - Yields a random number between 10 and 30 (inclusive),
      * saves the amount of health this Animal lost - deducts from the current Health - and if the Health is below 0,
      * this animal dies - cause of death being Starvation.
-     *
-     * @param round the round
      */
-    public void decay(int round){
+    public void decay(){
         wasAtHealth = health;
         Random random = new Random();
         // Random number between 10 and 30 (inclusive)
@@ -335,7 +350,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Is alive boolean.
-     *
      * @return the boolean
      */
     public boolean isAlive(){
@@ -344,7 +358,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Set alive.
-     *
      * @param status the status
      */
     public void setAlive(boolean status){
@@ -353,7 +366,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Get was at health int.
-     *
      * @return the int
      */
     public int getWasAtHealth(){
@@ -362,7 +374,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Set name.
-     *
      * @param name the name
      */
     public void setName(String name){
@@ -371,7 +382,6 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * Get lost health int.
-     *
      * @return the int
      */
     public int getLostHealth(){
@@ -419,7 +429,7 @@ public abstract class Animal extends utilityFunctions implements Serializable {
                     gained -= (this.health - 100);
                     this.health = 100;
                 }
-                System.out.println(this.getInfo() + " gained " + gained + " health!");
+                System.out.println("\u001b[32m" + this.getVanillaInfo() + " gained " + gained + " health!\u001b[0m");
                 return 1; //Went through fine, the Animal ate the food
             }
         } return -2; //The animal did not like the type of food being  served

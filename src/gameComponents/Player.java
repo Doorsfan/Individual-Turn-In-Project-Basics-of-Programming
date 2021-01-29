@@ -4,7 +4,6 @@ import Animals.Animal;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Scanner;
-import gameComponents.utilityFunctions;
 
 /**
  * The class that is responsible for handling each Player and some of their interactions
@@ -14,11 +13,11 @@ public class Player extends utilityFunctions implements Serializable {
     private String name;
     private int amountOfMoney;
     private boolean playing = true;
-    private ArrayList<Animal> ownedAnimals = new ArrayList<>(), shouldBeRemoved = new ArrayList<>();;
+    private ArrayList<Animal> ownedAnimals = new ArrayList<>(), shouldBeRemoved = new ArrayList<>();
     private ArrayList<Food> ownedFood = new ArrayList<>();
     private boolean turnIsOver = false, addedToHighScore = false;
-    private ArrayList<Integer> diedAtRoundList = new ArrayList<Integer>();
-    private ArrayList<String> deathMessageList = new ArrayList<String>(), savedDeathList = new ArrayList<String>();
+    private ArrayList<Integer> diedAtRoundList = new ArrayList<>();
+    private ArrayList<String> deathMessageList = new ArrayList<>(), savedDeathList = new ArrayList<>();
     private transient Scanner foodInput = new Scanner(System.in);
 
     /**
@@ -33,14 +32,14 @@ public class Player extends utilityFunctions implements Serializable {
     }
 
     /**
-     * A method that builds a list of Healthy animals - Sick animals die at the end of the Round,
+     * A method that builds a list of Healthy animals - Sick animals die at the end of the Turn,
      * and cannot be sold or bought.
-     * @return
+     * @return An ArrayList of Animals of whom all are Healthy (if any)
      */
     public ArrayList<Animal> getHealthyAnimals(){
         ArrayList<Animal> healthyAnimals = new ArrayList<>();
         for(Animal toCheck : this.getOwnedAnimals()){
-            if(!toCheck.isSick()){
+            if(!toCheck.isSick() && toCheck.getHealth() > 0){ //Can't sell dead animals or Sick Animals
                 healthyAnimals.add(toCheck);
             }
         }
@@ -49,7 +48,6 @@ public class Player extends utilityFunctions implements Serializable {
 
     /**
      * Get added to high score boolean.
-     *
      * @return the boolean
      */
     public boolean getAddedToHighScore(){
@@ -58,7 +56,6 @@ public class Player extends utilityFunctions implements Serializable {
 
     /**
      * Set added to high score.
-     *
      * @param wasAdded the was added
      */
     public void setAddedToHighScore(boolean wasAdded){
@@ -67,7 +64,6 @@ public class Player extends utilityFunctions implements Serializable {
 
     /**
      * Getter that aids in interacting with what Animal should be removed from owned Animals in Game from Players
-     *
      * @return the array list
      */
     public ArrayList<Animal> getShouldBeRemoved(){
@@ -111,9 +107,7 @@ public class Player extends utilityFunctions implements Serializable {
      * message should only be re-created if a gameSave is loaded on Round 2, where it's death is
      * announced - Older than that should not be re-created)
      *
-     * @param round An int, a round notation in the death message that we use to identify which message to remove,
-     *              save it in a list and then remove from the list when we have composed all of the relevant indexes
-     * @return An int, a status code
+     * @param round An int, The round to identify by and remove in terms of death archives
      */
     public void purgeSavedDeathList(int round){
         for(int i = this.savedDeathList.size()-1; i > -1; i--){
@@ -132,12 +126,13 @@ public class Player extends utilityFunctions implements Serializable {
      *                     then clears both list of deathMessages and Time of death lists
      */
     public void announceDeaths(int currentRound){
-        ArrayList<Integer> removeRound = new ArrayList<Integer>();
-        ArrayList<String> removeMessage = new ArrayList<String>();
+        ArrayList<Integer> removeRound = new ArrayList<>();
+        ArrayList<String> removeMessage = new ArrayList<>();
         if(diedAtRoundList.size() > 0){
             for(int i = diedAtRoundList.size()-1; i > -1; i--){
                 if(diedAtRoundList.get(i) == currentRound-1){ //Check deaths for corresponding to last round
-                    System.out.println(deathMessageList.get(i)); //Print it out
+                    //HERE
+                    System.out.println("\u001b[31m" + deathMessageList.get(i) + "\u001b[0m"); //Print it out
                     removeRound.add(diedAtRoundList.get(i));
                     removeMessage.add(deathMessageList.get(i));
                 }
@@ -173,7 +168,11 @@ public class Player extends utilityFunctions implements Serializable {
      */
     public void printAnimalsInFeedMenu(Player playerFeeding){
         int counter = 1;
-        System.out.println("Which animal do you wish to feed?");
+        System.out.println("You have: ");
+        for(Food ownedFood : playerFeeding.getOwnedFood()){
+            System.out.println(ownedFood.getGrams() + " grams of " + ownedFood.getName());
+        }
+        System.out.println("\u001b[33mWhich animal do you wish to feed?\u001b[0m");
         for(Animal ownedAnimal: playerFeeding.getHungryAnimals()){
             System.out.println("[" + counter + "] " + ownedAnimal.getName() +
                     " the " + ownedAnimal.getClass().getSimpleName() + " (" + ownedAnimal.getGender()
@@ -218,8 +217,8 @@ public class Player extends utilityFunctions implements Serializable {
      */
     public  ArrayList<Food> printFoodOptions(Animal toBeFed, Player playerFeeding){
         int counter = 1;
-        System.out.println("With what do you wish to feed " + toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() +
-                "(" + toBeFed.getGender() + ", " + " Health: " + toBeFed.getHealth() + ")?");
+        System.out.println("\u001b[33mWith what do you wish to feed " + toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() +
+                "(" + toBeFed.getGender() + ", " + " Health: " + toBeFed.getHealth() + ")?\u001b[0m");
         ArrayList<Food> acceptedFood = toBeFed.getWhatItEats();
         ArrayList<Food> filteredFood = new ArrayList<>();
         for(Food ownedItems: playerFeeding.getOwnedFood()){
@@ -252,38 +251,43 @@ public class Player extends utilityFunctions implements Serializable {
      */
     public int feedAnimal(){
         if(foodInput == null){ this.foodInput = new Scanner(System.in); }
-        int counter = 1, returnCode = 0; //Shop index counter and the ReturnCode
+        int returnCode; //Shop index counter and the ReturnCode
         boolean finishedFeeding = false;
+
         String wantedAnimalToFeed, wantedFood;
 
         if(this.getOwnedAnimals().size() == 0){ //Has no Animals to feed, thrown back to main menu
-            System.out.println(this.getName() + " has no Animals to feed. Returning to main menu.\n");
+            System.out.println("\u001b[31m" + this.getName() + " has no Animals to feed. Returning to Game menu.\u001b[0m");
             return -2; }
 
         while(!finishedFeeding){
-            if(this.getHungryAnimals().size() == 0){ System.out.println(this.getName() + //Only allow feeding if any animal is hungry
-                    " has no more hungry animals to feed. Exiting to game menu.");
+            boolean hasFood = true;
+            if(this.getHungryAnimals().size() == 0){
+                System.out.println("\u001b[31m" + this.getName() + " has no more hungry animals to feed. " +
+                        "Returning to Game menu.\u001b[0m");
                 return -2; }
-            boolean foundFood = false;
             if(this.getOwnedFood().size() == 0){ //Ran out of Food to feed with
-                System.out.println(this.getName() + " has no food left to feed with. Returning to main menu.\n");
+                System.out.println("\u001b[31m" + this.getName() + " has no food left to feed with. Returning to Game menu.\n\u001b[0m");
                 return -2; }
             printAnimalsInFeedMenu(this); //Print the Animals feeding menu
             while(!((returnCode = (safeIntInput(1, this.getHungryAnimals().size()+1,
                     wantedAnimalToFeed = foodInput.next(), true))) == 1)){ if(returnCode == 2) return 1; }
-            Animal toBeFed = this.getHungryAnimals().get((Integer.valueOf(wantedAnimalToFeed)-1)); //The animal being fed
+            Animal toBeFed = this.getHungryAnimals().get((Integer.parseInt(wantedAnimalToFeed)-1)); //The animal being fed
 
-            if(!checkIfItEatsFood(toBeFed, this)){ //If the player does not own any food the Animal would want, returns to main menu
-                System.out.println(this.getName() + " does not have any food that a " + toBeFed.getClassName() + " would like.");
-                return -1; }
-            ArrayList<Food> filteredFood = printFoodOptions(toBeFed, this); //Relevant food items for the Specified Animal
-            //Handles a filtered list based on what the Animal wants - returnCode is 2 if the index is the Exit index
-            while(!((returnCode = (safeIntInput(1, filteredFood.size()+1, wantedFood = foodInput.next(),
-                    true))) == 1)){ if(returnCode == 2) return 1; } //Which Animal to feed
-            Food foodToFeedWith = filteredFood.get(Integer.valueOf(wantedFood)-1); //The chosen food from filtered food items
-            checkingFoodFound(toBeFed, foodToFeedWith); //Checks amount of food left and attempts to feed the Animal - doesn't feed if not enough left
-            clearOutFood(this); //Clears out food if there is 0 grams left of it in the Inventory
-            counter = 1;
+            if(!checkIfItEatsFood(toBeFed, this)){ //If the player does not own any food the Animal would want, the animal wont eat it
+                System.out.println("\u001b[31m" + this.getName() + " does not have any food that a "
+                        + toBeFed.getClassName() + " would like.\u001b[0m");
+                hasFood = false;
+            }
+            if(hasFood){
+                ArrayList<Food> filteredFood = printFoodOptions(toBeFed, this); //Relevant food items for the Specified Animal
+                //Handles a filtered list based on what the Animal wants - returnCode is 2 if the index is the Exit index
+                while(!((returnCode = (safeIntInput(1, filteredFood.size()+1, wantedFood = foodInput.next(),
+                        true))) == 1)){ if(returnCode == 2) return 1; } //Which Animal to feed
+                Food foodToFeedWith = filteredFood.get(Integer.parseInt(wantedFood)-1); //The chosen food from filtered food items
+                checkingFoodFound(toBeFed, foodToFeedWith); //Checks amount of food left and attempts to feed the Animal - doesn't feed if not enough left
+                clearOutFood(this); //Clears out food if there is 0 grams left of it in the Inventory
+            }
         }
         return 1; //Successfully fed Animals
     }
@@ -303,21 +307,25 @@ public class Player extends utilityFunctions implements Serializable {
         for(Food foodItEats : toBeFed.getWhatItEats()){
             if(foodItEats.getName().equals(foodToFeedWith.getName())){
                 if(toBeFed.getPortionSize() > foodToFeedWith.getGrams()){
-                    System.out.println("There is not enough grams of " + foodToFeedWith.getName() + " left to feed " +
+                    System.out.println("\u001b[31mThere is not enough grams of " + foodToFeedWith.getName() + " left to feed " +
                             toBeFed.getName() + " the " + toBeFed.getClassName() + "(" + toBeFed.getGender() + ") Health: " +
                             toBeFed.getHealth() + " - (" + foodToFeedWith.getGrams() +
-                            " grams left, needs " + toBeFed.getPortionSize() + " grams per meal)");
+                            " grams left, needs " + toBeFed.getPortionSize() + " grams per meal)\u001b[0m");
                 }
                 else{
                     foundFood = true;
                     int resultCode = toBeFed.eat(toBeFed.getPortionSize(),foodToFeedWith);
                     if(resultCode == 1){ //The animal liked the food
-                        System.out.println(toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() +")" +
-                                " happily eats the " + foodToFeedWith.getName() + "!");
+                        System.out.println("\u001b[32m" +
+                                toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() +")" +
+                                " happily eats the " + foodToFeedWith.getName() + "!\u001b[0m");
                     }
                     else if(resultCode == -3){ //Mystery meat that did not seem appealing..
-                        System.out.println(toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() + ")" +
-                                " seems to think there's something funny with the " + foodToFeedWith.getClass().getSimpleName() +"..");
+                        //HERE
+                        System.out.println("\u001b[31m" +
+                                toBeFed.getName() + " the " + toBeFed.getClass().getSimpleName() + "(" + toBeFed.getGender() + ")" +
+                                " seems to think there's something funny with the " + foodToFeedWith.getClass().getSimpleName() +".." +
+                                "\u001b[0m");
                     }
                     return foundFood;
                 }
@@ -342,13 +350,14 @@ public class Player extends utilityFunctions implements Serializable {
             indexToRemove += 1;
         }
         if(shouldRemoveFood){
+            System.out.println("\u001b[31m" + playerFeeding.getName() + " has run out of " +
+                    playerFeeding.getOwnedFood().get(indexToRemove).getName() + "!\u001b[0m");
             playerFeeding.getOwnedFood().remove(indexToRemove); //Remove the food that had run out of Stock
         }
     }
     
     /**
      * Get amount of money int.
-     *
      * @return the int
      */
     public int getAmountOfMoney(){
@@ -357,21 +366,18 @@ public class Player extends utilityFunctions implements Serializable {
 
     /**
      * Pay.
-     *
      * @param amount the amount
      */
     public void pay(int amount){ this.amountOfMoney -= amount; }
 
     /**
      * Get paid.
-     *
      * @param amount the amount
      */
     public void getPaid(int amount){ this.amountOfMoney += amount; }
 
     /**
      * Get owned animals array list.
-     *
      * @return the array list
      */
     public ArrayList<Animal> getOwnedAnimals(){
@@ -380,14 +386,12 @@ public class Player extends utilityFunctions implements Serializable {
 
     /**
      * Gets owned food.
-     *
      * @return the owned food
      */
     public ArrayList<Food> getOwnedFood() { return this.ownedFood; }
 
     /**
      * Add to owned animals.
-     *
      * @param toAdd the to add
      */
     public void addToOwnedAnimals(Animal toAdd){
@@ -396,7 +400,6 @@ public class Player extends utilityFunctions implements Serializable {
 
     /**
      * Get name string.
-     *
      * @return the string
      */
     public String getName(){
@@ -405,7 +408,6 @@ public class Player extends utilityFunctions implements Serializable {
 
     /**
      * Get turn is over boolean.
-     *
      * @return the boolean
      */
     public boolean getTurnIsOver(){
@@ -414,7 +416,6 @@ public class Player extends utilityFunctions implements Serializable {
 
     /**
      * Set turn is over.
-     *
      * @param isOver the is over
      */
     public void setTurnIsOver(boolean isOver){
@@ -423,7 +424,6 @@ public class Player extends utilityFunctions implements Serializable {
 
     /**
      * Add to owned food.
-     *
      * @param toAdd the to add
      */
     public void addToOwnedFood(Food toAdd){
@@ -431,11 +431,11 @@ public class Player extends utilityFunctions implements Serializable {
     }
 
     /**
-     * The toString of the Player class which has been overrided to allow for some more general info about the player
+     * The toString of the Player class which has been replaced to allow for some more general info about the player
      * @return A string, the information about the player
      */
     @Override
     public String toString(){
-        return "Name: " + this.getName() + " - Funds: " + this.getAmountOfMoney() + " - Animals: " + this.getOwnedAnimals().size();
+        return "Name: " + this.getName() + " - Funds: " + this.getAmountOfMoney();
     }
 }

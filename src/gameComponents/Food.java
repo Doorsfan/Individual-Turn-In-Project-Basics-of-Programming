@@ -41,7 +41,7 @@ public abstract class Food implements Serializable {
      *
      * @return the name
      */
-    public String getName() { return this.getClass().getSimpleName(); };
+    public String getName() { return this.getClass().getSimpleName(); }
 
     /**
      * Reduce from stock by the amount specified
