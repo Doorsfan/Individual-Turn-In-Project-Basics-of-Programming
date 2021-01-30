@@ -416,19 +416,15 @@ public class Game extends utilityFunctions implements Serializable{
                     gameMenuInput = gameMenuScanner.next();
                     makePlayerChoice(gameMenuInput, ourStore); //handle the player choice input
                 }
-                //Word boundaries Examples
-                String myCard = "King of Diamonds of Spades of Hearts of Clubs";
-                String purged = myCard.replaceAll("\\b of Diamonds\\b\\b of Spades\\b\\b of Hearts\\b\\b of Clubs\\b", "");
-                System.out.println("purged is: " + purged);
                 if(!gameMenuInput.equals("8")){ playersPlaying.get(currentPlayer).setTurnIsOver(true); }
                 showedMenu = true; //menu was shown and input was processed
             }
             if (playersPlaying.get(currentPlayer).getTurnIsOver()) { //If the player turn is over
                 showedMenu = false; //Reset variables
                 decayAgeAndDiseaseAtEndofTurn(); //Age, Decay and roll for Disease on Animals
-                makeDeathAnnouncementsForDeadAnimals(0); //Handle death announcements of Animals for current Player
+                makeDeathAnnouncementsForDeadAnimals(playersPlaying.get(currentPlayer)); //Handle death announcements of Animals for current Player
                 removeDeadAnimals(); //Remove dead animals for current Player
-                checkIfPlayerIsEliminated(); //See if a player was eliminated
+                checkIfPlayerIsEliminated(playersPlaying.get(currentPlayer)); //See if the current player was eliminated
                 if(ifGameIsOver()){ break; } //Check if the Game is over, i.e any players remaining
                 nextPlayer(); //Increment the currentPlayer index
                 if(seeIfNewRound()){ //See if there is a new round abound
@@ -576,29 +572,31 @@ public class Game extends utilityFunctions implements Serializable{
             if(sellersIndex > buyersIndex){ //Age, Decay and Disease the Animal if it would have circumvented this
                 if(animalBeingSold.isAlive()){
                     animalBeingSold.decay();
-                    System.out.println(animalBeingSold.getColoredInfo() + " DECAYED WHEN SOLD OFF IN ROUND: " + currentRound);
                 }
                 if(animalBeingSold.isAlive()){
                     animalBeingSold.age();
-                    System.out.println(animalBeingSold.getColoredInfo() + " AGED WHEN SOLD OFF IN ROUND: " + currentRound);
                 }
                 if(animalBeingSold.isAlive()){
                     animalBeingSold.chanceForDisease(buyer); //Buyer is responsible for vet bill as the new owner
-                    System.out.println(animalBeingSold.getColoredInfo() + " GOT SICK WHEN SOLD OFF IN ROUND: " + currentRound);
                 }
                 animalBeingSold.setDecayedThisRound(true);
                 //To place the deathAnnouncement on the correct player (the buyer), we need to have a modifier of
                 //the SELLER_INDEX - BUYER_INDEX (This would be the same as saying CURRENT_PLAYER - BUYER_INDEX) -
                 //to place the death announcement for the correct player who is (CURRENT_PLAYER - BUYER_INDEX) turns
                 //behind in the turn order
-                makeDeathAnnouncementsForDeadAnimals((sellersIndex - buyersIndex));
+                makeDeathAnnouncementsForDeadAnimals(buyer); //If the Animal died in the process of selling to a player who is
+                //earlier in the turn order - make a death announcement for that respective player - based on this turn
                 for(int i = buyer.getOwnedAnimals().size()-1; i > -1; i--){
                     if(!buyer.getOwnedAnimals().get(i).isAlive()){
                         buyer.getOwnedAnimals().remove(i); //if the Animal died during the process, remove it
                     }
                 }
+                checkIfPlayerIsEliminated(buyer); //If the player Buying has run out of funds, the animal they were
+                //buying would be their only Animal and it Died in the selling process due to Aging/decay or Disease
+                //when it had to Decay/Age/Check for Disease to not circumvent this mechanic in the trading process of a player
+                //later in the turn order selling to an earlier one - they should be eliminated at this point of time instead of
+                //their own turn, to avoid being eliminated on their own turn
             }
-
             //Reset the variables at the end of the While loop, so they're clean for the next run
             buyersIndex = 0;
             sellersIndex = 0;
@@ -658,6 +656,9 @@ public class Game extends utilityFunctions implements Serializable{
             buyer.addToOwnedAnimals(animalBeingBought); //Buyer gets Animal
             seller.getOwnedAnimals().remove(animalBeingBought); //Seller removes Animal
             sellers = new ArrayList<>(); //Sellers list is reset
+            checkIfPlayerIsEliminated(seller); //Check to see if the Seller is to be eliminated based on that they have
+            //no more animals and insufficient coins to do ANYTHING on their turn - this is to ensure that a player is eliminated
+            //at the point of time where they ran out of resources - not just during their own turn
         }
         return 3;
     }
@@ -682,10 +683,10 @@ public class Game extends utilityFunctions implements Serializable{
             }
         }
         System.out.println("What would you like to name your save file?");
-        while(((saveGameName = saveGameScanner.nextLine()).length()) == 0){
-            System.out.println("The name of the save game cannot be empty. Please try again.");
+        while(((saveGameName = saveGameScanner.nextLine()).replaceAll("[^A-Za-z0-9]", "").length()) == 0){
+            System.out.println("The name of the save game can only consist of letters,Numbers and must be more than 0 Symbols long.");
+            System.out.println("Attempted input was: " + saveGameName);
         }
-        saveGameName = saveGameName.replaceAll("[^A-Za-z0-9]", "");
         fullSavePath += saveGameName + ".ser";
         for(File gameFile : gameFiles){
             if(("savedGames\\" + gameFile.getName()).equals(fullSavePath)){
@@ -726,7 +727,8 @@ public class Game extends utilityFunctions implements Serializable{
             return 1;
         }
         catch(Exception e){
-            System.out.println(e);
+            System.out.println(e + "\nReturning back to Game Menu.");
+            printAnimals(false, currentRound, currentPlayer, playersPlaying, (roundsRemaining+currentRound-1));
             return -1;
         }
     }
@@ -736,26 +738,18 @@ public class Game extends utilityFunctions implements Serializable{
      * Method that handles aging,decaying and disease at the end of the turn FOR CURRENT PLAYER
      */
     public void decayAgeAndDiseaseAtEndofTurn(){
-        System.out.println("STARTING DECAY PROCESS FOR : " + playersPlaying.get(currentPlayer).getName() + " IN END OF TURN: " + currentRound);
         for (Animal eachPlayerAnimal : playersPlaying.get(currentPlayer).getOwnedAnimals()) {
             if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.getDecayedThisRound()) { //If the Animal is alive and hasn't decayed, decay
                 eachPlayerAnimal.decay();
-                System.out.println(eachPlayerAnimal.getColoredInfo() + " DECAYED");
             }
             if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.getDecayedThisRound()) { //If the Animal is alive and hasn't decayed, age
                 eachPlayerAnimal.age();
-                System.out.println(eachPlayerAnimal.getColoredInfo() + " AGED");
             }
             if (eachPlayerAnimal.isAlive() && !eachPlayerAnimal.getDecayedThisRound()) { //If the Animal is alive and hasn't decayed, roll for Disease
                 eachPlayerAnimal.chanceForDisease(playersPlaying.get(currentPlayer));
-                System.out.println(eachPlayerAnimal.getColoredInfo() + " GOT SICK");
             }
             if(!eachPlayerAnimal.getDecayedThisRound()){
-                System.out.println(eachPlayerAnimal.getColoredInfo() + " HAS NOW DECAYED IN END OF ROUND " + currentRound);
                 eachPlayerAnimal.setDecayedThisRound(true); //The animal has had it's decay/age/disease for the Turn
-            }
-            else{
-                System.out.println(eachPlayerAnimal.getColoredInfo() + " ALREADY DECAYED IN END OF ROUND: " + currentRound);
             }
         }
     }
@@ -767,12 +761,9 @@ public class Game extends utilityFunctions implements Serializable{
      * there is a modifier otherwise - is when sold to an Earlier player - as ownership of the Pet is
      * changed - and the death announcement should be added for the respective new owner.
      */
-    public void makeDeathAnnouncementsForDeadAnimals(int modifier){
-        Player theOwnerOfTheAnimal = playersPlaying.get(currentPlayer-modifier);
+    public void makeDeathAnnouncementsForDeadAnimals(Player theOwnerOfTheAnimal){
         for (int i = 0; i < theOwnerOfTheAnimal.getOwnedAnimals().size(); i++) {
             if (!theOwnerOfTheAnimal.getOwnedAnimals().get(i).isAlive()) {
-                System.out.println("A DEATH ANNOUNCEMENT WAS ADDED FOR THE PLAYER : " + theOwnerOfTheAnimal.getName());
-                System.out.println("BASED ON THAT: " + theOwnerOfTheAnimal.getOwnedAnimals().get(i).getColoredInfo() + " DIED.");
                 //Died of starvation or Old Age or Disease
                 theOwnerOfTheAnimal.getOwnedAnimals().get(i).setPerishedAtRound(currentRound);
                 //Add a death Announcement
@@ -799,14 +790,22 @@ public class Game extends utilityFunctions implements Serializable{
     /**
      * Checks if a Player fulfills the criteria of being eliminated and eliminates them if true
      */
-    public void checkIfPlayerIsEliminated(){
-        if (playersPlaying.get(currentPlayer).getAmountOfMoney() < 10 &&
-                playersPlaying.get(currentPlayer).getOwnedAnimals().size() == 0) { //If the player cannot afford anything and has no Animals
+    public void checkIfPlayerIsEliminated(Player playerToCheck){
+        if (playerToCheck.getAmountOfMoney() < 10 &&
+                playerToCheck.getOwnedAnimals().size() == 0) { //If the player cannot afford anything and has no Animals
             //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
-            System.out.println("\u001b[31m" + playersPlaying.get(currentPlayer).getName()
+            System.out.println("\u001b[31m" + playerToCheck.getName()
                     + " was eliminated at Round: " + currentRound + " due to not having" +
                     " enough money to buy anything and no animals left." + "\u001b[0m");
-            playersPlaying.remove(currentPlayer); //Remove the player
+            playersPlaying.remove(playerToCheck); //Remove the player
+            int newIndex = 0;
+            for(Player playerRemaining: playersPlaying){
+                if(!playerRemaining.getTurnIsOver()){
+                    currentPlayer = newIndex;
+                    break;
+                }
+                newIndex += 1;
+            }
             if(currentPlayer == playersPlaying.size()){
                 currentPlayer -= 1;
             }

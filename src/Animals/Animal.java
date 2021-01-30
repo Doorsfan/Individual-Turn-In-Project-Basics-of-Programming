@@ -378,6 +378,7 @@ public abstract class Animal extends utilityFunctions implements Serializable {
         String answer;
         if(this.diseaseScanner == null){ this.diseaseScanner = new Scanner(System.in); }
         Random random = new Random();
+        //DISABLE DISEASE WHEN DEBUGGING
         if(random.ints(1, 6).findFirst().getAsInt() == 1){ //20% chance of being diseased, 1 out of 5
             this.setSick(true);
             //Print some info about who has been struck by a Disease
@@ -463,6 +464,7 @@ public abstract class Animal extends utilityFunctions implements Serializable {
                     }
                 }
                 fedWith.reduceFromStock(gramsFedWith); //Reduce the amount of fed food from owners Stock of Food
+                System.out.println(this.getColoredInfo() + " starts eating the food..");
                 int beforeHealing = this.health;
                 this.health *= 1.10;
                 int afterHealing = this.health;
