@@ -160,8 +160,8 @@ public class Store extends utilityFunctions implements Serializable {
      * @param index An int, the index of the chosen animal
      */
     public void choseAnimal(Player buyer, int index){
-        if(nameScanner == null){ nameScanner = new Scanner(System.in); }
-        if (animalsToOffer.get(index).getValue() <= buyer.getAmountOfMoney()) {
+        if(nameScanner == null){ nameScanner = new Scanner(System.in); } //To avoid nullPointer exception
+        if (animalsToOffer.get(index).getValue() <= buyer.getAmountOfMoney()) { //Can afford the Animal
             //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[33mWhat would you like to name your new "
                     + animalsToOffer.get(index).getClassName() + " (" + animalsToOffer.get(index).getGender() + ")?\u001b[0m");
@@ -194,10 +194,10 @@ public class Store extends utilityFunctions implements Serializable {
      * @param buyer A player object who is the Buyer wanting to buy a Animal from the Shop
      */
     public void buyAnimal(Player buyer){
-        if(userInput == null){ userInput = new Scanner(System.in); }
+        if(userInput == null){ userInput = new Scanner(System.in); } //To avoid nullPointer Exception
         boolean buyingAnimal = true;
         while(buyingAnimal) {
-            if(buyer.getAmountOfMoney() < pricesOfAnimals.get(0)){
+            if(buyer.getAmountOfMoney() < pricesOfAnimals.get(0)){ //Remove player from the store if they don't have enough money left
                 //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31m" + buyer.getName() + " cannot afford any animal in the store at the moment.\n" +
                         "The lowest price of an animal in the shop is: " + pricesOfAnimals.get(0) + " coins." +
@@ -218,7 +218,7 @@ public class Store extends utilityFunctions implements Serializable {
             //it is named index because it's frequency of writing is so high, that i wanted to have a shorthand name
             //for when i had to repeat it constantly
             int index = Integer.parseInt(wantedAnimal) - 1;
-            choseAnimal(buyer, index);
+            choseAnimal(buyer, index); //Handles the logic of buying the chosen Animal
         }
         return;
     }
@@ -229,13 +229,13 @@ public class Store extends utilityFunctions implements Serializable {
      * @param seller A player object who is the Seller selling Animals to the Store
      */
     public void sellAnimal(Player seller){
-        if(userInput == null){ userInput = new Scanner(System.in); }
+        if(userInput == null){ userInput = new Scanner(System.in); } //To avoid a null Pointer exception
         ArrayList<Animal> animalsToSell = seller.getHealthyAnimals(); //The owned Animals that are available to be sold
         String wantedAnimal; //index of the wanted animal to be sold
         int returnCode;
         boolean finishedSelling = false;
         while(!finishedSelling){
-            if(seller.getHealthyAnimals().size() == 0){
+            if(seller.getHealthyAnimals().size() == 0){ //Has no healthy Animals to sell
                 //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31m" + seller.getName() + " has no healthy animals left to sell currently." +
                         " Returning to Game Menu\u001b[0m");
@@ -245,13 +245,13 @@ public class Store extends utilityFunctions implements Serializable {
             //Keep asking for a input until it is a valid index - highest accepted Index is exit index, returns back to main menu
             while(!((returnCode = (safeIntInput(1, seller.getHealthyAnimals().size()+1, wantedAnimal = userInput.next(),
                     true))) == 1)){ if(returnCode == 2) return; }
-            Animal animalBeingSold = seller.getHealthyAnimals().get(Integer.parseInt(wantedAnimal)-1);
-            seller.getPaid(animalBeingSold.getSellsFor());
+            Animal animalBeingSold = seller.getHealthyAnimals().get(Integer.parseInt(wantedAnimal)-1); //The animal being Sold
+            seller.getPaid(animalBeingSold.getSellsFor()); //seller gets Paid
             //RESET \u001b[0m - GREEN - \u001b[32m
             System.out.println("\u001b[32m" + seller.getName() + " sold " + animalBeingSold.getVanillaInfo()
                     + " for " + animalBeingSold.getSellsFor() + " coins. " + seller.getName() + " now has: "
                     + seller.getAmountOfMoney() + " coins.\u001b[0m");
-            seller.getOwnedAnimals().remove(animalBeingSold);
+            seller.getOwnedAnimals().remove(animalBeingSold); //Remove the animal being Sold
         }
     }
 
@@ -267,8 +267,8 @@ public class Store extends utilityFunctions implements Serializable {
         boolean foundFood = false;
 
         Food foodToAdd = foodToOffer.get(index); //The food to add to inventory
-        String foodOfNameToAdd = foodToAdd.getName();
-        switch (foodOfNameToAdd) {
+        String foodOfNameToAdd = foodToAdd.getName(); //Name of the Food
+        switch (foodOfNameToAdd) { //Based on what the name is, add that specific item
             case "cowMeat" -> foodToAdd = new cowMeat();
             case "horseMeat" -> foodToAdd = new horseMeat();
             case "Apple" -> foodToAdd = new Apple();

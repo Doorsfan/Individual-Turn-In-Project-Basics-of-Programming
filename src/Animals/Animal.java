@@ -367,18 +367,14 @@ public abstract class Animal extends utilityFunctions implements Serializable {
 
     /**
      * The method to simulate getting sick - 20% chance per call that the respective Animal gets sick,
-     * if this happens - a player is prompted to pay a Vet bill to possibly cure the Animal - if not done,
-     * the Animal will remain sick until the end of the Round and die afterwards.
-     *
-     * If the player pays for the Vet bill, there is a 50% chance that the treatment will work, and the
-     * animal is no longer sick. If this fails, however, the Animal perishes.
+     * if this happens - a player is prompted to pay a Vet bill to possibly cure the Animal (50% chance of working)
+     * - if not done or the treatment fails, the Animal dies.
      * @param owner the owner
      */
     public void chanceForDisease(Player owner){
         String answer;
         if(this.diseaseScanner == null){ this.diseaseScanner = new Scanner(System.in); }
         Random random = new Random();
-        //DISABLE DISEASE WHEN DEBUGGING
         if(random.ints(1, 6).findFirst().getAsInt() == 1){ //20% chance of being diseased, 1 out of 5
             this.setSick(true);
             //Print some info about who has been struck by a Disease
@@ -429,27 +425,23 @@ public abstract class Animal extends utilityFunctions implements Serializable {
     public void decay(){
         wasAtHealth = health;
         Random random = new Random();
-        // Random number between 10 and 30 (inclusive)
-        //DEBUG
+        //Returns a Int stream, gets the first occurrence, returns it as a int - between 10 and 30 (inclusive)
         int decayFactor = random.ints(10, 31).findFirst().getAsInt();
-        this.health -= decayFactor;
-        lostHealth = decayFactor;
-        if(this.health <= 0){
-            setAlive(false);
+        this.health -= decayFactor; //Decays
+        lostHealth = decayFactor; //The amount of Health the animal lost
+        if(this.health <= 0){ //It died because of Starvation
+            setAlive(false); //It's dead
             setCauseOfDeath("Starvation"); //Died of starvation
         }
     }
 
     /**
-     * The method for an Animal to eat Food - Checks if this Animal eats what it is being fed,
-     * if it is something it likes and wants - it eats it and the amount of Grams it takes is
-     * reduced from the owning players Stock of food.
-     *
-     * Heals the animal for 10 health if at or under 90 Health, otherwise sets health to 100
-     *
-     * @param gramsFedWith An int, the amount of grams fed with
-     * @param fedWith      A food object, the Food the Animal was fed with
-     * @return An status code     An int, that acts as a Status code for events transpiring
+     * The method responsible for handling the Animal attempting/eating the Food. Heals the Animal for 10% of the
+     * Current health if it likes the food - Displays gained Health. (Can't go over 100 Health)
+     * @param gramsFedWith An int, the amount of Grams the Animal is being fed with - is reduced from Player stock
+     * @param fedWith A food object, the food that the Animal is being fed with
+     * @return A int, wether it likes the food or not - used to differentiate between if it ate the food or attempted
+     *          to eat mysteryMeat (which can contain Plants or Rat, in which case the Animal will not eat it.)
      */
     public int eat(int gramsFedWith, Food fedWith){
         //Go through all of the food that the Animal eats
@@ -465,11 +457,11 @@ public abstract class Animal extends utilityFunctions implements Serializable {
                 }
                 fedWith.reduceFromStock(gramsFedWith); //Reduce the amount of fed food from owners Stock of Food
                 System.out.println(this.getColoredInfo() + " starts eating the food..");
-                int beforeHealing = this.health;
-                this.health *= 1.10;
-                int afterHealing = this.health;
+                int beforeHealing = this.health; //The Health before it healed
+                this.health *= 1.10; //Increase health by 10% of the Current health
+                int afterHealing = this.health; //The health after healing
                 int gained = afterHealing - beforeHealing; //Example: started at 99, went up to 108, 108 - 99 = gained is 9
-                if(this.health > 100){
+                if(this.health > 100){ //Health is capped at 100, so if it's above 100, set it to 100
                     gained -= (this.health - 100); //Example: 108 - 100 = 8, gained is 9, 9 - 8 = 1, actual gain was 1
                     this.health = 100;
                 }
@@ -477,7 +469,8 @@ public abstract class Animal extends utilityFunctions implements Serializable {
                 System.out.println("\u001b[32m" + this.getVanillaInfo() + " gained " + gained + " health!\u001b[0m");
                 return 1; //Went through fine, the Animal ate the food
             }
-        } return -2; //The animal did not like the type of food being  served
+        }
+        return -2; //The animal did not like the type of food being  served
     }
 
     /**

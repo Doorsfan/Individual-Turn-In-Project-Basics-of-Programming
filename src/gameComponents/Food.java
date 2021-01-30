@@ -46,7 +46,7 @@ public abstract class Food implements Serializable {
 
     // ============= GAME LOGIC METHOD ==================
     /**
-     * Reduce from stock by the amount specified
+     * Reduce from stock by the amount specified if there is enough left
      *
      * @param amount the amount
      */

@@ -96,13 +96,12 @@ public class utilityFunctions implements Serializable{
     }
 
     /**
-     * This is the method that is responsible for printing out the information in the Main menu, in terms of
-     * Rounds, Owned Animals, Decay
      *
-     * @param loadedGame A boolean, if the Game was being loaded at this point or not
+     * @param loadedGame A boolean, if the game was loaded or not
      * @param currentRound An int, the current Round
-     * @param currentPlayer An int, the currentPlayer
-     * @param playersPlaying An ArrayList of Player objects, all of whom are Players still playing
+     * @param currentPlayer An int, the index of the current Player
+     * @param playersPlaying An ArrayList of Players, all of the players still Playing
+     * @param maxRounds An int, the max amount of rounds
      */
     public void printAnimals(boolean loadedGame, int currentRound, int currentPlayer, ArrayList<Player> playersPlaying, int maxRounds) {
         int counter = 0;
@@ -111,21 +110,21 @@ public class utilityFunctions implements Serializable{
                 + playersPlaying.get(currentPlayer).getName() + "\u001b[0m's turn.");
         System.out.println("\t~~===    STILL PLAYING    ===~~\t");
         for(Player playerStillPlaying: playersPlaying){
-            if(counter == currentPlayer){
+            if(counter == currentPlayer){ //Mark the current players name as red to highlight it in the turn order
                 //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.print("== \u001b[31m" + playerStillPlaying.getName() + "\u001b[0m - " + " Funds: " +
                         playerStillPlaying.getAmountOfMoney() + " coins ==\n");
             }
-            else{
+            else{ //otherwise, it's just standard text with no coloring
                 System.out.print("== " + playerStillPlaying.getName() + " - " + " Funds: " +
                         playerStillPlaying.getAmountOfMoney() + " coins ==\n");
             }
             counter += 1;
         }
         counter = 0;
-        playersPlaying.get(currentPlayer).announceDeaths(currentRound);
-        if (loadedGame) {
-            for (String printedDeath : playersPlaying.get(currentPlayer).getSavedDeathList()) {
+        playersPlaying.get(currentPlayer).announceDeaths(currentRound); //Announce the relevant deaths for the current player
+        if (loadedGame) { //If a game was loaded
+            for (String printedDeath : playersPlaying.get(currentPlayer).getSavedDeathList()) { //print the death lists from the death Archive
                 //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31m" + printedDeath + "\u001b[0m");
             }
@@ -133,33 +132,34 @@ public class utilityFunctions implements Serializable{
         //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
         System.out.print("\n\u001b[31m" + playersPlaying.get(currentPlayer).getName() + "\u001b[0m's Owned Animals: \n");
 
+        //Print info about the current living Animals
         for (Animal ownedAnimal : playersPlaying.get(currentPlayer).getOwnedAnimals()) {
             System.out.print(ownedAnimal.getName() + " the " + ownedAnimal.getClass().getSimpleName() +
                     "(" + ownedAnimal.getGender() + "), who is at: ");
-            if(ownedAnimal.getHealth() >= 50){
+            if(ownedAnimal.getHealth() >= 50){ //Is healthy
                 //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[32m"); //Green health
             }
-            else if(ownedAnimal.getHealth() >= 30 && ownedAnimal.getHealth() <= 49){
+            else if(ownedAnimal.getHealth() >= 30 && ownedAnimal.getHealth() <= 49){ //A bit worse off
                 //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[33m"); //Yellow health
             }
-            else{
+            else{ //is in the danger zone of dying
                 //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[31m"); //Red health
             }
             System.out.print(ownedAnimal.getHealth() + "\u001b[0m health (Lost " + ownedAnimal.getLostHealth()
                     + " health last round, was at: " + ownedAnimal.getWasAtHealth() + " health.) (Age: ");
-            double percentOfYearsSpent = (double)ownedAnimal.getAge()/(double)ownedAnimal.getMaxAge();
-            if(percentOfYearsSpent >= 0.75){
+            double percentOfYearsSpent = (double)ownedAnimal.getAge()/(double)ownedAnimal.getMaxAge(); //How much of their time they have left
+            if(percentOfYearsSpent >= 0.75){ //Lived for at least 75% of their life span
                 //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[31m"); //Red age
             }
-            else if(percentOfYearsSpent >= 0.33 && percentOfYearsSpent <= 74){
+            else if(percentOfYearsSpent >= 0.33 && percentOfYearsSpent <= 74){ //lived 33-74% of its lifespan
                 //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[33m"); //Yellow age
             }
-            else{
+            else{ //Hasnt lived for 33% of its lifespan yet
                 //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[32m"); //Green age
             }
@@ -206,13 +206,13 @@ public class utilityFunctions implements Serializable{
      * @param buyer A player object, the buyer
      * @param seller A player object, the seller
      * @param playersPlaying An arraylist of Players, the collective set of people who are still playing
-     * @return An int, the index of the buyer, will be kept for processing later
+     * @return An int, the index of the buyer, will be kept for preventing a bug in selling to other players
      */
     public int sellingAnimalToOtherPlayerMenu(Player buyer, Player seller, ArrayList<Player> playersPlaying){
         int counter = 0, buyersIndex = 0;
         for(Player player: playersPlaying){
             if(player.equals(buyer)){
-                buyersIndex = counter;
+                buyersIndex = counter; //Keep record of who the buyers index, needed for tracking turn order in selling
             }
             counter += 1;
         }
@@ -225,7 +225,7 @@ public class utilityFunctions implements Serializable{
             counter += 1;
         }
         System.out.println("[" + counter + "]" + " Back to main menu");
-        return buyersIndex;
+        return buyersIndex; //return the buyers index
     }
 
     /**
@@ -244,17 +244,17 @@ public class utilityFunctions implements Serializable{
         System.out.println("\u001b[33mWhich Player does " + seller.getName() + " wish to sell Animals to? ("
                 + seller.getName() +"'s funds: " + seller.getAmountOfMoney() + " coins)\u001b[0m");
         for(Player players : playersPlaying){
-            if(!players.equals(seller)){
+            if(!players.equals(seller)){ //If the players gone through are not the seller themselves
                 System.out.println("[" + counter + "] " + players.getName() + " - Funds: " + players.getAmountOfMoney() + " coins.");
                 counter += 1;
-                buyers.add(players);
+                buyers.add(players); //Add to the buyers list
             }
             else{
                 sellersIndex = counter-1; //Keep track of when the sellers turn is
             }
         }
         System.out.println("[" + counter + "] Back to main menu");
-        return sellersIndex;
+        return sellersIndex; //Keep track of the Sellers index, to prevent a bug
     }
 
     // ======================== UTILITY METHODS ========================
@@ -289,41 +289,37 @@ public class utilityFunctions implements Serializable{
     }
 
     /**
-     * A utility method that forces an input to be a number between lowerBoundary (inclusive) and upperBoundary (inclusive)
-     * If the input is not within this range, a accepted range is displayed and the given Input is also displayed
+     * The method that is responsible for forcing a input that is a int between a certain range.
      *
-     * @param lowerBoundary An int, the lower limit of what the number is allowed to be
-     * @param upperBoundary An int, the upper limit of what the number is allowed to be
-     * @param input A string, the users input which is to be verified to be a number and within the given range
-     * @return Status code message:
-     *                -1: Did not make it through
-     *                 1: Made it through with no Issues
-     *                 2: Used chose to exit based on feeding in an index that is the exit index
-     *
-     * @throws RuntimeException Throws a RuntimeException if the input is not within the accepted Range of Numbers
+     * @param lowerBoundary A int, the lower accepted boundary, inclusive
+     * @param upperBoundary A int, the upper accepted boundary, inclusive
+     * @param input A string, the input that the user wrote, which is to be vetted
+     * @param maxIsExitCode A boolean, if the upper boundary index is a exit index or not (it's not always the case)
+     * @return An int, the status code, used to figure out if while loop encasing this in calls should be broken or not (sometimes)
+     * @throws RuntimeException The exception to throw, in case a input is out of boundary
      */
     public  int safeIntInput(int lowerBoundary, int upperBoundary, String input, boolean maxIsExitCode) throws RuntimeException{
         int check;
         try{
-            check = Integer.parseInt(input);
-            if(check < lowerBoundary || check > upperBoundary){
+            check = Integer.parseInt(input); //Try to parse the input
+            if(check < lowerBoundary || check > upperBoundary){ //If the input is out of boundary in terms of value
                 //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 throw new RuntimeException("\u001b[31mOut of accepted boundary - [LOWER: " + lowerBoundary + " UPPER: " + upperBoundary +
                         " GIVEN: " + check + "] - " + "Please write a number between: " + lowerBoundary +
-                        " and " + upperBoundary + ".\u001b[0m");
+                        " and " + upperBoundary + ".\u001b[0m"); //Case it was out of bounds
             }
-            if(check == upperBoundary && maxIsExitCode){
+            if(check == upperBoundary && maxIsExitCode){ //If the max is a exit code index, return 2 to signal exiting
                 //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31mUser chose to exit. Returning back to main menu.\u001b[0m");
                 return 2;
             }
         }
-        catch(Exception e){
-            if(e.getMessage().contains("For input")){
+        catch(Exception e){ //In case input was not in boundary or not a parsable integer
+            if(e.getMessage().contains("For input")){  //If the input was text
                 //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31mPlease do not put in letters instead of Numbers.\u001b[0m");
             }
-            else{
+            else{ //otherwise, it was just ouf of boundary
                 System.out.println(e.getMessage());
             }
             return -1; //Did not make it through with no issues

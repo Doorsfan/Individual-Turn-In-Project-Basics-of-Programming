@@ -36,7 +36,7 @@ public class Game extends utilityFunctions implements Serializable{
      * names - and then Run the actual Game logic loop
      */
     public Game(){
-        int result = showMainMenu();
+        int result = showMainMenu(); //Show the Main Menu for the Player, and account for what happens in the main menu
         if(result == 1){ runGame(); }//Boot the game up if we loaded a game successfully
     }
 
@@ -80,9 +80,9 @@ public class Game extends utilityFunctions implements Serializable{
     }
 
     /**
-     * Getter of rounds, rounds being the total amount of rounds to play
+     * Getter of roundsRemaining, roundsRemaining being the amount of Rounds remaining
      *
-     * @return An int, returns the amount of Rounds to be played in total
+     * @return An int, returns the amount of Rounds remaining
      */
     public int getRoundsRemaining(){
         return this.roundsRemaining;
@@ -172,9 +172,9 @@ public class Game extends utilityFunctions implements Serializable{
     // ============= SHOW THE MAIN MENU ==================
     /**
      * The method that is responsible for handling input choices in the main menu - can start new game, load game
-     * or exit the game.
+     * , show the Rule set or exit the game.
      * @return An int based on success:
-     *          -1: Failed or exited
+     *          -1: Failed - Should realistically never return this
      *           1: Successfully loaded a game
      */
     public int showMainMenu(){
@@ -184,7 +184,7 @@ public class Game extends utilityFunctions implements Serializable{
         while(!((safeIntInput(1, 4, userInput = loadingMenuScanner.next(),false)) == 1)){}
         if(userInput.equals("1")){ askForInput(); runGame(); } //If the user chose to create a new game, ask for input and run the  game
         if(userInput.equals("2")){ loadGame(this); return 1; } //Goes to Load game Menu
-        if(userInput.equals("3")){ printRules(); showMainMenu(); }
+        if(userInput.equals("3")){ printRules(); showMainMenu(); } //Print the Rule set of the game
         if (userInput.equals("4")){
             //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.print("\u001b[31mUser chose to exit game. Shutting down.\u001b[0m");
@@ -241,17 +241,16 @@ public class Game extends utilityFunctions implements Serializable{
     // =========== IN CASE OF A NEW GAME BEING STARTED ======================
     /**
      * The method responsible for handling amount of rounds and players to be played with - delegates tasks of
-     * input to Sub-methods
+     * input to Sub-methods resets values of CurrentRound, CurrentPlayer and showedMenu - Needed for when
+     * creating a new game, if player already loaded a game before starting a new one.
      */
     public void askForInput(){
-        //To account for resetting the game state between saving/loading - we have to reset player lists, round and showed menu
-        //between calls of this method
-        if(nameScanner == null){ nameScanner = new Scanner(System.in); }
-        if(userInputScanner == null){ userInputScanner = new Scanner(System.in); }
-        playersPlaying.clear();
-        setCurrentRound(1);
-        setCurrentPlayer(0);
-        this.setShowedMenu(false);
+        if(nameScanner == null){ nameScanner = new Scanner(System.in); } //To avoid a NullPointer exception
+        if(userInputScanner == null){ userInputScanner = new Scanner(System.in); } //To avoid a NullPointer exception
+        playersPlaying.clear(); //Clear out the playersPlaying list
+        setCurrentRound(1); //Reset the current Round to be 1
+        setCurrentPlayer(0); //Set the currentPlayer to be the first one
+        this.setShowedMenu(false); //Reset showed the menu
         System.out.println("\n===================================\n == STARTING A FRESH NEW GAME ==");
         System.out.println("How many rounds would you like to play? (5-30)");
         while(!(safeIntInput(5, 30, wantedRoundsInput = userInputScanner.next(), false) == 1)){
@@ -265,35 +264,43 @@ public class Game extends utilityFunctions implements Serializable{
         players = Integer.parseInt(wantedPlayersInput); //Amount of players
         for(int i = 0; i < players; i++){ //Create the Players
             System.out.print("Please write the name for player " + (i+1) + ": ");
-            String name = nameScanner.nextLine();
+            String name = nameScanner.nextLine(); //Ask user to put in the Name of the respective Players
             playersPlaying.add(new Player(name, 1000)); //Add them to the list of players playing
         }
         System.out.println("\n===================================\n");
     }
 
     // =========== IF PLAYER CHOSE TO LOAD GAME FROM MAIN MENU ==============
+
     /**
-     * Handles menu when loading games and passes down Game object that is to be replaced in terms of Loading game
-     * Shows information about each respective Game available to be loaded - like their current Round, amount of Players
-     * in the game and some info about the Players in that Game
-     * @param myGame A game object, the game object that is current and to be replaced
-     * @throws FileNotFoundException An Exception that has to be able to be thrown in terms of loading and parsing Files
+     * The method responsible for handling loading of Games - creates a savedGames folder if
+     * one does not exist - creates a list of all files in the savedGames folder.
+     *
+     * If there are no files in the savedGames folder, returns to the Main Menu again.
+     *
+     * Loads every Game File in the savedGames folder (but does not START them) - to showcase
+     * information about each respective game (current round in that game, current player, players left,
+     * how many were eliminated and each players funds.)
+     *
+     * @param myGame A game object, the Game the player is currently in
      */
     public void loadGame(Game myGame){
-        int counter = 1, returnCode = 0;
+        //Initialize the variables we will be needing
+        int counter = 1;
         String userInput = "", filePath;
         File savedGamesFolder = new File("savedGames"); //This is only to make sure that there is a savedGames folder if none exist
         savedGamesFolder.mkdir(); //Returns true if it made a dir, false if not - does not create a new dir if one exists
-        File[] gameFiles = new File("savedGames").listFiles();
-        if(loadGameScanner == null){ loadGameScanner = new Scanner(System.in); }
-        if(gameFiles.length == 0){
+        File[] gameFiles = new File("savedGames").listFiles(); //Create a list of all the files present in savedGames
+        if(loadGameScanner == null){ loadGameScanner = new Scanner(System.in); } //To avoid NullPointer Excpetion
+        if(gameFiles.length == 0){ //In case there are no save games in the savedGamesFolder
             //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31mThere are no save games currently. Returning to main menu.\u001b[0m");
-            myGame.showMainMenu();
+            myGame.showMainMenu(); //Return to the main menu
             return;
         }
         else{
             System.out.println("Which game would you like to load?");
+            //Loop through the save files and present info about each save game file
             for(File saves : gameFiles){
                 try{
                     FileInputStream fileIn = new FileInputStream("savedGames\\" + saves.getName());
@@ -301,37 +308,45 @@ public class Game extends utilityFunctions implements Serializable{
                     Object obj = objectIn.readObject(); //Read the object in from the Save file
                     Game loadedGame = (Game) obj; //Convert it to a game object and save it
                     objectIn.close(); //Close the stream when Done
+                    //Info about the save Game
                     System.out.println("[" + counter + "] " + saves.getName().substring(0, saves.getName().length()-4) + " [ = Round: "
                             + loadedGame.getCurrentRound() + "/" + (loadedGame.getRoundsRemaining() + (loadedGame.getCurrentRound()-1))
                             + " - Players remaining (" + loadedGame.getPlayersPlaying().size() + "/" + loadedGame.getPlayers() + ") = ]");
+                    //Print which players are still in the respective available saved Game
                     for(Player playerInGame : loadedGame.getPlayersPlaying()){
                         System.out.println("\t\t\t" + playerInGame);
                     }
+                    //Current players name and funds without the Name: part
                     System.out.println("\tCurrent player: " +
                             loadedGame.getPlayersPlaying().get(loadedGame.getCurrentPlayer()).toString().substring(6));
+                    //The point of time when the respective saved Game was Saved
                     System.out.println("\tLast played: " + dtf.format(loadedGame.getTimeOfSaving()));
                 }
-                catch(Exception e){ //IGNORE
-                }
+                catch(Exception e){ } //Should just ignore errors in terms of invalid Files loaded
                 counter += 1;
             }
             System.out.println("[" + counter + "] Exit");
+            //Ask the player for a int input that is valid (between 1 and gameFiles.length+1, inclusive)
             while(!((safeIntInput(1, gameFiles.length+1, userInput = loadGameScanner.next(),false)) == 1)){}
-            if(Integer.parseInt(userInput) == gameFiles.length+1){
+            if(Integer.parseInt(userInput) == gameFiles.length+1){ //If the player wanted to exit back to the Main Menu
                 //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                 System.out.println("\u001b[31mExiting from loading game menu.\u001b[0m");
-                myGame.showMainMenu();
+                myGame.showMainMenu(); //Show the Main Menu again
                 return;
             }
-            filePath = "savedGames\\" + gameFiles[Integer.parseInt(userInput)-1].getName();
+            filePath = "savedGames\\" + gameFiles[Integer.parseInt(userInput)-1].getName(); //Build the filePath for the selected save Game
             System.out.println("filePath is:" + filePath);
         }
-        loadFile(filePath, myGame);
+        loadFile(filePath, myGame); //Attempt to load the specified save file, based on the chosen save File
     }
 
     /**
-     * Handles loading of an Save game based on filePath and replace our Game object as being the one we loaded
-     * @param filePath A string, the Filepath to load from
+     * The method that is responsible for loading the save File - opens a FileInputStream on the passed down filePath,
+     * opens a ObjectInputStream on the fileInputStream, reads the Object from the ObjectInputStream, converts it to
+     * Game - sets the attributes on the passed down Game object with attributes taken from the Loaded game - and runs
+     * the passed down game.
+     * @param filePath A string, the filePath to open the FileInputStream on
+     * @param myGame A game object, the current Game to set attributes for and Run, if loading is successful
      */
     public void loadFile(String filePath, Game myGame){
         //Open the FileInputStream on the given Filepath
@@ -349,57 +364,40 @@ public class Game extends utilityFunctions implements Serializable{
             myGame.setOurStore(loadedGame.getOurStore());
             System.out.println("Successfully loaded save game from: " + filePath);
             if(!myGame.getShowedMenu()){ //When loading, re-create Menus printed as well - including Deaths from saved Turn
-                //myGame.removeAnimals(loadedGame.getPlayersPlaying(), loadedGame.getCurrentPlayer());
                 myGame.printAnimals(true, loadedGame.getCurrentRound(), loadedGame.getCurrentPlayer()
                         , loadedGame.getPlayersPlaying(), (roundsRemaining+currentRound-1));
-                myGame.setShowedMenu(true);
+                myGame.setShowedMenu(true); //
             }
             objectIn.close(); //Close the stream when Done
-            myGame.runGame();
+            myGame.runGame(); //Run the loaded game
         } catch (Exception ex) {
             System.out.println(ex);
         }
     }
 
-    /**
-     * Handles advancements in rounds as the game progresses
-     */
-    public void advanceRound(){
-        if (playersPlaying.get(currentPlayer).getTurnIsOver()) { //Its the last player
-            currentPlayer += 1;
-            if(currentPlayer > playersPlaying.size()-1){
-                currentPlayer = 0;
-                currentRound += 1;
-                roundsRemaining -= 1; //Rounds remaining
-                for(Player players : playersPlaying){
-                    for(Animal animals: players.getOwnedAnimals()){
-                        animals.setDecayedThisRound(false);
-                    }
-                    players.setTurnIsOver(false);
-                    players.purgeSavedDeathList(currentRound-2);
-                }
-            }
-        }
-    }
-
     // =============== RUNS THE GAME UNTIL REMAINING ROUNDS HITS 0 OR NO MORE PLAYERS IN THE GAME ============
+
     /**
-     * A method that hosts and interacts with the main set of Game mechanics in play,
-     * such as Deaths, Menus, player choices etc, through Sub-methods
+     * The method that is responsible for running a Game session - handles the flow of the game, such as turns,
+     * deaths of Animals, making player choices, calling decay, making death announcements, removing dead animals,
+     * checking if a player is eliminated (at the end of their own turn), if the game is over, advancing the round,
+     * etc. - When the roundsRemaining hit 0 - or there are no players left - the game ends and concludes with
+     * showing the high scores for that session. (If any, if no players are left - it just says that no players made
+     * it to the end of the game to actually be crowned a winner).
      */
     public void runGame() {
-        if(ourStore == null){ ourStore = new Store(); }
-        if(gameMenuScanner == null){ this.gameMenuScanner = new Scanner(System.in); }
-        while (roundsRemaining > 0) {
-            String gameMenuInput = "";
+        if(ourStore == null){ ourStore = new Store(); } //To avoid Null pointer exception
+        if(gameMenuScanner == null){ this.gameMenuScanner = new Scanner(System.in); } //To avoid Null pointer exception
+        while (roundsRemaining > 0) { //While there still are rounds remaining
+            String gameMenuInput = ""; //Input of the player in terms of action choice
             if (playersPlaying.get(currentPlayer).getAmountOfMoney() < 10 &&
-                    playersPlaying.get(currentPlayer).getOwnedAnimals().size() == 0){
-                playersPlaying.get(currentPlayer).setTurnIsOver(true);
+                    playersPlaying.get(currentPlayer).getOwnedAnimals().size() == 0){ //The player should be eliminated
+                playersPlaying.get(currentPlayer).setTurnIsOver(true); //Their turn is forfeited due to no resources
             }
-            if(!playersPlaying.get(currentPlayer).getTurnIsOver()){
+            if(!playersPlaying.get(currentPlayer).getTurnIsOver()){ //If the players turn is not over
                 System.out.println("\n===================================\n");
                 if (!showedMenu) { //If the menu has not been shown
-                    printAnimals(false, currentRound, currentPlayer, playersPlaying, (roundsRemaining+currentRound-1)); //Showcase the info menu
+                    printAnimals(false, currentRound, currentPlayer, playersPlaying, (roundsRemaining+currentRound-1));
                 }
                 System.out.println("\nChoose an action:\n" +
                         "[1] Buy an Animal from Store\n" +
@@ -413,10 +411,10 @@ public class Game extends utilityFunctions implements Serializable{
                         "[9] Skip turn");
                 //Breaks when input is 1 long and is a number between 1-9
                 while(gameMenuInput.replaceAll("[^1-9]", "XX").length() != 1){
-                    gameMenuInput = gameMenuScanner.next();
+                    gameMenuInput = gameMenuScanner.next(); //Keep asking for input
                     makePlayerChoice(gameMenuInput, ourStore); //handle the player choice input
                 }
-                if(!gameMenuInput.equals("8")){ playersPlaying.get(currentPlayer).setTurnIsOver(true); }
+                if(!gameMenuInput.equals("8")){ playersPlaying.get(currentPlayer).setTurnIsOver(true); } //Saving does not consume a turn
                 showedMenu = true; //menu was shown and input was processed
             }
             if (playersPlaying.get(currentPlayer).getTurnIsOver()) { //If the player turn is over
@@ -429,17 +427,17 @@ public class Game extends utilityFunctions implements Serializable{
                 nextPlayer(); //Increment the currentPlayer index
                 if(seeIfNewRound()){ //See if there is a new round abound
                     //If there is, then..
-                    advanceToNewRound();
-                    resetAnimalDecay(); //Reset the Decay for Animals
-                    resetTurnIsOver(); //Reset the Turn is over for Players
+                    advanceToNewRound(); //Resets currentPlayer to 0, increases current round and reduces roundsRemaining
+                    resetAnimalDecay(); //Reset the Decay for ALL Animals of ALL players
+                    resetTurnIsOver(); //Reset the Turn is over for ALL remaining Players
                     purgeSavedDeathLists(); //Purge SavedDeathLists from 2 rounds ago
                 }
 
             }
         }
-        presentHighScore();
+        presentHighScore(); //Proceed to handling the high scores
         System.out.println("Thanks for playing The Pet Game! See you next time!");
-        System.exit(1);
+        System.exit(1); //Exit the game, as the session is concluded
     }
 
     // ==================== PLAYER MAKES A CHOICE ============
@@ -456,10 +454,10 @@ public class Game extends utilityFunctions implements Serializable{
             case "4" -> breedAnimal(playersPlaying.get(currentPlayer)); //Breed a set of Animals
             case "5" -> ourStore.buyFood(playersPlaying.get(currentPlayer)); //Buy some food from the Store
             case "6" -> sellToOtherPlayer(playersPlaying.get(currentPlayer)); //Sell Animals to other players
-            case "7" -> buyFromOtherPlayer(playersPlaying.get(currentPlayer));
-            case "8" -> saveGame(this);
-            case "9" -> System.out.println(playersPlaying.get(currentPlayer).getName() + " chose to skip their turn.");
-            default -> System.out.println("Not a valid option, please try again.");
+            case "7" -> buyFromOtherPlayer(playersPlaying.get(currentPlayer)); //Buy Animals from other players
+            case "8" -> saveGame(this); //Goes to saving game menu
+            case "9" -> System.out.println(playersPlaying.get(currentPlayer).getName() + " chose to skip their turn."); //User skipped their turn
+            default -> System.out.println("Not a valid option, please try again."); //In case input is not 1-9
         }
     }
 
@@ -475,7 +473,7 @@ public class Game extends utilityFunctions implements Serializable{
         ArrayList<Animal> ownedAnimals = playerBreeding.getOwnedAnimals(), males = new ArrayList<>(), females = new ArrayList<>();
         String firstAnimalWanted,secondAnimalWanted; //wanted Animals indexes
         int returnCode = 0; //status code from handling input, used to check for exit
-        if(ownedAnimals.size() <= 1){
+        if(ownedAnimals.size() <= 1){ //If the player has not enough Animals to breed
             //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31m" + playerBreeding.getName() +
                     " needs to have at least 2 Animals to breed. Returning to Game menu.\u001b[0m");
@@ -485,7 +483,7 @@ public class Game extends utilityFunctions implements Serializable{
             if( inspectedAnimal.getGender().equals("Male") ) { males.add(inspectedAnimal); } //Males get added to male List
             else{ females.add(inspectedAnimal); } //Females get added to female list
         }
-        if(males.size() == 0 || females.size() == 0){
+        if(males.size() == 0 || females.size() == 0){ //If the player owns no Males or Females
             //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31mDid not find enough males or females to breed with, Returning to Game menu.\u001b[0m");
             return;
@@ -504,14 +502,14 @@ public class Game extends utilityFunctions implements Serializable{
             Animal theMale = males.get(Integer.parseInt(firstAnimalWanted) - 1); //The wanted Male
             Animal theFemale = females.get(Integer.parseInt(secondAnimalWanted) - 1); //The wanted female
             if(theMale.getClassName().equals(theFemale.getClassName())){ //If they're both of the same race
-                int madeOffspring = random.ints(1,3).findFirst().getAsInt(); //NR of Offspring
-                if(madeOffspring > 1)
+                int madeOffspring = random.ints(1,3).findFirst().getAsInt(); //Chanse of making offspring
+                if(madeOffspring > 1) //Failed
                 {
                     //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
                     System.out.println("\u001b[31m" + theFemale.getVanillaInfo() + " and " + theMale.getVanillaInfo() +
                             " did not manage to make any babies.\n\u001b[0m");
                 }
-                else{
+                else{ //Made children
                     //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
                     int amountOfBabies = random.ints(theFemale.getMinimumOffspring(),theFemale.getMaximumOffspring()).findFirst().getAsInt();
                     System.out.println("\u001b[32m" + theMale.getVanillaInfo() + " and " + theFemale.getVanillaInfo() + " made "
@@ -571,10 +569,10 @@ public class Game extends utilityFunctions implements Serializable{
             //as Decay,Aging and Disease occurs at the end of a Turn (once per Round), however - this would be skipped if sold downwards
             if(sellersIndex > buyersIndex){ //Age, Decay and Disease the Animal if it would have circumvented this
                 if(animalBeingSold.isAlive()){
-                    animalBeingSold.decay();
+                    animalBeingSold.decay(); //Decay
                 }
                 if(animalBeingSold.isAlive()){
-                    animalBeingSold.age();
+                    animalBeingSold.age(); //Age
                 }
                 if(animalBeingSold.isAlive()){
                     animalBeingSold.chanceForDisease(buyer); //Buyer is responsible for vet bill as the new owner
@@ -799,14 +797,14 @@ public class Game extends utilityFunctions implements Serializable{
                     " enough money to buy anything and no animals left." + "\u001b[0m");
             playersPlaying.remove(playerToCheck); //Remove the player
             int newIndex = 0;
-            for(Player playerRemaining: playersPlaying){
+            for(Player playerRemaining: playersPlaying){ //When a player is eliminated, find the index of the next players turn
                 if(!playerRemaining.getTurnIsOver()){
                     currentPlayer = newIndex;
                     break;
                 }
                 newIndex += 1;
             }
-            if(currentPlayer == playersPlaying.size()){
+            if(currentPlayer == playersPlaying.size()){ //To prevent out of bounds error
                 currentPlayer -= 1;
             }
         }
