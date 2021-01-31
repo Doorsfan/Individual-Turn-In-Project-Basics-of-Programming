@@ -4,7 +4,9 @@ This is the first graded turn in project, that we were tasked to create.
 We are tasked to implement a Game, that allows us to raise animals 
 and allow for playing with 1-4 players.
 
-This is potentially the Final draft before a meeting with respective Teacher to verify the project.
+This is the Final version that is being turned in.
+
+For upcoming projects i will implement a Changelog from the start.
 
 **RULES:**
 
@@ -64,9 +66,3 @@ and a amount of players that they wish to play with. These numbers must be withi
 - Players can Sell animals amongst each other [DONE]
 
 - Animals age and their sell value declines as they Age - When they get older than their max age, they die. [DONE]
-
-- Refactor [DONE]
-
-# TO-DO LIST
-
-- Add Changelog //Not started - will do after Refactoring and all commits have been done - Will implement on next project from Start
