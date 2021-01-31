@@ -291,7 +291,7 @@ public class Game extends utilityFunctions implements Serializable{
         File savedGamesFolder = new File("savedGames"); //This is only to make sure that there is a savedGames folder if none exist
         savedGamesFolder.mkdir(); //Returns true if it made a dir, false if not - does not create a new dir if one exists
         File[] gameFiles = new File("savedGames").listFiles(); //Create a list of all the files present in savedGames
-        if(loadGameScanner == null){ loadGameScanner = new Scanner(System.in); } //To avoid NullPointer Excpetion
+        if(loadGameScanner == null){ loadGameScanner = new Scanner(System.in); } //To avoid NullPointer exception
         if(gameFiles.length == 0){ //In case there are no save games in the savedGamesFolder
             //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m
             System.out.println("\u001b[31mThere are no save games currently. Returning to main menu.\u001b[0m");
@@ -502,7 +502,7 @@ public class Game extends utilityFunctions implements Serializable{
             Animal theMale = males.get(Integer.parseInt(firstAnimalWanted) - 1); //The wanted Male
             Animal theFemale = females.get(Integer.parseInt(secondAnimalWanted) - 1); //The wanted female
             if(theMale.getClassName().equals(theFemale.getClassName())){ //If they're both of the same race
-                int madeOffspring = random.ints(1,3).findFirst().getAsInt(); //Chanse of making offspring
+                int madeOffspring = random.ints(1,3).findFirst().getAsInt(); //Chance of making offspring
                 if(madeOffspring > 1) //Failed
                 {
                     //Code for Red in Consoles - \u001b[31m - Reset code for Colors in Console \u001b[0m

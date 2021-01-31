@@ -159,7 +159,7 @@ public class utilityFunctions implements Serializable{
                 //Code for Yellow in Consoles - \u001b[33m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[33m"); //Yellow age
             }
-            else{ //Hasnt lived for 33% of its lifespan yet
+            else{ //Hasn't lived for 33% of its lifespan yet
                 //Code for Green in Consoles - \u001b[32m - Reset code for Colors in Console \u001b[0m
                 System.out.print("\u001b[32m"); //Green age
             }
